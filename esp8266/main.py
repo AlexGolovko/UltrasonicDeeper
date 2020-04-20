@@ -4,7 +4,7 @@ import utime
 import time
 import gc
 
-global pin,trig,echo
+global pin, trig, echo
 
 
 def pingLED():
@@ -87,6 +87,45 @@ def work_loop():
     time.sleep(0.5)
 
 
+def gen_json():
+    json = """{
+   "status":"%s",g
+   "depth":"%s"
+}"""
+    return json
+
+
+def send_loop():
+    server = server_init()
+    while True:
+        conn, addr = server.accept()
+        status = '500'
+        for _ in range(5):
+            [depth, duration] = measure_depth()
+            if duration > 0:
+                status = '200'
+                break
+        print('Got a connection from %s' % str(addr))
+        request = conn.recv(1024)
+        print('Content = %s' % str(request))
+        conn.send('HTTP/1.1 200 OK\n')
+        conn.send('Content-Type: application/json\n')
+        conn.send('Connection: close\n\n')
+        conn.sendall(gen_json() % (status, depth))
+        conn.close()
+
+
+def server_init():
+    try:
+        import usocket as socket
+    except:
+        import socket
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind(('', 80))
+    server.listen(5)
+    return server
+
+
 if __name__ == '__main__':
     pin = machine.Pin(2, machine.Pin.OUT)
     trig = machine.Pin(5, machine.Pin.OUT)
@@ -94,7 +133,8 @@ if __name__ == '__main__':
     webrepl.start()
     while True:
         try:
-            work_loop()
+            send_loop()
+            # work_loop()
         except Exception as err:
             print(err)
-            machine.reset()
+            # machine.reset()
