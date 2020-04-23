@@ -1,0 +1,36 @@
+body {
+    background-color: black;
+
+  }
+
+h1 {
+color: white;
+text-align: center;
+font-size: 60px;
+margin: 0px;
+
+  }
+#measure{
+    color:white;
+    font-size: 60px;
+    text-align: center;
+    padding: 10px 20px;
+}
+.depth{
+    padding: 0px 0px;
+    margin: 5px 5px;
+}
+#control{
+    text-align: center;
+    background-color: rgb(20, 70, 22);
+}
+.out{
+    padding: 10px 32px;
+    background-color: rgb(20, 70, 22); /* Green */
+    border: none;
+    color: white;
+    padding: 20px 40px;
+    text-decoration: none;
+    font-size: 50px;
+    text-align: end;
+}

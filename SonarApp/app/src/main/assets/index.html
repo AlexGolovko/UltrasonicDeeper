@@ -5,19 +5,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ultrasonic sonar</title>
-    <!-- <link rel="stylesheet" href="css/style.css"> -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
-<!-- <body onload="updateDepth()" style="background-color: black;"> -->
+<!-- <body onload="callEndpoint()" style="background-color: black;"> -->
 
-<body onload="updateDepth()">
+<body onload="callEndpoint()">
     <!-- <h1 style="color: white;">Depth</h1> -->
     <div id="measure">
-        <h1>Depth</h1>
-        <p id="depth" class="depth">Measure...</p>
+        <h1 class='label'>Depth</h1>
+        <p class="depth">Measure...</p>
+        <p class="depth" style='color : black'>empty</p>
+        <p class="depth" style='color : black'>empty</p>
+        <p class="depth" style='color : black'>empty</p>
+        <p class="depth" style='color : black'>empty</p>
+        <p class="depth" style='color : black'>empty</p>
     </div>
     <div id="control">
-        <button type=“button” onclick="goToApp()" id="out" title="Go to main window">close</button>
+        <button type=“button” onclick="goToApp()" class="out" title="Go to main window">stop</button>
     </div>
 
 </body>
