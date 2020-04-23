@@ -2,7 +2,6 @@
 let interval;
 
 function updateDepth() {
-    var depth = document.getElementById("depth")
     var testPoint = 'http://localhost:8080/sonar';
     var prodPoint = 'http://192.168.4.1/';
     interval = setInterval(function () { callSonar() }, 1000);
