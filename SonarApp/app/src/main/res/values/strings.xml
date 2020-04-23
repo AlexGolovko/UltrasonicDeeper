@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">SonarApp</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="text_description">App automatically connect to wifi network of your sonar and after this button connect will be available... in future.</string>
+    <string name="button_connect">connect</string>
+</resources>

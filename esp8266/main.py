@@ -6,17 +6,6 @@ import gc
 
 global pin, trig, echo
 
-
-def pingLED():
-    pin.on()
-    print("on")
-    utime.sleep(1)
-    pin.off()
-    print("off")
-    utime.sleep(1)
-    gc.collect()
-
-
 # machine.time_pulse_us from Pythondoc:
 # Time a pulse on the given pin, and return the duration of the pulse in microseconds.
 # The pulse_level argument should be 0 to time a low pulse or 1 to time a high pulse.
@@ -76,7 +65,7 @@ def measure_depth():
     return distance, duration
 
 
-def work_loop():
+def led_loop():
     pin.on()
     time.sleep(0.5)
     print('Air: ')
@@ -89,13 +78,13 @@ def work_loop():
 
 def gen_json():
     json = """{
-   "status":"%s",g
+   "status":"%s",
    "depth":"%s"
 }"""
     return json
 
 
-def send_loop():
+def work_loop():
     server = server_init()
     while True:
         conn, addr = server.accept()
@@ -113,6 +102,7 @@ def send_loop():
         conn.send('Connection: close\n\n')
         conn.sendall(gen_json() % (status, depth))
         conn.close()
+        gc.collect()
 
 
 def server_init():
@@ -131,10 +121,10 @@ if __name__ == '__main__':
     trig = machine.Pin(5, machine.Pin.OUT)
     echo = machine.Pin(4, machine.Pin.IN)
     webrepl.start()
+    pin.on()
     while True:
         try:
-            send_loop()
-            # work_loop()
+            work_loop()
         except Exception as err:
             print(err)
-            # machine.reset()
+            machine.reset()
