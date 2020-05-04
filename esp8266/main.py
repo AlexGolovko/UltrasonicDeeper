@@ -3,8 +3,10 @@ import machine
 import utime
 import time
 import gc
+import vcc
 
 global pin, trig, echo
+
 
 # machine.time_pulse_us from Pythondoc:
 # Time a pulse on the given pin, and return the duration of the pulse in microseconds.
@@ -77,11 +79,17 @@ def led_loop():
 
 
 def gen_json():
+    #Should be changed to Data Transfer Object
     json = """{
    "status":"%s",
    "depth":"%s"
 }"""
     return json
+
+
+def get_battery_level():
+    vdd = vcc.get_vcc()
+    return vdd
 
 
 def work_loop():

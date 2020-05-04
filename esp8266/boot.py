@@ -4,20 +4,15 @@
 # import gc
 # import webrepl
 # webrepl.start()
-import network
-import machine
-import esp
 import gc
-import utime
+import machine
+import network
+import vcc
 
 machine.freq(160000000)
 
 
-# esp.osdebug(None)
-
-
 def do_connect(wifi_name, wifi_pass):
-
     ssid = 'microsonar'
     password = 'microsonar'
     ap_if = network.WLAN(network.AP_IF)
@@ -50,6 +45,7 @@ def do_connect_default():
     print('network config:', wlan.ifconfig())
 
 
+vcc.set_adc_mode(vcc.ADC_MODE_VCC)
 do_connect('royter', 'traveller22')
 gc.collect()
 print('wifi connected')
