@@ -1,7 +1,12 @@
 package com.example.sonarapp;
 
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -15,7 +20,12 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final String ssid = "microsonar";
+    private static final String key = "microsonar";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +44,57 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void connect(View view){
-        Intent intent = new Intent(this, SonarActivity.class);
-        startActivity(intent);
+    public void connect(View view) {
+        changeAP();
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isConnected(MainActivity.this)) {
+                        Thread.sleep(500);
+                    }
+                    Intent intent = new Intent(MainActivity.this, SonarActivity.class);
+                    startActivity(intent);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        t.start();
+
+    }
+
+    public static boolean isConnected(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager)
+                context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = null;
+        if (connectivityManager != null) {
+            networkInfo = connectivityManager.getActiveNetworkInfo();
+        }
+
+        return networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED;
+    }
+
+    public void changeAP() {
+        WifiConfiguration wifiConfig = new WifiConfiguration();
+        wifiConfig.SSID = String.format("\"%s\"", ssid);
+        wifiConfig.preSharedKey = String.format("\"%s\"", key);
+
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        if (wifiManager != null) {
+            wifiManager.addNetwork(wifiConfig);
+            List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+            for (WifiConfiguration i : list) {
+                if (i.SSID != null && i.SSID.equals("\"" + ssid + "\"")) {
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(i.networkId, true);
+                    wifiManager.reconnect();
+                    System.out.println(ssid + "connected");
+                    break;
+                }
+            }
+        }
+        System.out.println("changeAP end");
     }
 }

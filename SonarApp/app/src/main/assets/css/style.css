@@ -10,19 +10,52 @@ font-size: 60px;
 margin: 0px;
 
   }
-#measure{
+.measure{
     color:white;
     font-size: 60px;
     text-align: center;
     padding: 10px 20px;
 }
+.depths{
+    float: left;
+    width: 60%;
+}
+
 .depth{
     padding: 0px 0px;
     margin: 5px 5px;
 }
+.sensors{
+    float: left;
+    width: 40%;
+}
+.measure:after{
+    content: "";
+    display: table;
+    clear: both;
+}
+
 #control{
     text-align: center;
     background-color: rgb(20, 70, 22);
+}
+.battery_title{
+    text-align: center;
+    font-size: 30px;
+    margin-top:50px;
+}
+.battery_level{
+    text-align: center;
+    font-size: 45px;
+}
+.temperature_title{
+    text-align: center;
+    font-size: 30px;
+}
+
+.temperature{
+    text-align: center;
+    font-size: 45px;
 }
 .out{
     padding: 10px 32px;

@@ -1,31 +1,20 @@
-import webrepl
+import gc
+import time
+
 import machine
 import utime
-import time
-import gc
-import vcc
+import webrepl
+import runner
 
 global pin, trig, echo
 
 
-# machine.time_pulse_us from Pythondoc:
-# Time a pulse on the given pin, and return the duration of the pulse in microseconds.
-# The pulse_level argument should be 0 to time a low pulse or 1 to time a high pulse.
-
-# If the current input value of the pin is different to pulse_level,
-# the function first (*) waits until the pin input becomes equal to pulse_level,
-# then (**) times the duration that the pin is equal to pulse_level.
-# If the pin is already equal to pulse_level then timing starts straight away.
-
-# The function will return -2 if there was timeout waiting for condition marked (*) above,
-# and -1 if there was timeout during the main measurement, marked (**) above.
-# The timeout is the same for both cases and given by timeout_us (which is in microseconds).
 def measure_air_distance():
     # Trig-D1-GPIO5
     # Echo-D2-GPIO4
     utime.ticks_ms()
-    # trig = machine.Pin(5, machine.Pin.OUT)
-    # echo = machine.Pin(4, machine.Pin.IN)
+    trig = machine.Pin(5, machine.Pin.OUT)
+    echo = machine.Pin(4, machine.Pin.IN)
     timeout = 30000
     trig.value(1)
     time.sleep_us(1)
@@ -48,8 +37,8 @@ def measure_air_distance():
 def measure_depth():
     # Trig-D1-GPIO5
     # Echo-D2-GPIO4
-    # trig = machine.Pin(5, machine.Pin.OUT)
-    # echo = machine.Pin(4, machine.Pin.IN)
+    trig = machine.Pin(5, machine.Pin.OUT)
+    echo = machine.Pin(4, machine.Pin.IN)
     timeout = 30000
     trig.value(1)
     time.sleep_us(1)
@@ -67,19 +56,8 @@ def measure_depth():
     return distance, duration
 
 
-def led_loop():
-    pin.on()
-    time.sleep(0.5)
-    print('Air: ')
-    measure_air_distance()
-    print('Depth: ')
-    measure_depth()
-    pin.off()
-    time.sleep(0.5)
-
-
-def gen_json():
-    #Should be changed to Data Transfer Object
+def tojson():
+    # Should be changed to Data Transfer Object
     json = """{
    "status":"%s",
    "depth":"%s"
@@ -87,52 +65,11 @@ def gen_json():
     return json
 
 
-def get_battery_level():
-    vdd = vcc.get_vcc()
-    return vdd
-
-
-def work_loop():
-    server = server_init()
-    while True:
-        conn, addr = server.accept()
-        status = '500'
-        for _ in range(5):
-            [depth, duration] = measure_depth()
-            if duration > 0:
-                status = '200'
-                break
-        print('Got a connection from %s' % str(addr))
-        request = conn.recv(1024)
-        print('Content = %s' % str(request))
-        conn.send('HTTP/1.1 200 OK\n')
-        conn.send('Content-Type: application/json\n')
-        conn.send('Connection: close\n\n')
-        conn.sendall(gen_json() % (status, depth))
-        conn.close()
-        gc.collect()
-
-
-def server_init():
-    try:
-        import usocket as socket
-    except:
-        import socket
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('', 80))
-    server.listen(5)
-    return server
-
-
 if __name__ == '__main__':
-    pin = machine.Pin(2, machine.Pin.OUT)
-    trig = machine.Pin(5, machine.Pin.OUT)
-    echo = machine.Pin(4, machine.Pin.IN)
     webrepl.start()
-    pin.on()
-    while True:
-        try:
-            work_loop()
-        except Exception as err:
-            print(err)
-            machine.reset()
+    try:
+        runner.run()
+    except Exception as err:
+        print(err)
+        time.sleep(10)
+        machine.reset()

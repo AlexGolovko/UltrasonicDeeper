@@ -2,6 +2,7 @@ package com.example.sonarapp;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -25,7 +26,7 @@ public class SonarActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
         webView.setWebChromeClient(new WebChromeClient());
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         webView.loadUrl("file:///android_asset/index.html");
 
     }

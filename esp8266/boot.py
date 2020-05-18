@@ -1,15 +1,11 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
-# import esp
-# esp.osdebug(None)
-# import gc
-# import webrepl
-# webrepl.start()
+import esp
+esp.osdebug(0)
 import gc
 import machine
 import network
-import vcc
 
-machine.freq(160000000)
+# machine.freq(160000000)
 
 
 def do_connect(wifi_name, wifi_pass):
@@ -44,8 +40,7 @@ def do_connect_default():
             pass
     print('network config:', wlan.ifconfig())
 
-
-vcc.set_adc_mode(vcc.ADC_MODE_VCC)
+machine.Pin(2, machine.Pin.OUT).off()
 do_connect('royter', 'traveller22')
 gc.collect()
 print('wifi connected')

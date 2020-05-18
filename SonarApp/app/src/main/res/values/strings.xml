@@ -3,6 +3,6 @@
     <string name="title_home">Sonar App</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
-    <string name="text_description">App automatically connects to wifi network of your sonar and after this button connect will be available... in the future... now it always available! Connect to microsonar wifi point yourself</string>
+    <string name="text_description">App automatically connects to the wifi network of your sonar after pressing the connect button</string>
     <string name="button_connect">connect</string>
 </resources>
