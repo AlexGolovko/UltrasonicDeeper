@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Geolocation</title>
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script
+        src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>
+    <style>
+        .map {
+            width: 100%;
+            height: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map" class="map"></div>
+    <div id="info" style="display: none;"></div>
+    <label for="track">
+        track position
+        <input id="track" type="checkbox" />
+    </label>
+    <p>
+        position accuracy : <code id="accuracy"></code>&nbsp;&nbsp;
+        altitude : <code id="altitude"></code>&nbsp;&nbsp;
+        altitude accuracy : <code id="altitudeAccuracy"></code>&nbsp;&nbsp;
+        heading : <code id="heading"></code>&nbsp;&nbsp;
+        speed : <code id="speed"></code>
+    </p>
+    <script src="js/index.js"></script>
+    <script type="module" src="js/res/ol/ol.js"></script>
+
+</body>
+
+</html>

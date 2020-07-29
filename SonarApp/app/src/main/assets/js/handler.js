@@ -71,7 +71,7 @@ function callEndpoint() {
     ).then(function () {
         updateDepth(prodPoint)
     }).catch(function (e) {
-        updateDepth(testPoint)
+        updateDepth(prodPoint)//CHANGE FOR TEST
     });
 }
 
