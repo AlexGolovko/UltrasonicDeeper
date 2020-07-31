@@ -30,6 +30,7 @@ export class AppComponent implements OnInit {
     [3.3, 10]
   ]);
   private firstElement = true;
+  public isMeasureSuccess = 'SonarApp';
 
   constructor() {
   }
@@ -59,7 +60,14 @@ export class AppComponent implements OnInit {
         this.batteryLevel = this.updateBatteryLevel(Number(sonarData.battery));
         this.waterTemp = Number(sonarData.temperature);
         this.isSonarAvailable = true;
-        this.increaseTrackArray(this.depth);
+        if (200 === Number(sonarData.status)) {
+          this.isMeasureSuccess = 'SonarApp'
+          this.increaseTrackArray(this.depth);
+        } else {
+          this.isMeasureSuccess = 'Too deep/shallow';
+          console.log('Something wrong=' + sonarData);
+
+        }
         // console.log(sonarData);
       } catch (e) {
         this.isSonarAvailable = false;
