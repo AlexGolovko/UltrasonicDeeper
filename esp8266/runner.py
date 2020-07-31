@@ -70,7 +70,7 @@ def reset():
 
 def response():
     depths = []
-    isSucess = True
+    isSuccess = True
     for iter in range(3):
         measure = sensor.measure_depth()
         if measure > 0:
@@ -78,10 +78,10 @@ def response():
     if len(depths) > 1:
         depths.sort()
         if depths[len(depths) - 1] - depths[0] > 1:
-            isSucess = False
+            isSuccess = False
     else:
-        isSucess = False
-    if isSucess:
+        isSuccess = False
+    if isSuccess:
         dict = {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
                 "temperature": str(ds_temperature)}
     else:
