@@ -1,6 +1,6 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 import esp
-esp.osdebug(0)
+esp.osdebug(None)
 import gc
 import machine
 import network

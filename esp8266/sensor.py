@@ -9,16 +9,18 @@ global trig, echo, ds_pin, ds_sensor, timeout, roms
 # echo = machine.Pin(14, machine.Pin.IN)
 trig = machine.Pin(12, machine.Pin.OUT)
 echo = machine.Pin(14, machine.Pin.IN)
-timeout = 30000
+timeout = 60000
 # D3-GPIO0
-ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
+ds_pin = machine.Pin(13, machine.Pin.PULL_UP)
 ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
 roms = ds_sensor.scan()
 print('Found DS devices: ', roms)
 
 
 def battery_level():
-    return machine.ADC(0).read()
+    temp = machine.ADC(0).read()
+    print(temp)
+    return temp
 
 
 # machine.time_pulse_us from Pythondoc:

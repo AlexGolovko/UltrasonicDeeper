@@ -6,7 +6,7 @@ import ujson
 import sensor
 
 deep_sleep_count = 0
-deep_sleep_time = 18500
+deep_sleep_time = 600
 ds_temperature = 0
 
 
@@ -19,8 +19,8 @@ async def blink():
         led.off()
         await asyncio.sleep_ms(500)
         increase()
-        print('deep_sleep=' + str(deep_sleep_count) + ' depth= ' + str(sensor.measure_depth()) + 'voltage=' + str(
-            sensor.battery_level()))
+        # print('deep_sleep=' + str(deep_sleep_count) + ' depth= ' + str(sensor.measure_depth()) + 'voltage=' + str(
+        #     sensor.battery_level()))
 
 
 @asyncio.coroutine
@@ -55,7 +55,9 @@ async def temperature():
 def increase():
     global deep_sleep_count
     deep_sleep_count += 1
+    print("I am going to sleep in " + str(deep_sleep_time - deep_sleep_count))
     if deep_sleep_count > deep_sleep_time:
+        print('I am going to sleep')
         machine.deepsleep(0)
     return deep_sleep_count
 
@@ -67,8 +69,24 @@ def reset():
 
 
 def response():
-    dict = {"status": 200, "depth": str(sensor.measure_depth()), "battery": sensor.battery_level(),
-            "temperature": str(ds_temperature)}
+    depths = []
+    isSucess = True
+    for iter in range(3):
+        measure = sensor.measure_depth()
+        if measure > 0:
+            depths.append(measure)
+    if len(depths) > 1:
+        depths.sort()
+        if depths[len(depths) - 1] - depths[0] > 1:
+            isSucess = False
+    else:
+        isSucess = False
+    if isSucess:
+        dict = {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
+                "temperature": str(ds_temperature)}
+    else:
+        dict = {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
+                "temperature": str(ds_temperature)}
     return ujson.dumps(dict)
 
 
