@@ -12,6 +12,5 @@ jobs:
         with:
           java-version: 1.8
       - name: Build with Gradle
-        run: |
-        cd SonarApp
-        ./gradlew assembleDebug
+      working-directory: ./SonarApp
+        run: ./gradlew assembleDebug
