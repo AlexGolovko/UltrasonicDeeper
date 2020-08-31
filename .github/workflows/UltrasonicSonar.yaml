@@ -1,4 +1,4 @@
-name: Android CI
+name: CI
 
 on: [push]
 
@@ -12,4 +12,6 @@ jobs:
         with:
           java-version: 1.8
       - name: Build with Gradle
-        run: ./gradlew assembleDebug
+        run: |
+        cd SonarApp
+        ./gradlew assembleDebug
