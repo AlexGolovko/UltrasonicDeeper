@@ -1,4 +1,4 @@
-package com.example.sonarapp;
+package com.golovkobalak.sonarapp;
 
 import android.content.Context;
 
