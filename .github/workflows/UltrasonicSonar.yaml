@@ -15,4 +15,5 @@ jobs:
         working-directory: ./SonarApp
         run: ./gradlew assembleDebug
       - name: Run unit tests
+        working-directory: ./SonarApp
         run: ./gradlew test
