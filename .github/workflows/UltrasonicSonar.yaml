@@ -21,4 +21,5 @@ jobs:
         working-directory: ./SonarApp
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: ./gradlew assembleRelease appDistributionUploadRelease
+        run: ./gradlew assembleRelease
+        #appDistributionUploadRelease
