@@ -24,6 +24,7 @@ jobs:
       run:
         working-directory: ./SonarApp
     steps:
+      - uses: actions/checkout@v1
       - name: Firebase App Distribute
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
