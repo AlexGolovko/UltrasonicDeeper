@@ -5,9 +5,8 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
+    defaults:
       working-directory: ./SonarApp
-      FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
     steps:
       - uses: actions/checkout@v1
       - name: set up JDK 1.8
@@ -19,5 +18,7 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test
       - name: Firebase App Distribute
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: ./gradlew assembleRelease
         #appDistributionUploadRelease
