@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on: [push]
 
@@ -51,9 +51,9 @@ jobs:
     name: Run UI tests with Firebase Test Lab and Deliver
     needs: build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./SonarApp
+#    defaults:
+#      run:
+#        working-directory: ./SonarApp
     steps:
       - uses: actions/checkout@v1
 
