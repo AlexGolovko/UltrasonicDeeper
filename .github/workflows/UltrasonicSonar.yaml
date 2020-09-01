@@ -6,7 +6,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
-      working-directory: ./SonarApp
+      run:
+        working-directory: ./SonarApp
     steps:
       - uses: actions/checkout@v1
       - name: set up JDK 1.8
