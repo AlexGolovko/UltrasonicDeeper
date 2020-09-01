@@ -21,7 +21,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
       - name: Build with Gradle
-          run: ./gradlew build
+        run: ./gradlew build
       - name: Build with Gradle and assemble debug APk
         run: ./gradlew assembleDebug --stacktrace
       - name: Run unit tests
