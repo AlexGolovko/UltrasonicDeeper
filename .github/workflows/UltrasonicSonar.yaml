@@ -39,7 +39,7 @@ jobs:
 
   firebase:
     name: Run UI tests with Firebase Test Lab and Deliver
-    needs: apk
+    needs: build
     runs-on: ubuntu-latest
     defaults:
       run:
