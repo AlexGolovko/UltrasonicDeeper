@@ -1,7 +1,9 @@
 package com.golovkobalak.sonarapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiConfiguration;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -93,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             wifiManager.addNetwork(wifiConfig);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
             for (WifiConfiguration i : list) {
                 if (i.SSID != null && i.SSID.equals("\"" + ssid + "\"")) {
