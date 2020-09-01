@@ -14,10 +14,21 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug
+      - name: Build with Gradle and assemble debug APk
+        run: ./gradlew assembleDebug --stacktrace
       - name: Run unit tests
-        run: ./gradlew test
+        run: ./gradlew test 
+      - name: Upload app APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload Android Test APK
+        uses: actions/upload-artifact@v1
+        with:
+          name: app-debug-androidTest
+          path: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+
   deploy:
     runs-on: ubuntu-latest
     defaults:
