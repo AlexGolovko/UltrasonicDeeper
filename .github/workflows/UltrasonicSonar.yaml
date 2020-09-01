@@ -19,6 +19,7 @@ jobs:
       - name: Run unit tests
         run: ./gradlew test
   deploy:
+    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./SonarApp
