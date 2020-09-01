@@ -82,6 +82,5 @@ jobs:
       - name: Firebase App Distribute
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease appDistributionUploadRelease
         working-directory: ./SonarApp
-        #appDistributionUploadRelease
