@@ -18,6 +18,11 @@ jobs:
         run: ./gradlew assembleDebug
       - name: Run unit tests
         run: ./gradlew test
+  deploy:
+    defaults:
+      run:
+        working-directory: ./SonarApp
+    steps:
       - name: Firebase App Distribute
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
