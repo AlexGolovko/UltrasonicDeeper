@@ -10,7 +10,7 @@ jobs:
         working-directory: ./SonarApp
     env:
       FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }
+      KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ALIAS: ${{ secrets.ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
     steps:
