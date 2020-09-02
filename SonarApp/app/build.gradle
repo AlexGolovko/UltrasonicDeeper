@@ -4,6 +4,21 @@ apply plugin: 'com.google.firebase.appdistribution'
 
 
 android {
+    signingConfigs {
+        release {
+            def signFile = project.rootProject.file('./release.keystore')
+            storeFile signFile
+            if (System.getenv('KEY_STORE_PASSWORD') != null) {
+                storePassword = System.getenv('KEY_STORE_PASSWORD')
+                keyAlias = System.getenv('ALIAS')
+                keyPassword = System.getenv('KEY_PASSWORD')
+            } else {
+                storePassword = project.property('storePassword')
+                keyAlias = project.property('keyAlias')
+                keyPassword = project.property('keyPassword')
+            }
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
@@ -15,15 +30,17 @@ android {
         versionName "0.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
             firebaseAppDistribution {
-                releaseNotes="Release notes at bit.ly/notes"
-                testers= "golovkobalak@gmail.com"
+                releaseNotes = "Release notes at bit.ly/notes"
+                groups = "first-squad"
             }
         }
     }
