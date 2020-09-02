@@ -13,9 +13,11 @@ android {
                 keyAlias = System.getenv('ALIAS')
                 keyPassword = System.getenv('KEY_PASSWORD')
             } else {
-                storePassword = project.property('storePassword')
-                keyAlias = project.property('keyAlias')
-                keyPassword = project.property('keyPassword')
+                def  props = new Properties()
+                props.load(file('../key.properties').newReader())
+                storePassword = props['storePassword']
+                keyAlias = props['keyAlias']
+                keyPassword = props['keyPassword']
             }
         }
     }
