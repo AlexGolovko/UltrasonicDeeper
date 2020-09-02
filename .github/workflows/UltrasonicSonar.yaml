@@ -13,6 +13,7 @@ jobs:
       KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ALIAS: ${{ secrets.ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      
     steps:
       - uses: actions/checkout@v1
       - name: set up JDK 1.8
@@ -53,12 +54,8 @@ jobs:
           path: SonarApp/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
 
   firebase:
-    name: Run UI tests with Firebase Test Lab and Deliver
     needs: build
     runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        working-directory: ./SonarApp
     steps:
       - uses: actions/checkout@v1
 
