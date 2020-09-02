@@ -83,8 +83,8 @@ jobs:
       - name: Firebase App Distribute
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          KEY_STORE_PASSWORD: ${{ secrets.FIREBASE_TOKEN }}
-          ALIAS: ${{ secrets.FIREBASE_TOKEN }}
-          KEY_PASSWORD: ${{ secrets.FIREBASE_TOKEN }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease appDistributionUploadRelease
         working-directory: ./SonarApp
