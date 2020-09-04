@@ -5,4 +5,10 @@
     <string name="title_notifications">Notifications</string>
     <string name="text_description">App automatically connects to the wifi network of your sonar after pressing the connect button</string>
     <string name="button_connect">connect</string>
+    <string name="WifiIsDisabled">Wifi is disabled..making it enabled</string>
+    <string name="NotPermit">Wifi Permission is not allowed</string>
+    <string name="AlreadyConnected">Already connected to Sonar</string>
+    <string name="SucessfullyConnected">Successfully connected</string>
+    <string name="SonarIsUnavailable">Sonar is unavailable</string>
+    <string name="WifiManagerIsUnavailable">Wifi Manager is unavailable</string>
 </resources>

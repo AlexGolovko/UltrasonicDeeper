@@ -1,3 +1,5 @@
+import static java.lang.System.getenv
+
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.appdistribution'
@@ -8,10 +10,10 @@ android {
         release {
             def signFile = project.rootProject.file('./release.keystore')
             storeFile signFile
-            if (System.getenv('KEY_STORE_PASSWORD') != null) {
-                storePassword = System.getenv('KEY_STORE_PASSWORD')
-                keyAlias = System.getenv('ALIAS')
-                keyPassword = System.getenv('KEY_PASSWORD')
+            if (getenv('KEY_STORE_PASSWORD') != null) {
+                storePassword = getenv('KEY_STORE_PASSWORD')
+                keyAlias = getenv('ALIAS')
+                keyPassword = getenv('KEY_PASSWORD')
             } else {
                 def  props = new Properties()
                 props.load(file('../key.properties').newReader())
@@ -71,5 +73,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.google.firebase:firebase-analytics:17.5.0'
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+
 
 }
