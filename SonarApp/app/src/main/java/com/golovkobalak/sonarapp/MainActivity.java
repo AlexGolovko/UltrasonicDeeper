@@ -138,17 +138,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isSonarAvailable(WifiManager wifiManager) {
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                &&
-                ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-            askForLocationPermissions();
-        } else {
-            //do your work
-        }
         final List<ScanResult> scanResults = wifiManager.getScanResults();
         if (scanResults != null) {
             for (final ScanResult scanResult : scanResults) {
