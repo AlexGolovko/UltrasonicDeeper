@@ -11,4 +11,5 @@
     <string name="SucessfullyConnected">Successfully connected</string>
     <string name="SonarIsUnavailable">Sonar is unavailable</string>
     <string name="WifiManagerIsUnavailable">Wifi Manager is unavailable</string>
+    <string name="inProcess">Connection to Sonar in process</string>
 </resources>

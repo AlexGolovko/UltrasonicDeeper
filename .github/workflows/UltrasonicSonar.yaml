@@ -13,7 +13,7 @@ jobs:
       KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ALIAS: ${{ secrets.ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      
+
     steps:
       - uses: actions/checkout@v1
       - name: set up JDK 1.8
@@ -36,16 +36,25 @@ jobs:
 
       - name: Run unit tests
         run: ./gradlew test 
+        
+      - name: Assemble Android Instrumentation Tests
+         run: bash ./gradlew assembleDebugAndroidTest
+      
+      - name: Setup nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: Angular build
+        run: bash node run build
+        working-directory: ./AngularSonar
+        
 
       - name: Upload app APK
         uses: actions/upload-artifact@v1
         with:
           name: app-debug
           path: SonarApp/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Assemble Android Instrumentation Tests
-        run: bash ./gradlew assembleDebugAndroidTest
-
 
       - name: Upload Android Test APK
         uses: actions/upload-artifact@v1

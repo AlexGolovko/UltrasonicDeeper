@@ -11,9 +11,9 @@
     "module": "esnext",
     "moduleResolution": "node",
     "importHelpers": true,
-    "target": "es2015",
+    "target": "es5",
     "lib": [
-      "es2015",
+      "es6",
       "dom"
     ]
   },

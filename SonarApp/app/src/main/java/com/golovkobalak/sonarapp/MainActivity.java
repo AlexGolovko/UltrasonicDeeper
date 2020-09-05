@@ -49,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect(View view) {
+        Toast.makeText(getApplicationContext(), "Clicked", Toast.LENGTH_SHORT).show();
         if (changeAP()) {
+            connStatus.setText(R.string.text_description);
             Thread t = new Thread() {
                 @Override
                 public void run() {
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean changeAP() {
         final WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        connStatus.setText(R.string.inProcess);
         if (wifiManager != null) {
             if (!wifiManager.isWifiEnabled()) {
                 connStatus.setText(R.string.WifiIsDisabled);
@@ -141,10 +144,13 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         boolean isWifiConfigured = false;
-        for (final WifiConfiguration network : wifiManager.getConfiguredNetworks()) {
-            if (MICROSONAR_SSID.equalsIgnoreCase(network.SSID)) {
-                isWifiConfigured = true;
-                break;
+        final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+        if (list != null) {
+            for (final WifiConfiguration network : list) {
+                if (MICROSONAR_SSID.equalsIgnoreCase(network.SSID)) {
+                    isWifiConfigured = true;
+                    break;
+                }
             }
         }
         if (!isWifiConfigured) {
