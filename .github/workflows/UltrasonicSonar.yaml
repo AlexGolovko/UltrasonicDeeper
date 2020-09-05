@@ -48,8 +48,8 @@ jobs:
       - name: Angular build
         working-directory: ./AngularSonar
         run: |
-        npm install
-        npm run build
+          npm install
+          npm run build
         
 
       - name: Upload app APK
