@@ -46,7 +46,7 @@ jobs:
           node-version: '12.x'
 
       - name: Angular build
-        run: node run build
+        run: npm run build
         working-directory: ./AngularSonar
         
 
