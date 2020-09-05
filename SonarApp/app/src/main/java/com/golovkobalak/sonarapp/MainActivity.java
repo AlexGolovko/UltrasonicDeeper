@@ -1,6 +1,7 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -45,7 +47,16 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
         connStatus = findViewById(R.id.textDescription);
-
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                Toast.makeText(this, "The permission to get BLE location data is required", Toast.LENGTH_SHORT).show();
+            } else {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            }
+        } else {
+            Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void connect(View view) {
@@ -127,6 +138,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isSonarAvailable(WifiManager wifiManager) {
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                &&
+                ContextCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+            askForLocationPermissions();
+        } else {
+            //do your work
+        }
         final List<ScanResult> scanResults = wifiManager.getScanResults();
         if (scanResults != null) {
             for (final ScanResult scanResult : scanResults) {
@@ -135,8 +157,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
         return false;
     }
+
 
     private void configureSonarNetwork(WifiManager wifiManager) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {

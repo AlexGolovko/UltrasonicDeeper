@@ -51,7 +51,6 @@ jobs:
           npm install
           npm run build
         
-
       - name: Upload app APK
         uses: actions/upload-artifact@v1
         with:
