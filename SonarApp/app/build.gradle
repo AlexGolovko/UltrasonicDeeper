@@ -1,23 +1,51 @@
+import static java.lang.System.getenv
+
 apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.appdistribution'
+
 
 android {
+    signingConfigs {
+        release {
+            def signFile = project.rootProject.file('./release.keystore')
+            storeFile signFile
+            if (getenv('KEY_STORE_PASSWORD') != null) {
+                storePassword = getenv('KEY_STORE_PASSWORD')
+                keyAlias = getenv('ALIAS')
+                keyPassword = getenv('KEY_PASSWORD')
+            } else {
+                def  props = new Properties()
+                props.load(file('../key.properties').newReader())
+                storePassword = props['storePassword']
+                keyAlias = props['keyAlias']
+                keyPassword = props['keyPassword']
+            }
+        }
+    }
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
     defaultConfig {
-        applicationId "com.example.sonarapp"
+        applicationId "com.golovkobalak.sonarapp"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "0.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            firebaseAppDistribution {
+                releaseNotes = "Release notes at bit.ly/notes"
+                groups = "first-squad"
+            }
         }
     }
     sourceSets {
@@ -43,4 +71,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'com.google.firebase:firebase-analytics:17.5.0'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+
+
 }

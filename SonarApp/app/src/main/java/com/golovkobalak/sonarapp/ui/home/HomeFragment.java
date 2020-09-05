@@ -1,4 +1,4 @@
-package com.example.sonarapp.ui.home;
+package com.golovkobalak.sonarapp.ui.home;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.example.sonarapp.R;
+import com.golovkobalak.sonarapp.R;
 
 public class HomeFragment extends Fragment {
 

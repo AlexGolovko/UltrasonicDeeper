@@ -1,4 +1,4 @@
-package com.example.sonarapp.ui.notifications;
+package com.golovkobalak.sonarapp.ui.notifications;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
