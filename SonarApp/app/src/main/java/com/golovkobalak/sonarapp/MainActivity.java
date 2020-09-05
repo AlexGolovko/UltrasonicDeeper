@@ -12,6 +12,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         if (wifiManager != null) {
             if (!wifiManager.isWifiEnabled()) {
                 connStatus.setText(R.string.WifiIsDisabled);
+                Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
                 wifiManager.setWifiEnabled(true);
             }
             while (!isConnected(MainActivity.this)) {
@@ -93,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-            configureSonarNetwork(wifiManager);
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
                 connStatus.setText(R.string.NotPermit);
                 return false;
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 connStatus.setText(R.string.AlreadyConnected);
                 return true;
             }
+            configureSonarNetwork(wifiManager);
             if (isSonarAvailable(wifiManager)) {
                 final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
                 for (final WifiConfiguration i : list) {
@@ -134,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void configureSonarNetwork(WifiManager wifiManager) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            connStatus.setText(R.string.NotPermit);
+            return;
+        }
         boolean isWifiConfigured = false;
         for (final WifiConfiguration network : wifiManager.getConfiguredNetworks()) {
             if (MICROSONAR_SSID.equalsIgnoreCase(network.SSID)) {
