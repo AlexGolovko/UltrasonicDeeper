@@ -46,9 +46,10 @@ jobs:
           node-version: '12.x'
 
       - name: Angular build
-        run: npm install
-        run: npm run build
         working-directory: ./AngularSonar
+        run: |
+        npm install
+        npm run build
         
 
       - name: Upload app APK
