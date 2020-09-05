@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew test 
         
       - name: Assemble Android Instrumentation Tests
-         run: bash ./gradlew assembleDebugAndroidTest
+        run: bash ./gradlew assembleDebugAndroidTest
       
       - name: Setup nodejs
         uses: actions/setup-node@v1
