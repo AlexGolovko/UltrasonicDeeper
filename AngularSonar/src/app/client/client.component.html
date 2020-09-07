@@ -1,0 +1,32 @@
+<div class="sonar">
+  <div class="table">
+    <div class="row">
+      <div class="cell">
+        <div class="depth_chart">
+          <div class="depth_chart" *ngFor="let track of trackArray">
+            <p class="depth_chart">{{track}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="cell">
+        <div>
+          <p class="item">Battery level
+          <p>
+          <div class="sensor_number">{{sonarClientData.batteryLevel}}</div>
+        </div>
+        <div>
+          <p class="item">Water temp.</p>
+          <div class="sensor_number">{{sonarClientData.waterTemp}}</div>
+        </div>
+        <div *ngIf="crd">
+          <p class="item">Longitude</p>
+          <p class="sensor_number">{{crd.coords.longitude}}</p>
+          <p class="item">latitude</p>
+          <p class="sensor_number">{{crd.coords.latitude}}</p>
+          <p class="item">Accuracy</p>
+          <p class="sensor_number">{{crd.coords.accuracy}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

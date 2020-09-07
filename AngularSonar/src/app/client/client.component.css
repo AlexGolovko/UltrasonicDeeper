@@ -1,0 +1,34 @@
+p{
+  color: white;
+}
+h1 {
+  color: white;
+  text-align: center;
+  font-size: 60px;
+  margin: 0px;
+}
+.table{
+  color: white;
+  display: block;
+}
+.row{
+  display: block;
+}
+.cell{
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+.depth_chart{
+  font-size: 60px;
+  margin: 0;
+  text-align: center;
+}
+.item{
+  font-size: 35px;
+  margin: 0;
+}
+.sensor_number{
+  margin: 0;
+  font-size: 50px;
+}
