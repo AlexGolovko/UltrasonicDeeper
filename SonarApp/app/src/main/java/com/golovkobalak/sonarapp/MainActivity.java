@@ -1,7 +1,6 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +10,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,8 +29,10 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String MICROSONAR_SSID = "\"microsonar\"";
+    private static final String MICROSONAR_SSID = "microsonar";
+    private static final String MICROSONAR_SSID_QUOTED = "\"" + MICROSONAR_SSID + "\"";
     private static final String MICROSONAR_PASS = "\"microsonar\"";
+    final String TAG = "SonarApp";
     private TextView connStatus;
 
     @Override
@@ -60,80 +62,82 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect(View view) {
-        Toast.makeText(getApplicationContext(), "Clicked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "Connection in progress", Toast.LENGTH_SHORT).show();
         if (changeAP()) {
             connStatus.setText(R.string.text_description);
             Thread t = new Thread() {
                 @Override
                 public void run() {
                     try {
-                        while (!isConnected(MainActivity.this)) {
-                            Thread.sleep(500);
+                        while (connected(MainActivity.this)) {
+                            Thread.sleep(1000);
                         }
                         Intent intent = new Intent(MainActivity.this, SonarActivity.class);
                         startActivity(intent);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-
                 }
             };
             t.start();
         }
     }
 
-    public static boolean isConnected(Context context) {
+    public static boolean connected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = null;
         if (connectivityManager != null) {
             networkInfo = connectivityManager.getActiveNetworkInfo();
         }
-
-        return networkInfo != null && networkInfo.getState() == NetworkInfo.State.CONNECTED;
+        return networkInfo == null || networkInfo.getState() != NetworkInfo.State.CONNECTED;
     }
 
     public boolean changeAP() {
+        log("changeAP");
         final WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         connStatus.setText(R.string.inProcess);
-        if (wifiManager != null) {
-            if (!wifiManager.isWifiEnabled()) {
-                connStatus.setText(R.string.WifiIsDisabled);
-                Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
-                wifiManager.setWifiEnabled(true);
-            }
-            while (!isConnected(MainActivity.this)) {
-                try {
-                    Thread.sleep(300);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-                connStatus.setText(R.string.NotPermit);
-                return false;
-            }
-            if (MICROSONAR_SSID.equalsIgnoreCase(wifiManager.getConnectionInfo().getSSID())) {
-                connStatus.setText(R.string.AlreadyConnected);
-                return true;
-            }
-            configureSonarNetwork(wifiManager);
-            if (isSonarAvailable(wifiManager)) {
-                final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-                for (final WifiConfiguration i : list) {
-                    if (MICROSONAR_SSID.equalsIgnoreCase(i.SSID)) {
-                        wifiManager.disconnect();
-                        wifiManager.enableNetwork(i.networkId, true);
-                        wifiManager.reconnect();
-                        connStatus.setText(R.string.SucessfullyConnected);
-                        return true;
-                    }
-                }
-            }
-            connStatus.setText(R.string.SonarIsUnavailable);
+        if (wifiManager == null) {
+            log("WiFi Manager == null");
+            connStatus.setText(R.string.WifiManagerIsUnavailable);
             return false;
         }
-        connStatus.setText(R.string.WifiManagerIsUnavailable);
+        if (!wifiManager.isWifiEnabled()) {
+            connStatus.setText(R.string.WifiIsDisabled);
+            Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
+            wifiManager.setWifiEnabled(true);
+        }
+        while (connected(MainActivity.this)) {
+            try {
+                log("!isConnected(MainActivity.this)");
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            connStatus.setText(R.string.NotPermit);
+            return false;
+        }
+        if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(wifiManager.getConnectionInfo().getSSID())) {
+            connStatus.setText(R.string.AlreadyConnected);
+            return true;
+        }
+        configureSonarNetwork(wifiManager);
+        if (isSonarAvailable(wifiManager)) {
+            final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
+            for (final WifiConfiguration configuration : list) {
+                if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(configuration.SSID)) {
+                    log("Reconnect to " + configuration.SSID);
+                    wifiManager.disconnect();
+                    wifiManager.enableNetwork(configuration.networkId, true);
+                    log("Reconnected : " + wifiManager.reconnect());
+                    connStatus.setText(R.string.SucessfullyConnected);
+                    return true;
+                }
+            }
+        }
+        connStatus.setText(R.string.SonarIsUnavailable);
         return false;
     }
 
@@ -142,11 +146,12 @@ public class MainActivity extends AppCompatActivity {
         if (scanResults != null) {
             for (final ScanResult scanResult : scanResults) {
                 if (MICROSONAR_SSID.equalsIgnoreCase(scanResult.SSID)) {
+                    log("Sonar Available");
                     return true;
                 }
             }
         }
-
+        log("Sonar is not available");
         return false;
     }
 
@@ -160,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
         final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         if (list != null) {
             for (final WifiConfiguration network : list) {
-                if (MICROSONAR_SSID.equalsIgnoreCase(network.SSID)) {
+                if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(network.SSID)) {
                     isWifiConfigured = true;
                     break;
                 }
@@ -174,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
 
     private WifiConfiguration createWifiConfiguration() {
         final WifiConfiguration wfc = new WifiConfiguration();
-        wfc.SSID = MICROSONAR_SSID;
+        wfc.SSID = MICROSONAR_SSID_QUOTED;
         wfc.preSharedKey = MICROSONAR_PASS;
         wfc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
         wfc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
@@ -186,5 +191,9 @@ public class MainActivity extends AppCompatActivity {
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
         return wfc;
+    }
+
+    public void log(String log) {
+        Log.d(TAG, log);
     }
 }
