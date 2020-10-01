@@ -1,8 +1,16 @@
 import {SonarData} from '../SonarData';
 import {environment} from '../../environments/environment';
 import {SonarClientData} from './SonarClientData';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {SonarState} from '../SonarState';
+import {Injectable} from '@angular/core';
 
+@Injectable({
+  providedIn: 'root'
+})
 export class ClientService {
+  private static sonarInfo: BehaviorSubject<SonarState>;
+
   private readonly endpoint: string;
   private batteryLevels: Map<number, number> = new Map([
     [4.2, 100],
@@ -17,16 +25,27 @@ export class ClientService {
     [3.3, 10]
   ]);
 
+
   constructor() {
+    console.log('In constructor');
     this.endpoint = environment.url;
+    if (ClientService.sonarInfo == null) {
+      ClientService.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
+    }
+  }
+
+  getState(): Observable<SonarState> {
+    return ClientService.sonarInfo.asObservable();
+  }
+
+  setState(newState: SonarState): void {
+    ClientService.sonarInfo.next(newState);
   }
 
   async getSonarData(): Promise<SonarClientData> {
     const sonarClientData: SonarClientData = new SonarClientData();
     try {
-      const sonarData = await this.http<SonarData>(
-        this.endpoint
-      );
+      const sonarData = await this.http<SonarData>(this.endpoint);
       sonarClientData.depth = Number(sonarData.depth);
       sonarClientData.batteryLevel = this.updateBatteryLevel(Number(sonarData.battery));
       sonarClientData.waterTemp = Number(sonarData.temperature);
@@ -41,6 +60,7 @@ export class ClientService {
       sonarClientData.isSonarAvailable = false;
       console.log(e);
     }
+    this.setState({isSonarAvailable: sonarClientData.isSonarAvailable, isMeasureSuccess: sonarClientData.isMeasureSuccess});
     return sonarClientData;
   }
 
@@ -65,5 +85,6 @@ export class ClientService {
       }
     }
   }
+
 
 }

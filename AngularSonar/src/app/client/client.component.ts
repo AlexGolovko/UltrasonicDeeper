@@ -94,7 +94,7 @@ export class ClientComponent implements OnInit, OnDestroy {
   private saveAndroidData(response: SonarClientData, crd: Position) {
     const data: AndroidData = new AndroidData(response.depth.toString(), response.batteryLevel.toString(), response.waterTemp.toString(), crd, String(Date.now()));
     if (typeof TrackingService !== 'undefined') {
-      if (this.androidDataList.length > 10) {
+      if (this.androidDataList.length > 100) {
         TrackingService.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
       }
       this.androidDataList.push(data);
