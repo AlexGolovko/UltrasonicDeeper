@@ -1,7 +1,6 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -27,14 +26,17 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import io.realm.Realm;
 
+public class MainActivity extends AppCompatActivity {
+    public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     private static final String MICROSONAR_SSID = "\"microsonar\"";
     private static final String MICROSONAR_PASS = "\"microsonar\"";
     private TextView connStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Realm.init(this.getBaseContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -60,6 +62,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect(View view) {
+        //TODO FOR TESTING
+//        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
+//        startActivity(intent);
+//        if (true) {
+//            return;
+//        }
+        //
         Toast.makeText(getApplicationContext(), "Clicked", Toast.LENGTH_SHORT).show();
         if (changeAP()) {
             connStatus.setText(R.string.text_description);
@@ -186,5 +195,9 @@ public class MainActivity extends AppCompatActivity {
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
         return wfc;
+    }
+
+    public void upload(View view) {
+
     }
 }
