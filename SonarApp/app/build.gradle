@@ -33,7 +33,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "0.0.1"
-        ndkVersion '21.2.6472646'
+        ndkVersion '21.3.6528147'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
