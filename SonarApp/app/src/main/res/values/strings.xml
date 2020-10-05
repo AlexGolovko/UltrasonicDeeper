@@ -12,4 +12,5 @@
     <string name="SonarIsUnavailable">Sonar is unavailable</string>
     <string name="WifiManagerIsUnavailable">Wifi Manager is unavailable</string>
     <string name="inProcess">Connection to Sonar in process</string>
+    <string name="button_upload">UPLOAD</string>
 </resources>

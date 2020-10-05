@@ -3,6 +3,7 @@ import static java.lang.System.getenv
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.appdistribution'
+apply plugin: 'realm-android'
 
 
 android {
@@ -15,7 +16,7 @@ android {
                 keyAlias = getenv('ALIAS')
                 keyPassword = getenv('KEY_PASSWORD')
             } else {
-                def  props = new Properties()
+                def props = new Properties()
                 props.load(file('../key.properties').newReader())
                 storePassword = props['storePassword']
                 keyAlias = props['keyAlias']
@@ -32,6 +33,7 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "0.0.1"
+        ndkVersion '21.3.6528147'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
@@ -55,9 +57,11 @@ android {
             }
         }
     }
-
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
-
+def fasterxmlJacksonVersion = '2.8.11'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -68,6 +72,8 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment:2.0.0'
     implementation 'androidx.navigation:navigation-ui:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'

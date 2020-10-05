@@ -1,29 +1,35 @@
-import {Component, OnInit} from '@angular/core';
-import {SonarState} from './SonarState';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {ClientService} from './service/client.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   public readonly title = 'SonarApp';
   public readonly fail = 'Too deep/shallow';
   public isAvailable: boolean;
   public isMeasureSuccess: boolean;
 
-  ngOnInit(): void {
-    this.isAvailable = false;
-    this.isMeasureSuccess = true;
+  constructor(private clientService: ClientService) {
+
   }
 
-  onStatusUpdated(sonarState: SonarState) {
-    this.isAvailable = sonarState.isSonarAvailable;
-    if (this.isAvailable === false) {
-      this.isMeasureSuccess = true;
-    } else {
-      this.isMeasureSuccess = sonarState.isMeasureSuccess;
-    }
+  ngOnInit(): void {
+    this.clientService.getState().subscribe(value => {
+        console.log('this.clientService.getState().subscribe(value => {' + value);
+        this.isAvailable = value.isSonarAvailable;
+        if (this.isAvailable === false) {
+          this.isMeasureSuccess = true;
+        } else {
+          this.isMeasureSuccess = value.isMeasureSuccess;
+        }
+      }
+    );
+  }
+
+  ngOnDestroy(): void {
   }
 }
 

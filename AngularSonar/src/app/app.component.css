@@ -4,28 +4,21 @@ h1 {
   font-size: 60px;
   margin: 0px;
 }
-/*.table{*/
-/*  color: white;*/
-/*  display: block;*/
-/*}*/
-/*.row{*/
-/*  display: block;*/
-/*}*/
-/*.cell{*/
-/*  display: inline-block;*/
-/*  width: 50%;*/
-/*  vertical-align: top;*/
-/*}*/
-/*.depth_chart{*/
-/*  font-size: 60px;*/
-/*  margin: 0;*/
-/*  text-align: center;*/
-/*}*/
-/*.item{*/
-/*  font-size: 35px;*/
-/*  margin: 0;*/
-/*}*/
-/*.sensor_number{*/
-/*  margin: 0;*/
-/*  font-size: 50px;*/
-/*}*/
+
+.Measure {
+  width: 90vw;
+  height: 10vh;
+}
+
+.Container {
+  width: 100vw;
+  height: 100vh;
+}
+
+.App {
+  width: 100vw;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+}
+

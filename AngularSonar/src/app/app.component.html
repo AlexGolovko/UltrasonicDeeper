@@ -1,8 +1,6 @@
-<div>
-  <h1 [style.color]="isAvailable?'green':'red'"
+<div class="App">
+  <h1 routerLink="/map" [style.color]="isAvailable?'green':'red'"
       class="Measure">{{isMeasureSuccess ? title : fail}}</h1>
-  <app-client (statusUpdated)="onStatusUpdated($event)"></app-client>
-  <!--  <a routerLink="client">Client Why two</a>-->
-  <!--  <router-outlet></router-outlet>-->
+  <router-outlet class="Container"></router-outlet>
 </div>
 

@@ -27,8 +27,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+import io.realm.Realm;
 
+public class MainActivity extends AppCompatActivity {
+    public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     private static final String MICROSONAR_SSID = "microsonar";
     private static final String MICROSONAR_SSID_QUOTED = "\"" + MICROSONAR_SSID + "\"";
     private static final String MICROSONAR_PASS = "\"microsonar\"";
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Realm.init(this.getBaseContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -62,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect(View view) {
+        //TODO FOR TESTING
+//        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
+//        startActivity(intent);
+//        if (true) {
+//            return;
+//        }
+        //
         Toast.makeText(getApplicationContext(), "Connection in progress", Toast.LENGTH_SHORT).show();
         if (changeAP()) {
             connStatus.setText(R.string.text_description);
@@ -191,6 +201,9 @@ public class MainActivity extends AppCompatActivity {
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
         return wfc;
+    }
+
+    public void upload(View view) {
     }
 
     public void log(String log) {
