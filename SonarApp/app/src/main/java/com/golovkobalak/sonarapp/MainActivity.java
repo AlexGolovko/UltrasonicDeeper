@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect(View view) {
-        //TODO FOR TESTING
+        //TODO FOR MANUAL TESTING
 //        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
 //        startActivity(intent);
 //        if (true) {
@@ -117,13 +117,17 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
             wifiManager.setWifiEnabled(true);
         }
-        while (connected(MainActivity.this)) {
+
+        while (wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED) {
             try {
-                log("!isConnected(MainActivity.this)");
+                log("wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED");
                 Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+        if (wifiManager.getConnectionInfo().getFrequency() > 1) {
+
         }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
             connStatus.setText(R.string.NotPermit);
