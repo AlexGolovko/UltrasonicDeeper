@@ -12,6 +12,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
 //            return;
 //        }
         //
+        final Button connectButton = (Button) findViewById(R.id.button_sonar);
+        connectButton.setEnabled(false);
         Toast.makeText(getApplicationContext(), "Connection in progress", Toast.LENGTH_SHORT).show();
         if (changeAP()) {
             connStatus.setText(R.string.text_description);
@@ -91,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             };
             t.start();
         }
+        connectButton.setEnabled(true);
     }
 
     public static boolean connected(Context context) {
