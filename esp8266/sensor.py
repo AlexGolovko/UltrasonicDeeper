@@ -1,7 +1,7 @@
 import machine, utime, onewire, ds18x20
 import uasyncio as asyncio
 
-global trig, echo, ds_pin, ds_sensor, timeout, roms
+# global trig, echo, ds_pin, ds_sensor, timeout, roms
 
 # Trig-D6-GPIO12
 # Echo-D5-GPIO14
@@ -9,12 +9,28 @@ global trig, echo, ds_pin, ds_sensor, timeout, roms
 # echo = machine.Pin(14, machine.Pin.IN)
 trig = machine.Pin(12, machine.Pin.OUT)
 echo = machine.Pin(14, machine.Pin.IN)
+
 timeout = 60000
-# D3-GPIO0
 ds_pin = machine.Pin(13, machine.Pin.PULL_UP)
-ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
-roms = ds_sensor.scan()
-print('Found DS devices: ', roms)
+
+global ds_sensor, roms
+
+
+# D3-GPIO0
+
+def init():
+    print("In init")
+    global ds_sensor
+    global roms
+    try:
+        ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
+        roms = ds_sensor.scan()
+        print('Found DS devices: ', roms)
+    except Exception as err:
+        print(err)
+
+
+init()
 
 
 def battery_level():
@@ -72,6 +88,10 @@ def measure_air_distance():
 
 
 def temperature():
-    ds_sensor.convert_temp()
-    utime.sleep_ms(750)
-    return ds_sensor.read_temp(roms[0])
+    try:
+        ds_sensor.convert_temp()
+        utime.sleep_ms(750)
+        return ds_sensor.read_temp(roms[0])
+    except Exception as err:
+        print(err)
+        return -273
