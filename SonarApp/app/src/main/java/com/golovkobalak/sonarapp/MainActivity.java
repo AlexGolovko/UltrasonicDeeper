@@ -12,6 +12,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
 //            return;
 //        }
         //
+        final Button connectButton = (Button) findViewById(R.id.button_sonar);
+        connectButton.setEnabled(false);
         Toast.makeText(getApplicationContext(), "Connection in progress", Toast.LENGTH_SHORT).show();
         if (changeAP()) {
             connStatus.setText(R.string.text_description);
@@ -91,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
             };
             t.start();
         }
+        connectButton.setEnabled(true);
     }
 
     public static boolean connected(Context context) {
@@ -115,13 +119,19 @@ public class MainActivity extends AppCompatActivity {
         if (!wifiManager.isWifiEnabled()) {
             connStatus.setText(R.string.WifiIsDisabled);
             Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
+            log("turn on WIFI");
             wifiManager.setWifiEnabled(true);
         }
-
+        int counter=0;
         while (wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED) {
             try {
-                log("wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED");
-                Thread.sleep(500);
+                log("wait to wifi is turn on "+counter+" sec, current status: "+wifiManager.getWifiState());
+                counter++;
+                Thread.sleep(1000);
+                if(counter>10){
+                    log("wifi cannot be turned on");
+                    return false;
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -131,10 +141,12 @@ public class MainActivity extends AppCompatActivity {
         }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
             connStatus.setText(R.string.NotPermit);
+            log((String) getText(R.string.NotPermit));
             return false;
         }
         if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(wifiManager.getConnectionInfo().getSSID())) {
             connStatus.setText(R.string.AlreadyConnected);
+            log((String) getText(R.string.AlreadyConnected));
             return true;
         }
         configureSonarNetwork(wifiManager);

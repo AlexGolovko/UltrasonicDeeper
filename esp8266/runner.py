@@ -4,11 +4,16 @@ import utime
 import uasyncio as asyncio
 import ujson
 import sensor
+import math
+
+# import logging
 
 deep_sleep_count = 0
 deep_sleep_time = 600
 ds_temperature = 0
 
+
+# logging.basicConfig(logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s'))
 
 @asyncio.coroutine
 async def blink():
@@ -25,17 +30,25 @@ async def blink():
 
 @asyncio.coroutine
 def serve(reader, writer):
-    print(reader, writer)
-    print("================")
-    print((yield from reader.read()))
-    yield from writer.awrite("""HTTP/1.0 200 OK\r\n""")
-    yield from writer.awrite("""Content-Type: application/json\r\n\r\n""")
-    yield from writer.awrite(response())
-    print("After response write")
-    yield from writer.aclose()
-    print("Finished processing request")
-    print("deep_sleep= " + str(reset()))
-    gc.collect()
+    try:
+        request = (yield from reader.read()).decode('utf-8')
+        print("================")
+        print(request)
+        yield from writer.awrite("""HTTP/1.0 200 OK\r\n""")
+        yield from writer.awrite("""Content-Type: application/json\r\n""")
+        if request.startswith('GET /sonar'):
+            yield from writer.awrite("""Access-Control-Allow-Origin: *\r\n\r\n""")
+            yield from writer.awrite(response())
+            print("Finished processing request")
+            print("deep_sleep= " + str(reset()))
+        if request.startswith('GET /feature'):
+            yield from writer.awrite("""Access-Control-Allow-Origin: *\r\n\r\n""")
+            yield from writer.awrite(responseFeature())
+            print("deep_sleep= " + str(reset()))
+        yield from writer.aclose()
+        gc.collect()
+    except Exception as err:
+        print(err)
 
 
 @asyncio.coroutine
@@ -69,25 +82,47 @@ def reset():
 
 
 def response():
-    depths = []
-    isSuccess = True
-    for iter in range(3):
-        measure = sensor.measure_depth()
-        if measure > 0:
-            depths.append(measure)
-    if len(depths) > 1:
-        depths.sort()
-        if depths[len(depths) - 1] - depths[0] > 1:
-            isSuccess = False
-    else:
-        isSuccess = False
-    if isSuccess:
-        dict = {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
+    try:
+        dict = {"status": 200, "depth": str(sensor.measure_depth()), "battery": sensor.battery_level(),
                 "temperature": str(ds_temperature)}
-    else:
-        dict = {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
-                "temperature": str(ds_temperature)}
+    except Exception as err:
+        # logging.error(err)
+        pass
     return ujson.dumps(dict)
+
+
+def isCorrect(depths):
+    for depth in depths:
+        if depth == 0:
+            return False
+    deltas = [0 for i in range(3)]
+    depthsLen = len(depths)
+    for iter in range(depthsLen):
+        if iter == (depthsLen - 1):
+            deltas[iter] = math.fabs(depths[iter] - depths[0])
+        else:
+            deltas[iter] = math.fabs(depths[iter] - depths[iter + 1])
+    for delta in deltas:
+        if delta > 1:
+            return False
+    return True
+
+
+def responseFeature():
+    dictResponse = {}
+    try:
+        depths = [sensor.measure_depth() for i in range(3)]
+        if isCorrect(depths):
+            dictResponse = {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
+                            "temperature": str(ds_temperature)}
+        else:
+            dictResponse = {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
+                            "temperature": str(ds_temperature)}
+
+    except Exception as err:
+        print(err)
+        pass
+    return ujson.dumps(dictResponse)
 
 
 def run():
