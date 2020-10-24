@@ -5,10 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkInfo;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -26,17 +24,17 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.List;
-
 import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     private static final String MICROSONAR_SSID = "microsonar";
     private static final String MICROSONAR_SSID_QUOTED = "\"" + MICROSONAR_SSID + "\"";
-    private static final String MICROSONAR_PASS = "\"microsonar\"";
+    private static final String MICROSONAR_PASS_QUOTED = "\"microsonar\"";
+    private static final String MICROSONAR_PASS = "microsonar";
     final String TAG = "SonarApp";
     private TextView connStatus;
+    private WifiConnector wifiConnector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
         connStatus = findViewById(R.id.textDescription);
+        wifiConnector = new WifiConnector(getApplicationContext(), this);
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -82,7 +81,8 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        while (connected(MainActivity.this)) {
+                        while (!wifiConnector.isConnectedTo(MICROSONAR_SSID)) {
+                            log("Not connected yet");
                             Thread.sleep(1000);
                         }
                         Intent intent = new Intent(MainActivity.this, SonarActivity.class);
@@ -97,126 +97,52 @@ public class MainActivity extends AppCompatActivity {
         connectButton.setEnabled(true);
     }
 
-    public static boolean connected(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager)
-                context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = null;
-        if (connectivityManager != null) {
-            networkInfo = connectivityManager.getActiveNetworkInfo();
-        }
-        return networkInfo == null || networkInfo.getState() != NetworkInfo.State.CONNECTED;
-    }
-
     public boolean changeAP() {
         log("changeAP");
-        final WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
         connStatus.setText(R.string.inProcess);
-        if (wifiManager == null) {
-            log("WiFi Manager == null");
-            connStatus.setText(R.string.WifiManagerIsUnavailable);
-            return false;
-        }
-        if (!wifiManager.isWifiEnabled()) {
+        if (wifiConnector.isWifiDisabled()) {
             connStatus.setText(R.string.WifiIsDisabled);
-            Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
-            log("turn on WIFI");
-            wifiManager.setWifiEnabled(true);
-        }
-        int counter=0;
-        while (wifiManager.getWifiState() != WifiManager.WIFI_STATE_ENABLED) {
-            try {
-                log("wait to wifi is turn on "+counter+" sec, current status: "+wifiManager.getWifiState());
-                counter++;
-                Thread.sleep(1000);
-                if(counter>10){
-                    log("wifi cannot be turned on");
-                    return false;
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (!wifiConnector.enableWifi()) {
+                connStatus.setText("Wifi can't be enabled\n Please turn on WIFi yourself");
+                return false;
             }
         }
-        if (wifiManager.getConnectionInfo().getFrequency() > 1) {
-
+        if (wifiConnector.isConnectedTo(MICROSONAR_SSID)) {
+            connStatus.setText(R.string.AlreadyConnected);
+            log((String) getText(R.string.AlreadyConnected));
+            return true;
         }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
             connStatus.setText(R.string.NotPermit);
             log((String) getText(R.string.NotPermit));
             return false;
         }
-        if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(wifiManager.getConnectionInfo().getSSID())) {
-            connStatus.setText(R.string.AlreadyConnected);
-            log((String) getText(R.string.AlreadyConnected));
-            return true;
-        }
-        configureSonarNetwork(wifiManager);
-        if (isSonarAvailable(wifiManager)) {
-            final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-            for (final WifiConfiguration configuration : list) {
-                if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(configuration.SSID)) {
-                    log("Reconnect to " + configuration.SSID);
-                    wifiManager.disconnect();
-                    wifiManager.enableNetwork(configuration.networkId, true);
-                    log("Reconnected : " + wifiManager.reconnect());
-                    connStatus.setText(R.string.SucessfullyConnected);
-                    return true;
-                }
+        if (!(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q))
+            wifiConnector.configureSonarAccessPoint(MICROSONAR_SSID, MICROSONAR_PASS);
+        //TODO it should in another place ?
+//            wifiConnector.showSuggestion(MICROSONAR_SSID, MICROSONAR_PASS);
+
+
+        if (wifiConnector.isAccessPointAvailable(MICROSONAR_SSID)) {
+            if (wifiConnector.connectTo(MICROSONAR_SSID, MICROSONAR_PASS)) {
+                connStatus.setText(R.string.SucessfullyConnected);
+                return true;
             }
         }
         connStatus.setText(R.string.SonarIsUnavailable);
         return false;
     }
 
-    private boolean isSonarAvailable(WifiManager wifiManager) {
-        final List<ScanResult> scanResults = wifiManager.getScanResults();
-        if (scanResults != null) {
-            for (final ScanResult scanResult : scanResults) {
-                if (MICROSONAR_SSID.equalsIgnoreCase(scanResult.SSID)) {
-                    log("Sonar Available");
-                    return true;
-                }
+    private void turnOffMobileData() {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        for (Network network : connMgr.getAllNetworks()) {
+            NetworkInfo networkInfo = connMgr.getNetworkInfo(network);
+            if (networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+
             }
         }
-        log("Sonar is not available");
-        return false;
-    }
 
-
-    private void configureSonarNetwork(WifiManager wifiManager) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            connStatus.setText(R.string.NotPermit);
-            return;
-        }
-        boolean isWifiConfigured = false;
-        final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
-        if (list != null) {
-            for (final WifiConfiguration network : list) {
-                if (MICROSONAR_SSID_QUOTED.equalsIgnoreCase(network.SSID)) {
-                    isWifiConfigured = true;
-                    break;
-                }
-            }
-        }
-        if (!isWifiConfigured) {
-            final WifiConfiguration wfc = createWifiConfiguration();
-            wifiManager.addNetwork(wfc);
-        }
-    }
-
-    private WifiConfiguration createWifiConfiguration() {
-        final WifiConfiguration wfc = new WifiConfiguration();
-        wfc.SSID = MICROSONAR_SSID_QUOTED;
-        wfc.preSharedKey = MICROSONAR_PASS;
-        wfc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-        wfc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-        wfc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-        wfc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-        wfc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-        wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-        wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
-        wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-        wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-        return wfc;
     }
 
     public void upload(View view) {

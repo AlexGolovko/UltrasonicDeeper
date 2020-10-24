@@ -13,4 +13,5 @@
     <string name="WifiManagerIsUnavailable">Wifi Manager is unavailable</string>
     <string name="inProcess">Connection to Sonar in process</string>
     <string name="button_upload">UPLOAD</string>
+    <string name="turnOnWifiManually">Android is not allowed to turn on the WIFI programmatically, turn on wifi manually.. </string>
 </resources>
