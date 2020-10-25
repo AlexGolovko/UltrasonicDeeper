@@ -1,7 +1,9 @@
 package com.golovkobalak.sonarapp;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -18,6 +20,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import java.util.Collections;
 import java.util.List;
@@ -99,6 +102,9 @@ public class WifiConnector {
     }
 
     public void configureSonarAccessPoint(String ssid, String pass) {
+        if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         boolean isWifiConfigured = false;
         final String ssidQuoted = "\"" + ssid + "\"";
         final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();//Deprecated
@@ -115,6 +121,7 @@ public class WifiConnector {
             final WifiConfiguration wfc = createWifiConfiguration(ssidQuoted, passQuoted);
             wifiManager.addNetwork(wfc);
         }
+
     }
 
     private WifiConfiguration createWifiConfiguration(String ssidQuoted, String passQuoted) {
@@ -218,7 +225,8 @@ public class WifiConnector {
             }
         }
         final String ssidQuoted = "\"" + ssid + "\"";
-
+        if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED)
+            return false;
         final List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         for (final WifiConfiguration configuration : list) {
             if (ssidQuoted.equalsIgnoreCase(configuration.SSID)) {
