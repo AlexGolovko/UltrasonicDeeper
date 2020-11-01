@@ -22,8 +22,10 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static android.content.Context.WIFI_SERVICE;
 
@@ -32,11 +34,14 @@ public class WifiConnector {
     private final Context ctx;
     private final AppCompatActivity activity;
     final String TAG = "SonarApp";
+    private final Serializable lock = new ReentrantLock();
+    ;
 
     public WifiConnector(Context applicationContext, AppCompatActivity mainActivity) {
         this.ctx = applicationContext;
         this.activity = mainActivity;
         this.wifiManager = (WifiManager) ctx.getApplicationContext().getSystemService(WIFI_SERVICE);
+//        executor = Executors.newSingleThreadExecutor();
     }
 
 
@@ -54,33 +59,34 @@ public class WifiConnector {
 
 
     public boolean enableWifi() {
-        final Object lock = new Object();
         final ConnectivityManager connectivityManager = (ConnectivityManager) ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager == null) return false;
         final NetworkRequest build = new NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
-        if (connectivityManager != null) {
-            connectivityManager.registerNetworkCallback(build, new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onUnavailable() {
-                    super.onUnavailable();
-                    log("wifi is disabled");
-                    synchronized (lock) {
-                        lock.notifyAll();
-                    }
+        final ConnectivityManager.NetworkCallback availableCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onUnavailable() {
+                super.onUnavailable();
+                log("wifi is disabled");
+                synchronized (lock) {
+                    lock.notifyAll();
                 }
+            }
 
-                @Override
-                public void onAvailable(@NonNull Network network) {
-                    super.onAvailable(network);
-                    log("wifi enabled");
-                    synchronized (lock) {
-                        lock.notifyAll();
-                    }
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                super.onAvailable(network);
+                log("wifi enabled");
+                synchronized (lock) {
+                    lock.notifyAll();
                 }
-            });
-        }
+            }
+
+        };
+        connectivityManager.registerNetworkCallback(build, availableCallback);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             final Intent wifiIntent = new Intent(Settings.Panel.ACTION_WIFI);
+            wifiIntent.putExtra("lock", lock);
             activity.startActivityForResult(wifiIntent, 1);
         } else {
             wifiManager.setWifiEnabled(true);
@@ -93,6 +99,7 @@ public class WifiConnector {
                 e.printStackTrace();
             }
         }
+        connectivityManager.unregisterNetworkCallback(availableCallback);
         return isWifiEnabled();
     }
 
@@ -153,7 +160,23 @@ public class WifiConnector {
 
     }
 
-    public boolean isAccessPointAvailable(String ssid) {
+    public boolean isAccessPointAvailable(final String ssid) {
+        wifiManager.startScan();
+        synchronized (WifiScanReceiver.getLock()) {
+            try {
+                final boolean scanState = wifiManager.startScan();
+                if (scanState) {
+                    log("take lock");
+                    WifiScanReceiver.getLock().wait();
+                    log("WifiScanReceiver.getLock().get(): " + WifiScanReceiver.getLock().get());
+                    return WifiScanReceiver.getLock().get();
+                }
+                log("scanState: " + scanState);
+                return false;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
         final List<ScanResult> scanResults = wifiManager.getScanResults();
         if (scanResults != null) {
             for (final ScanResult scanResult : scanResults) {
@@ -170,22 +193,19 @@ public class WifiConnector {
 
     public boolean connectTo(final String ssid, String pass) {
         final Object lock = new Object();
+        final ConnectivityManager cm = (ConnectivityManager)
+                ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) return false;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             final WifiNetworkSpecifier wifiNetworkSpecifier = new WifiNetworkSpecifier
                     .Builder()
                     .setSsid(ssid)
                     .setWpa2Passphrase(pass)
-//                    .setBssid(MacAddress.fromString("DC:4F:22:7D:CF:57"))
                     .build();
-
-
             final NetworkRequest nr = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
                     .setNetworkSpecifier(wifiNetworkSpecifier)
                     .build();
-
-            final ConnectivityManager cm = (ConnectivityManager)
-                    ctx.getSystemService(Context.CONNECTIVITY_SERVICE);
             ConnectivityManager.NetworkCallback networkCallback = new
                     ConnectivityManager.NetworkCallback() {
                         @Override
@@ -203,17 +223,12 @@ public class WifiConnector {
                             super.onUnavailable();
                             Log.d(TAG, "unAvailable");
                             synchronized (lock) {
-                                lock.notify();
+                                lock.notifyAll();
                             }
                             throw new RuntimeException("Network is unavailable");
                         }
                     };
             try {
-                if (cm == null) {
-                    log("ConnectivityManager is null");
-                    return false;
-                }
-
                 cm.requestNetwork(nr, networkCallback);
                 synchronized (lock) {
                     lock.wait();
@@ -224,6 +239,21 @@ public class WifiConnector {
                 return false;
             }
         }
+        final ConnectivityManager.NetworkCallback connectionCallback = new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onCapabilitiesChanged(@NonNull Network network, @NonNull NetworkCapabilities networkCapabilities) {
+                super.onCapabilitiesChanged(network, networkCapabilities);
+                if (isConnectedTo(ssid)) {
+                    synchronized (lock) {
+                        lock.notifyAll();
+                    }
+                }
+            }
+        };
+        final NetworkRequest networkRequest = new NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
+        cm.registerNetworkCallback(networkRequest, connectionCallback);
+
         final String ssidQuoted = "\"" + ssid + "\"";
         if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED)
             return false;
@@ -234,17 +264,13 @@ public class WifiConnector {
                 wifiManager.disconnect();
                 wifiManager.enableNetwork(configuration.networkId, true);
                 log("Reconnected : " + wifiManager.reconnect());
-                int connTemp = 0;
-                while (!isConnectedTo(ssid) && connTemp <= 20) {
+
+                synchronized (lock) {
                     try {
-                        ++connTemp;
-                        Thread.sleep(300);
+                        lock.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }
-                if (connTemp > 20) {
-                    break;
                 }
                 return true;
             }
@@ -252,6 +278,9 @@ public class WifiConnector {
         return false;
     }
 
+    public Serializable getLock() {
+        return lock;
+    }
 
 }
 
