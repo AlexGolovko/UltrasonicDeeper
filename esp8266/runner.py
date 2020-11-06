@@ -1,21 +1,24 @@
 import gc
+
 import machine
 import utime
 import uasyncio as asyncio
 import ujson
 import sensor
 import math
-
-# import logging
+import logging
+from server import WSReader, WSWriter
 
 deep_sleep_count = 0
 deep_sleep_time = 600
 ds_temperature = 0
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 # logging.basicConfig(logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s'))
 
-@asyncio.coroutine
+
 async def blink():
     led = machine.Pin(2, machine.Pin.OUT);
     while True:
@@ -28,30 +31,28 @@ async def blink():
         #     sensor.battery_level()))
 
 
-@asyncio.coroutine
 def serve(reader, writer):
     try:
         request = (yield from reader.read()).decode('utf-8')
-        print("================")
-        print(request)
+        logging.debug("================")
+        logging.debug(request)
         yield from writer.awrite("""HTTP/1.0 200 OK\r\n""")
         yield from writer.awrite("""Content-Type: application/json\r\n""")
         if request.startswith('GET /sonar'):
             yield from writer.awrite("""Access-Control-Allow-Origin: *\r\n\r\n""")
             yield from writer.awrite(response())
-            print("Finished processing request")
-            print("deep_sleep= " + str(reset()))
+            logging.debug("Finished processing request")
+            logging.debug("deep_sleep= " + str(reset()))
         if request.startswith('GET /feature'):
             yield from writer.awrite("""Access-Control-Allow-Origin: *\r\n\r\n""")
             yield from writer.awrite(responseFeature())
-            print("deep_sleep= " + str(reset()))
+            logging.debug("deep_sleep= " + str(reset()))
         yield from writer.aclose()
         gc.collect()
     except Exception as err:
-        print(err)
+        logging.debug(err)
 
 
-@asyncio.coroutine
 async def temperature():
     while True:
         try:
@@ -59,18 +60,19 @@ async def temperature():
             await asyncio.sleep_ms(750)
             global ds_temperature
             ds_temperature = sensor.ds_sensor.read_temp(sensor.roms[0])
-            print('temperature= ' + str(ds_temperature))
+            logging.info('temperature= ' + str(ds_temperature))
             await asyncio.sleep(10)
         except Exception as err:
-            print(err)
+            logging.debug(err)
 
 
 def increase():
     global deep_sleep_count
     deep_sleep_count += 1
-    print("I am going to sleep in " + str(deep_sleep_time - deep_sleep_count))
+    if deep_sleep_count % 10 == 0:
+        logging.debug("I am going to sleep in " + str(deep_sleep_time - deep_sleep_count))
     if deep_sleep_count > deep_sleep_time:
-        print('I am going to sleep')
+        logging.debug('I am going to sleep')
         machine.deepsleep(0)
     return deep_sleep_count
 
@@ -86,7 +88,7 @@ def response():
         dict = {"status": 200, "depth": str(sensor.measure_depth()), "battery": sensor.battery_level(),
                 "temperature": str(ds_temperature)}
     except Exception as err:
-        # logging.error(err)
+        logging.error(err)
         pass
     return ujson.dumps(dict)
 
@@ -120,18 +122,46 @@ def responseFeature():
                             "temperature": str(ds_temperature)}
 
     except Exception as err:
-        print(err)
+        logging.debug(err)
         pass
     return ujson.dumps(dictResponse)
 
 
+def websocketHandle(reader, writer):
+    try:
+        logging.debug("echo")
+        # Consume GET line
+        yield from reader.readline()
+
+        reader = yield from WSReader(reader, writer)
+        writer = WSWriter(reader, writer)
+
+        while 1:
+            line = yield from reader.read(256)
+            logging.debug("line:" + str(line))
+            if line == b"\r":
+                await writer.awrite(b"\r\n")
+            else:
+
+                await writer.awrite(responseFeature())
+            logging.info("deep_sleep_cleaned " + str(reset()))
+            gc.collect()
+    except Exception as err:
+        logging.debug(str(err))
+
+
 def run():
     loop = asyncio.get_event_loop()
-    loop.call_soon(asyncio.start_server(serve, host="0.0.0.0", port=80))
+    httpServer = asyncio.start_server(serve, host="0.0.0.0", port=80)
+    wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=8080)
+    loop.call_soon(httpServer)
+    loop.create_task(wsServer)
     loop.create_task(blink())
     loop.create_task(temperature())
     try:
         loop.run_forever()
     except Exception as err:
+        httpServer.close()
+        wsServer.close()
         loop.close()
         raise err
