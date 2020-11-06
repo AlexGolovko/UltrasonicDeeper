@@ -12,6 +12,8 @@ from server import WSReader, WSWriter
 deep_sleep_count = 0
 deep_sleep_time = 600
 ds_temperature = 0
+http_server_port = 80
+ws_server_port = 8080
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -152,8 +154,8 @@ def websocketHandle(reader, writer):
 
 def run():
     loop = asyncio.get_event_loop()
-    httpServer = asyncio.start_server(serve, host="0.0.0.0", port=80)
-    wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=8080)
+    httpServer = asyncio.start_server(serve, host="0.0.0.0", port=http_server_port)
+    wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=ws_server_port)
     loop.call_soon(httpServer)
     loop.create_task(wsServer)
     loop.create_task(blink())
