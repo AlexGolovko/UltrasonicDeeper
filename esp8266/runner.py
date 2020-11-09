@@ -17,6 +17,8 @@ ws_server_port = 8080
 
 logging.basicConfig(level=logging.DEBUG)
 
+SONAR = "sonar"
+
 
 # logging.basicConfig(logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s'))
 
@@ -117,15 +119,20 @@ def responseFeature():
     try:
         depths = [sensor.measure_depth() for i in range(3)]
         if isCorrect(depths):
-            dictResponse = {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
-                            "temperature": str(ds_temperature)}
+            dictResponse = {"event": SONAR,
+                            "data": {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
+                                     "temperature": str(ds_temperature)}}
+
         else:
-            dictResponse = {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
-                            "temperature": str(ds_temperature)}
+            dictResponse = {"event": SONAR,
+                            "data": {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
+                                     "temperature": str(ds_temperature)}}
 
     except Exception as err:
         logging.debug(err)
         pass
+    reset()
+    logging.info(dictResponse)
     return ujson.dumps(dictResponse)
 
 
@@ -146,7 +153,6 @@ def websocketHandle(reader, writer):
             else:
 
                 await writer.awrite(responseFeature())
-            logging.info("deep_sleep_cleaned " + str(reset()))
             gc.collect()
     except Exception as err:
         logging.debug(str(err))

@@ -1,4 +1,5 @@
 import {Observable} from 'rxjs';
+import {Injectable} from '@angular/core';
 
 const GEOLOCATION_ERRORS = {
   'errors.location.unsupportedBrowser': 'Browser does not support location services',
@@ -7,6 +8,9 @@ const GEOLOCATION_ERRORS = {
   'errors.location.timeout': 'Service timeout has been reached'
 };
 
+@Injectable({
+  providedIn: 'root',
+})
 export class GeoService {
 
 
