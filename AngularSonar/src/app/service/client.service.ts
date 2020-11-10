@@ -32,14 +32,20 @@ export class ClientService {
 
   constructor(wsService: WebSocketServiceImpl) {
     this.wsService = wsService;
+    const sonarClientData = new SonarClientData();
+    sonarClientData.batteryLevel = 0;
+    sonarClientData.waterTemp = 0;
+    sonarClientData.depth = 0;
+    sonarClientData.isSonarAvailable = false;
+    this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
     this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
       const data = new SonarClientData();
       try {
         data.isSonarAvailable = true;
-        data.depth = Number(message.depth);
         data.batteryLevel = this.updateBatteryLevel(Number(message.battery));
         data.waterTemp = Number(message.temperature);
         if (200 === Number(message.status)) {
+          data.depth = Number(message.depth);
           data.isMeasureSuccess = true; // 'SonarApp';
         } else {
           data.isMeasureSuccess = false; // 'Too deep/shallow';
@@ -54,25 +60,16 @@ export class ClientService {
     });
 
     this.wsService.status.subscribe(isConnected => {
-      console.log(isConnected);
-      if (!isConnected) {
-        this.setState({isSonarAvailable: false, isMeasureSuccess: false});
-      }
+      this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
     });
 
     let a = 0;
     setInterval(() => {
-      this.wsService.send(WS.SONAR,);
+      this.wsService.send(WS.SONAR, '1');
       a = a + 1;
     }, environment.interval);
     this.endpoint = environment.url;
     this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
-    const sonarClientData = new SonarClientData();
-    sonarClientData.batteryLevel = 0;
-    sonarClientData.waterTemp = 0;
-    sonarClientData.depth = 0;
-    sonarClientData.isSonarAvailable = false;
-    this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
   }
 
   getState(): Observable<SonarState> {
@@ -127,6 +124,8 @@ export class ClientService {
     for (const [key, value] of this.batteryLevels.entries()) {
       if (batteryVcc > key) {
         return value;
+      } else {
+        return -1;
       }
     }
   }

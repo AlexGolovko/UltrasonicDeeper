@@ -7,8 +7,7 @@ import {MapService} from '../service/map.service';
 @Component({
   selector: 'app-map-load',
   templateUrl: './map-load.component.html',
-  styleUrls: ['./map-load.component.css'],
-  providers: [MapService]
+  styleUrls: ['./map-load.component.css']
 })
 export class MapLoadComponent implements OnInit, AfterViewInit {
   private map: Map;

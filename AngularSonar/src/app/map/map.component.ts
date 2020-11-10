@@ -7,8 +7,7 @@ import {Map, TileLayer} from 'leaflet';
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css'],
-  providers: [ClientService, GeoService]
+  styleUrls: ['./map.component.css']
 })
 export class MapComponent implements OnInit, AfterViewInit {
   private map: Map;

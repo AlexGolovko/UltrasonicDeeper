@@ -20,6 +20,7 @@ export class ClientComponent implements OnInit, OnDestroy {
   private intervalTime: number;
   private watchPosition: number;
   private androidDataList: Array<AndroidData>;
+  private androidListSendSize: number = environment.listSize;
 
 
   constructor(private clientService: ClientService, private geoService: GeoService) {
@@ -29,11 +30,16 @@ export class ClientComponent implements OnInit, OnDestroy {
         this.sonarClientData.waterTemp = data.waterTemp;
         if (data.isMeasureSuccess) {
           this.sonarClientData.depth = data.depth;
-          this.saveAndroidData(data, this.crd);
           this.increaseTrackArray(data.depth);
         }
       }
     });
+    this.clientService.getSonarClientData().subscribe(data => {
+      if (data.isSonarAvailable && data.isMeasureSuccess) {
+        this.saveAndroidData(data, this.crd);
+      }
+    });
+    this.geoService.getLocation().subscribe(value => this.crd = value);
   }
 
 
@@ -44,7 +50,6 @@ export class ClientComponent implements OnInit, OnDestroy {
     this.trackArray = new Array<string>();
     this.isFirstElement = true;
     this.trackArray.push('Wait a second');
-    this.geo();
   }
 
   ngOnDestroy(): void {
@@ -66,24 +71,10 @@ export class ClientComponent implements OnInit, OnDestroy {
     this.trackArray = array;
   }
 
-  public geo(): void {
-    const options = {
-      enableHighAccuracy: true,
-      timeout: 100000,
-      maximumAge: 0
-    };
-    this.watchPosition = navigator.geolocation.watchPosition(position => {
-      this.crd = position;
-    }, err => {
-      console.log(err);
-      this.geo();
-    }, options);
-  }
-
   private saveAndroidData(response: SonarClientData, crd: Position) {
     const data: AndroidData = new AndroidData(response.depth.toString(), response.batteryLevel.toString(), response.waterTemp.toString(), crd, String(Date.now()));
     if (typeof TrackingService !== 'undefined') {
-      if (this.androidDataList.length > 100) {
+      if (this.androidDataList.length > this.androidListSendSize) {
         TrackingService.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
       }
       this.androidDataList.push(data);
