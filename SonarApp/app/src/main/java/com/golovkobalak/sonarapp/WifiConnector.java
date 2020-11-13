@@ -35,13 +35,11 @@ public class WifiConnector {
     private final AppCompatActivity activity;
     final String TAG = "SonarApp";
     private final Serializable lock = new ReentrantLock();
-    ;
 
     public WifiConnector(Context applicationContext, AppCompatActivity mainActivity) {
         this.ctx = applicationContext;
         this.activity = mainActivity;
         this.wifiManager = (WifiManager) ctx.getApplicationContext().getSystemService(WIFI_SERVICE);
-//        executor = Executors.newSingleThreadExecutor();
     }
 
 

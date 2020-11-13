@@ -21,6 +21,17 @@ jobs:
         with:
           java-version: 1.8
 
+      - name: Setup nodejs
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+
+      - name: Angular build
+        working-directory: ./AngularSonar
+        run: |
+          npm install
+          npm run build
+
       - name: Cache Gradle packages
         uses: actions/cache@v2
         with:
@@ -35,22 +46,11 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Run unit tests
-        run: ./gradlew test 
-        
+        run: ./gradlew test
+
       - name: Assemble Android Instrumentation Tests
         run: bash ./gradlew assembleDebugAndroidTest
-      
-      - name: Setup nodejs
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
 
-      - name: Angular build
-        working-directory: ./AngularSonar
-        run: |
-          npm install
-          npm run build
-        
       - name: Upload app APK
         uses: actions/upload-artifact@v1
         with:
@@ -78,11 +78,11 @@ jobs:
         uses: actions/download-artifact@v1
         with:
           name: app-debug-androidTest
-      
+
       - name: Login to Google Cloud
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-        with: 
-          version: '270.0.0' 
+        with:
+          version: "270.0.0"
           service_account_key: ${{ secrets.GCLOUD_AUTH }}
 
       - name: Set current project
@@ -90,7 +90,6 @@ jobs:
 
       - name: Run Instrumentation Tests in Firebase Test Lab
         run: gcloud firebase test android run --type instrumentation --app app-debug/app-debug.apk --test app-debug-androidTest/app-debug-androidTest.apk --device model=Pixel2,version=28,locale=pl,orientation=portrait
-
 
       - name: Firebase App Distribute
         env:
