@@ -67,23 +67,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
-    <Button
-        android:id="@+id/button_sonar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="216dp"
-        android:background="#000000"
-        android:onClick="connect"
-        android:shadowColor="#F2E7E7"
-        android:text="@string/button_connect"
-        android:textColor="#FFFFFF"
-        android:textColorHint="#F4EDED"
-        app:layout_constraintBottom_toTopOf="@+id/nav_view"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent" />
-
-<!--    <Button-->
+    <!--    <Button-->
 <!--        android:id="@+id/button_upload"-->
 <!--        android:layout_width="wrap_content"-->
 <!--        android:layout_height="wrap_content"-->
@@ -99,5 +83,36 @@
 <!--        app:layout_constraintHorizontal_bias="0.501"-->
 <!--        app:layout_constraintStart_toStartOf="parent"-->
 <!--        app:layout_constraintTop_toBottomOf="@+id/button_sonar" />-->
+
+    <Button
+        android:id="@+id/button_sonar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="160dp"
+        android:background="#000000"
+        android:onClick="connect"
+        android:shadowColor="#F2E7E7"
+        android:text="@string/button_connect"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#F4EDED"
+        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_manual_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="#000000"
+        android:onClick="manualConnect"
+        android:shadowColor="#F2E7E7"
+        android:text="@string/manual_connect"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#F4EDED"
+        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,4 +14,6 @@
     <string name="inProcess">Connection to Sonar in process</string>
     <string name="button_upload">UPLOAD</string>
     <string name="turnOnWifiManually">Android is not allowed to turn on the WIFI programmatically, turn on wifi manually.. </string>
+    <string name="manual_connect">manual connect</string>
+    <string name="manual_connect_description">Turn on sonar\nTurn on wifi\nConnect to microsonar \n    password = microsonar\nClick button again</string>
 </resources>
