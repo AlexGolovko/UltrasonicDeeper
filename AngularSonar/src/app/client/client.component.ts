@@ -27,7 +27,7 @@ export class ClientComponent implements OnInit, OnDestroy {
     this.clientService.getSonarClientData().subscribe(data => {
       if (data.isSonarAvailable) {
         this.sonarClientData.batteryLevel = data.batteryLevel;
-        this.sonarClientData.waterTemp = data.waterTemp;
+        this.sonarClientData.waterTemp = Math.round(data.waterTemp / 0.1 ) *  0.1;
         if (data.isMeasureSuccess) {
           this.sonarClientData.depth = data.depth;
           this.increaseTrackArray(data.depth);
