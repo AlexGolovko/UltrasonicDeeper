@@ -37,7 +37,6 @@ public class SonarActivity extends Activity {
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setAppCacheEnabled(true);
         settings.setDatabaseEnabled(true);
-        settings.setAllowUniversalAccessFromFileURLs(true);
         // adb reverse tcp:8080 tcp:8080
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -51,9 +50,10 @@ public class SonarActivity extends Activity {
         });
         webView.getSettings().setGeolocationDatabasePath(this.getFilesDir().getPath());
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //webView.loadUrl("file:///android_asset/index.html");
+//        webView.loadUrl("file:///android_asset/index.html");
         webView.addJavascriptInterface(new TrackingInterface(this), "TrackingService");
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
+
 
     }
 
