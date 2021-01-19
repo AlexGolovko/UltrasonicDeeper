@@ -34,9 +34,7 @@ init()
 
 
 def battery_level():
-    temp = machine.ADC(0).read()
-    print(temp)
-    return temp
+    return machine.ADC(0).read()
 
 
 # machine.time_pulse_us from Pythondoc:
@@ -62,7 +60,6 @@ def measure_depth():
         distance = 1482.7 * duration / 1000000 / 2
         t = ('t= {} us'.format(duration))
         d = ('d= {:1.3f} m'.format(distance))
-        print(t, d)
     else:
         print('measuring error' + str(duration))
     return distance

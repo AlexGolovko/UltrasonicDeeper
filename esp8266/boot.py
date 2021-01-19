@@ -3,6 +3,7 @@ import esp
 import gc
 import machine
 import network
+
 esp.osdebug(None)
 
 
@@ -17,7 +18,7 @@ def do_connect(wifi_name, wifi_pass):
     ap_if.config(essid=ssid, password=password)
     while not ap_if.active():
         pass
-    print('Connection successful')
+    print('Access Point created')
     print(ap_if.ifconfig())
 
     wlan = network.WLAN(network.STA_IF)
@@ -28,10 +29,10 @@ def do_connect(wifi_name, wifi_pass):
         wlan.connect(wifi_name, wifi_pass)
         while not wlan.isconnected():
             pass
+        print('network config:', wlan.ifconfig())
     else:
         wlan.active(False)
 
-    print('network config:', wlan.ifconfig())
 
 machine.Pin(2, machine.Pin.OUT).off()
 do_connect('royter', 'traveller22')

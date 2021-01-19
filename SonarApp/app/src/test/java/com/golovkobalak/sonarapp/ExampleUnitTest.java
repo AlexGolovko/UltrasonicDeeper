@@ -1,5 +1,9 @@
 package com.golovkobalak.sonarapp;
 
+import android.content.Context;
+
+import com.golovkobalak.sonarapp.service.TrackingInterface;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -12,6 +16,8 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 2 + 2);
+//        String data ="[{\"depth\":\"2.6\",\"battery\":\"90\",\"temperature\":\"24.6\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.4\",\"battery\":\"90\",\"temperature\":\"24.4\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.7\",\"battery\":\"90\",\"temperature\":\"24.7\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.5\",\"battery\":\"90\",\"temperature\":\"24.5\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.5\",\"battery\":\"90\",\"temperature\":\"24.5\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.9\",\"battery\":\"90\",\"temperature\":\"24.9\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.9\",\"battery\":\"90\",\"temperature\":\"24.9\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.3\",\"battery\":\"90\",\"temperature\":\"24.3\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.3\",\"battery\":\"90\",\"temperature\":\"24.3\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.5\",\"battery\":\"90\",\"temperature\":\"24.5\",\"position\":{},\"time\":\"9/29/2020\"},{\"depth\":\"2.2\",\"battery\":\"90\",\"temperature\":\"24.2\",\"position\":{},\"time\":\"9/29/2020\"}]";
+//        final TrackingInterface trackingInterface = new TrackingInterface(null);
+//        trackingInterface.saveTrackingList(data);
     }
 }

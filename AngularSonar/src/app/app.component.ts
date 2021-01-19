@@ -1,5 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ClientService} from './service/client.service';
+import {SonarData} from './SonarData';
 
 @Component({
   selector: 'app-root',
@@ -17,8 +18,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+
     this.clientService.getState().subscribe(value => {
-        console.log('this.clientService.getState().subscribe(value => {' + value);
         this.isAvailable = value.isSonarAvailable;
         if (this.isAvailable === false) {
           this.isMeasureSuccess = true;

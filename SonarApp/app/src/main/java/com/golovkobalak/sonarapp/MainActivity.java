@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private WifiConnector wifiConnector;
     private WifiScanReceiver wifiScanReceiver;
     private Button connectButton;
+    private boolean isFirstClick = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,12 +80,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void connect(View view) {
-//        TODO FOR MANUAL TESTING
-//        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
-//        startActivity(intent);
-//        if (true) {
-//            return;
-//        }
         Toast.makeText(getApplicationContext(), CONNECTION_IN_PROGRESS, Toast.LENGTH_SHORT).show();
         executorService.execute(new Runnable() {
             @Override
@@ -227,5 +222,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(wifiScanReceiver);
+    }
+
+    public void manualConnect(View view) {
+        connStatus.setText(R.string.manual_connect_description);
+        if (isFirstClick) {
+            isFirstClick = false;
+            return;
+        }
+        isFirstClick = true;
+        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
+        startActivity(intent);
     }
 }

@@ -1,16 +1,19 @@
 import {SonarData} from '../SonarData';
-import {environment} from '../../environments/environment';
 import {SonarClientData} from './SonarClientData';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {SonarState} from '../SonarState';
 import {Injectable} from '@angular/core';
+import {WebSocketServiceImpl} from './websocket/websocket.service';
+import {WS} from './websocket/wsmessage';
+import {environment} from '../../environments/environment';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClientService {
-  private static sonarInfo: BehaviorSubject<SonarState>;
-
+  private readonly sonarInfo: BehaviorSubject<SonarState>;
+  private sonarClientData: BehaviorSubject<SonarClientData>;
   private readonly endpoint: string;
   private batteryLevels: Map<number, number> = new Map([
     [4.2, 100],
@@ -24,22 +27,61 @@ export class ClientService {
     [3.4, 20],
     [3.3, 10]
   ]);
+  private wsService: WebSocketServiceImpl;
 
 
-  constructor() {
-    console.log('In constructor');
+  constructor(wsService: WebSocketServiceImpl) {
+    this.wsService = wsService;
+    const sonarClientData = new SonarClientData();
+    sonarClientData.batteryLevel = 0;
+    sonarClientData.waterTemp = 0;
+    sonarClientData.depth = 0;
+    sonarClientData.isSonarAvailable = false;
+    this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
+    this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
+      const data = new SonarClientData();
+      try {
+        data.isSonarAvailable = true;
+        data.batteryLevel = this.updateBatteryLevel(Number(message.battery));
+        data.waterTemp = Number(message.temperature);
+        if (200 === Number(message.status)) {
+          data.depth = Number(message.depth);
+          data.isMeasureSuccess = true; // 'SonarApp';
+        } else {
+          data.isMeasureSuccess = false; // 'Too deep/shallow';
+          console.log('Something wrong=' + message.status);
+        }
+      } catch (e) {
+        data.isSonarAvailable = false;
+        console.log(e);
+      }
+      this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
+      this.sonarClientData.next(data);
+    });
+
+    this.wsService.status.subscribe(isConnected => {
+      this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
+    });
+
+    let a = 0;
+    setInterval(() => {
+      this.wsService.send(WS.SONAR, '1');
+      a = a + 1;
+    }, environment.interval);
     this.endpoint = environment.url;
-    if (ClientService.sonarInfo == null) {
-      ClientService.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
-    }
+    this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
   }
 
   getState(): Observable<SonarState> {
-    return ClientService.sonarInfo.asObservable();
+    return this.sonarInfo.asObservable();
   }
 
   setState(newState: SonarState): void {
-    ClientService.sonarInfo.next(newState);
+    this.sonarInfo.next(newState);
+  }
+
+  getSonarClientData(): Observable<SonarClientData> {
+    return this.sonarClientData.asObservable();
   }
 
   async getSonarData(): Promise<SonarClientData> {
@@ -82,6 +124,8 @@ export class ClientService {
     for (const [key, value] of this.batteryLevels.entries()) {
       if (batteryVcc > key) {
         return value;
+      } else {
+        return -1;
       }
     }
   }

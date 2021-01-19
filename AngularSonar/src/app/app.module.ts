@@ -7,7 +7,7 @@ import {ListViewModule} from '@syncfusion/ej2-angular-lists';
 import {MapComponent} from './map/map.component';
 import {ClientComponent} from './client/client.component';
 import {MapLoadComponent} from './map-load/map-load.component';
-import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 
 
 const appRoutes: Routes = [
@@ -28,6 +28,7 @@ const appRoutes: Routes = [
     ListViewModule,
     RouterModule.forRoot(appRoutes),
     LeafletModule
+
   ],
   providers: [],
   bootstrap: [AppComponent]
