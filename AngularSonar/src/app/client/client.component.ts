@@ -4,7 +4,7 @@ import {SonarClientData} from '../service/SonarClientData';
 import {GeoService} from '../service/geo.service';
 import {environment} from '../../environments/environment';
 import {AndroidData} from '../DTO/AndroidData';
-import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
+import {AndroidBridgeService} from '../service/android-bridge.service';
 
 @Component({
   selector: 'app-client',
@@ -12,22 +12,28 @@ import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
   styleUrls: ['./client.component.css']
 })
 export class ClientComponent implements OnInit, OnDestroy {
+  public readonly title = 'SonarApp';
+  public readonly fail = 'Too deep/shallow';
+  private readonly firstElement = 'Wait a second';
   public sonarClientData: SonarClientData = new SonarClientData();
   private interval: any;
   public trackArray: Array<string>;
   public crd: Position;
-  private isFirstElement: boolean;
   private intervalTime: number;
   private watchPosition: number;
   private androidDataList: Array<AndroidData>;
   private androidListSendSize: number = environment.listSize;
+  public isAvailable = false;
+  public isMeasureSuccess = false;
 
 
-  constructor(private clientService: ClientService, private geoService: GeoService) {
+  constructor(private clientService: ClientService, private geoService: GeoService, private androidBridge: AndroidBridgeService) {
     this.clientService.getSonarClientData().subscribe(data => {
+      this.isAvailable = data.isSonarAvailable;
       if (data.isSonarAvailable) {
         this.sonarClientData.batteryLevel = data.batteryLevel;
-        this.sonarClientData.waterTemp = Math.round(data.waterTemp / 0.1 ) *  0.1;
+        this.sonarClientData.waterTemp = data.waterTemp;
+        this.isMeasureSuccess = data.isMeasureSuccess;
         if (data.isMeasureSuccess) {
           this.sonarClientData.depth = data.depth;
           this.increaseTrackArray(data.depth);
@@ -48,21 +54,21 @@ export class ClientComponent implements OnInit, OnDestroy {
     document.body.style.backgroundColor = 'black';
     this.intervalTime = environment.interval;
     this.trackArray = new Array<string>();
-    this.isFirstElement = true;
-    this.trackArray.push('Wait a second');
+    this.trackArray.push(this.firstElement);
+    this.clientService.startConnection();
   }
 
   ngOnDestroy(): void {
     clearInterval(this.interval);
+    this.clientService.stopConnection();
     navigator.geolocation.clearWatch(this.watchPosition);
   }
 
   private increaseTrackArray(num: number): void {
     const array: Array<string> = Object.assign([], this.trackArray);
     const depth = Number(num.toFixed(2));
-    if (this.isFirstElement) {
+    if (array[0] === this.firstElement) {
       array.shift();
-      this.isFirstElement = false;
     }
     if (array.length > 8) {
       array.splice(-1, 1);
@@ -73,9 +79,9 @@ export class ClientComponent implements OnInit, OnDestroy {
 
   private saveAndroidData(response: SonarClientData, crd: Position) {
     const data: AndroidData = new AndroidData(response.depth.toString(), response.batteryLevel.toString(), response.waterTemp.toString(), crd, String(Date.now()));
-    if (typeof TrackingService !== 'undefined') {
+    if (this.androidBridge.isAvailable()) {
       if (this.androidDataList.length > this.androidListSendSize) {
-        TrackingService.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
+        this.androidBridge.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
       }
       this.androidDataList.push(data);
     } else {
@@ -84,4 +90,4 @@ export class ClientComponent implements OnInit, OnDestroy {
   }
 }
 
-declare var TrackingService: JavaScriptInterface;
+

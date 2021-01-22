@@ -1,28 +1,28 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {Map, TileLayer} from 'leaflet';
-import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
 import {MapService} from '../service/map.service';
-
+import {GeoService} from '../service/geo.service';
 
 @Component({
-  selector: 'app-map-load',
+  selector: 'app-root',
   templateUrl: './map-load.component.html',
   styleUrls: ['./map-load.component.css']
 })
 export class MapLoadComponent implements OnInit, AfterViewInit {
   private map: Map;
   private tiles: TileLayer;
-  private inter: JavaScriptInterface;
   downloadStatus: string;
+  private longitude: number;
+  private latitude: number;
 
-  constructor(private mapService: MapService) {
+  constructor(private mapService: MapService, private geoService: GeoService) {
     /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
     // 'assets/Tiles/{z}/{x}/{y}.png'
     this.tiles = new TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
         attribution: '&copy; <a href=”http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         subdomains: 'abc',
-        minZoom: 13,
+        minZoom: 5,
         maxZoom: 19,
         crossOrigin: true
       });
@@ -40,35 +40,33 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
     const south = bounds.getSouth();
     const east = bounds.getEast();
     const west = bounds.getWest();
+    console.log(bounds);
     console.log('download= ' + this.mapService.getTileNumber(bounds));
     const observableDownloadState = this.mapService.downloadMap(bounds);
     observableDownloadState.subscribe(value => {
       this.downloadStatus = value;
     });
-
   }
 
   ngAfterViewInit(): void {
     this.initMap();
-    this.map.invalidateSize();
-    // const control = L.control.saveTiles(this.tiles, {
-    //   saveButtonHtml: '<i class="fa fa-download" aria-hidden="true"></i>'
-    // });
-
-    // L.control.
-    // control.addTo(this.map);
-    // this.map.__initMapHandlers();
   }
 
   private initMap(): void {
+    this.latitude = 49.957943;
+    this.longitude = 36.338340;
+    this.geoService.getLocation().subscribe(value => {
+      this.longitude = value.coords.longitude;
+      this.latitude = value.coords.longitude;
+    });
+
     this.map = new Map('map', {
-      center: [49.957943, 36.338340],
+      center: [this.latitude, this.longitude],
       zoom: 12,
       maxZoom: 19
 
     });
     this.tiles.addTo(this.map);
+    this.map.invalidateSize();
   }
-
-
 }

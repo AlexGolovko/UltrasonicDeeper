@@ -1,5 +1,9 @@
+import {MapCoordinates} from '../DTO/MapCoordinates';
+
 export interface JavaScriptInterface {
-  downloadMap(north: number, south: number, east: number, west: number): void
+  downloadMap(map: MapCoordinates): void
 
   saveTrackingList(data: string): void
+
+  getActivity(): string;
 }

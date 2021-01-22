@@ -1,6 +1,9 @@
 import {LatLngBounds} from 'leaflet';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
+import {MapCoordinates} from '../DTO/MapCoordinates';
+import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
+import {AndroidBridgeService} from './android-bridge.service';
 
 @Injectable({
   providedIn: 'root',
@@ -8,24 +11,37 @@ import {Injectable} from '@angular/core';
 export class MapService {
   private minZoom = 19;
 
-  private lon2tile(lon, zoom): number {
+  constructor(private androidBridge: AndroidBridgeService) {
+  }
+
+  private static lon2tile(lon, zoom): number {
     return (Math.floor((lon + 180) / 360 * Math.pow(2, zoom)));
   }
 
-  private lat2tile(lat, zoom): number {
+  private static lat2tile(lat, zoom): number {
     return (Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2
       * Math.pow(2, zoom)));
   }
 
-  public getTileNumber(bounds: LatLngBounds) {
-    const topTile = this.lat2tile(bounds.getNorth(), this.minZoom);
-    const leftTile = this.lon2tile(bounds.getWest(), this.minZoom);
-    const bottomTile = this.lat2tile(bounds.getSouth(), this.minZoom);
-    const rightTile = this.lon2tile(bounds.getEast(), this.minZoom);
-    const width = Math.abs(leftTile - rightTile) + 1;
-    const height = Math.abs(topTile - bottomTile) + 1;
+  public getTiles(bounds: LatLngBounds): MapCoordinates {
+    const mapCoordinates = new MapCoordinates();
+    mapCoordinates.topTile = MapService.lat2tile(bounds.getNorth(), this.minZoom);
+    mapCoordinates.leftTile = MapService.lon2tile(bounds.getWest(), this.minZoom);
+    mapCoordinates.bottomTile = MapService.lat2tile(bounds.getSouth(), this.minZoom);
+    mapCoordinates.rightTile = MapService.lon2tile(bounds.getEast(), this.minZoom);
+    return mapCoordinates;
+  }
 
-// total tiles
+  public getTileNumber(bounds: LatLngBounds) {
+    const mapCoordinates = this.getTiles(bounds);
+    const width = Math.abs(mapCoordinates.leftTile - mapCoordinates.rightTile) + 1;
+    const height = Math.abs(mapCoordinates.topTile - mapCoordinates.bottomTile) + 1;
+    console.log({
+      topTile: mapCoordinates.topTile,
+      leftTile: mapCoordinates.leftTile,
+      bottomTile: mapCoordinates.bottomTile,
+      rightTile: mapCoordinates.rightTile
+    });
     return width * height;
   }
 
@@ -35,6 +51,7 @@ export class MapService {
     const mapPromise = new Promise(() => {
       downloadState.next('0/' + tiles);
     });
+    this.androidBridge.downloadMap(this.getTiles(bounds));
     return downloadState.asObservable();
   }
 }

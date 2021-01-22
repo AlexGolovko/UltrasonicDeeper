@@ -13,7 +13,7 @@ import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 const appRoutes: Routes = [
   {path: '', component: ClientComponent},
   {path: 'map', component: MapComponent},
-  {path: 'map-load', component: MapLoadComponent}
+  {path: 'load', component: MapLoadComponent}
 ];
 
 @NgModule({

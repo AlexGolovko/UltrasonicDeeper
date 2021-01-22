@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {ClientService} from './service/client.service';
-import {SonarData} from './SonarData';
+import {Router} from '@angular/router';
+import {AndroidBridgeService} from './service/android-bridge.service';
 
 @Component({
   selector: 'app-root',
@@ -8,31 +8,19 @@ import {SonarData} from './SonarData';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, OnDestroy {
-  public readonly title = 'SonarApp';
-  public readonly fail = 'Too deep/shallow';
-  public isAvailable: boolean;
-  public isMeasureSuccess: boolean;
 
-  constructor(private clientService: ClientService) {
+  constructor(private router: Router, private androidBridge: AndroidBridgeService) {
 
   }
 
   ngOnInit(): void {
-
-    this.clientService.getState().subscribe(value => {
-        this.isAvailable = value.isSonarAvailable;
-        if (this.isAvailable === false) {
-          this.isMeasureSuccess = true;
-        } else {
-          this.isMeasureSuccess = value.isMeasureSuccess;
-        }
-      }
-    );
+    if (this.androidBridge.getActivity() === 'map') {
+      this.router.navigate(['load']);
+    }
   }
 
   ngOnDestroy(): void {
   }
 }
-
 
 

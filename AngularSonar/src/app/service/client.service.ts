@@ -15,6 +15,7 @@ export class ClientService {
   private readonly sonarInfo: BehaviorSubject<SonarState>;
   private sonarClientData: BehaviorSubject<SonarClientData>;
   private readonly endpoint: string;
+  private clientInterval: any;
   private batteryLevels: Map<number, number> = new Map([
     [4.2, 100],
     [4.1, 90],
@@ -63,13 +64,18 @@ export class ClientService {
       this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
     });
 
-    let a = 0;
-    setInterval(() => {
-      this.wsService.send(WS.SONAR, '1');
-      a = a + 1;
-    }, environment.interval);
     this.endpoint = environment.url;
     this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
+  }
+
+  public startConnection(): void {
+    this.clientInterval = setInterval(() => {
+      this.wsService.send(WS.SONAR, '1');
+    }, environment.interval);
+  }
+
+  public stopConnection(): void {
+    clearInterval(this.clientInterval);
   }
 
   getState(): Observable<SonarState> {
@@ -90,7 +96,7 @@ export class ClientService {
       const sonarData = await this.http<SonarData>(this.endpoint);
       sonarClientData.depth = Number(sonarData.depth);
       sonarClientData.batteryLevel = this.updateBatteryLevel(Number(sonarData.battery));
-      sonarClientData.waterTemp = Number(sonarData.temperature);
+      sonarClientData.waterTemp = Math.round(Number(sonarData.temperature) / 0.1) * 0.1;
       sonarClientData.isSonarAvailable = true;
       if (200 === Number(sonarData.status)) {
         sonarClientData.isMeasureSuccess = true; // 'SonarApp';

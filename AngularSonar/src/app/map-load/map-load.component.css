@@ -22,16 +22,9 @@
 }
 
 #map {
-  height: 90vh;
+  height: 100vh;
 }
 
-/*#download {*/
-/*  position: absolute;*/
-/*  top: 20px;*/
-/*  right: 20px;*/
-/*  padding: 10px;*/
-/*  z-index: 400;*/
-/*}*/
 #downloadButton{
   display: flex;
   align-items: center;

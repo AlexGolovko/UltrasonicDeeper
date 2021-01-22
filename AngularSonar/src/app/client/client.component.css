@@ -1,11 +1,15 @@
 p{
   color: white;
 }
+
 h1 {
   color: white;
   text-align: center;
   font-size: 60px;
   margin: 0px;
+}
+.Measure {
+  height: 10vh;
 }
 .table{
   color: white;

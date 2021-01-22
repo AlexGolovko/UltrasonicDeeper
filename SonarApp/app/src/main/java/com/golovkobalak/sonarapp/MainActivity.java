@@ -21,6 +21,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.golovkobalak.sonarapp.service.WifiConnector;
+import com.golovkobalak.sonarapp.service.WifiScanReceiver;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.concurrent.Callable;
