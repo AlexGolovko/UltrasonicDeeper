@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Sonar</string>
     <string name="title_home">Sonar App</string>
-    <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="text_description">App automatically connects to the wifi network of your sonar after pressing the connect button</string>
     <string name="button_connect">connect</string>
@@ -16,4 +15,5 @@
     <string name="turnOnWifiManually">Android is not allowed to turn on the WIFI programmatically, turn on wifi manually.. </string>
     <string name="manual_connect">manual connect</string>
     <string name="manual_connect_description">Turn on sonar\nTurn on wifi\nConnect to microsonar \n    password = microsonar\nClick button again</string>
+    <string name="map">Map</string>
 </resources>

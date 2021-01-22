@@ -14,7 +14,7 @@
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.golovkobalak.sonarapp.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
+        android:label="@string/map"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment

@@ -51,7 +51,7 @@ public class SonarActivity extends Activity {
         webView.getSettings().setGeolocationDatabasePath(this.getFilesDir().getPath());
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 //        webView.loadUrl("file:///android_asset/index.html");
-        webView.addJavascriptInterface(new TrackingInterface(this), "TrackingService");
+        webView.addJavascriptInterface(new TrackingInterface(this, "sonar"), "TrackingService");
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
 
 

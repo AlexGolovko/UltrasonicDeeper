@@ -1,4 +1,4 @@
-package com.golovkobalak.sonarapp;
+package com.golovkobalak.sonarapp.service;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
