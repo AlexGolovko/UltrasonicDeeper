@@ -7,16 +7,50 @@
     tools:context=".ui.home.HomeFragment">
 
     <TextView
-        android:id="@+id/text_home"
-        android:layout_width="match_parent"
+        android:id="@+id/textDescription"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="100dp"
+        android:background="#000000"
+        android:fontFamily="monospace"
+        android:includeFontPadding="false"
+        android:text="@string/text_description"
+        android:textColor="#F9F9F9"
+        android:textSize="14sp"
+        android:textAlignment="gravity"
+        app:layout_constraintBottom_toTopOf="@+id/button_auto_connect"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_auto_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:background="#000000"
+        android:shadowColor="#F2E7E7"
+        android:text="@string/auto_connection"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#F4EDED"
+        app:layout_constraintBottom_toTopOf="@+id/button_manual_connect"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button_manual_connect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:background="#000000"
+        android:shadowColor="#F2E7E7"
+        android:text="@string/manual_connect"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#F4EDED"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

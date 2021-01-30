@@ -32,26 +32,26 @@ export class MapService {
     return mapCoordinates;
   }
 
-  public getTileNumber(bounds: LatLngBounds) {
-    const mapCoordinates = this.getTiles(bounds);
-    const width = Math.abs(mapCoordinates.leftTile - mapCoordinates.rightTile) + 1;
-    const height = Math.abs(mapCoordinates.topTile - mapCoordinates.bottomTile) + 1;
-    console.log({
-      topTile: mapCoordinates.topTile,
-      leftTile: mapCoordinates.leftTile,
-      bottomTile: mapCoordinates.bottomTile,
-      rightTile: mapCoordinates.rightTile
-    });
-    return width * height;
-  }
+  // public getTileNumber(bounds: LatLngBounds) {
+  //   const mapCoordinates = this.getTiles(bounds);
+  //   const width = Math.abs(mapCoordinates.leftTile - mapCoordinates.rightTile) + 1;
+  //   const height = Math.abs(mapCoordinates.topTile - mapCoordinates.bottomTile) + 1;
+  //   console.log({
+  //     topTile: mapCoordinates.topTile,
+  //     leftTile: mapCoordinates.leftTile,
+  //     bottomTile: mapCoordinates.bottomTile,
+  //     rightTile: mapCoordinates.rightTile
+  //   });
+  //   return width * height;
+  // }
 
-  downloadMap(bounds: LatLngBounds): Observable<string> {
-    const tiles = this.getTileNumber(bounds);
-    const downloadState = new BehaviorSubject<string>('0/' + tiles);
-    const mapPromise = new Promise(() => {
-      downloadState.next('0/' + tiles);
-    });
-    this.androidBridge.downloadMap(this.getTiles(bounds));
-    return downloadState.asObservable();
-  }
+  // downloadMap(bounds: LatLngBounds): Observable<string> {
+  //   const tiles = this.getTileNumber(bounds);
+  //   const downloadState = new BehaviorSubject<string>('0/' + tiles);
+  //   const mapPromise = new Promise(() => {
+  //     downloadState.next('0/' + tiles);
+  //   });
+  //   this.androidBridge.downloadMap(this.getTiles(bounds));
+  //   return downloadState.asObservable();
+  // }
 }

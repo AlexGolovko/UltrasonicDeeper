@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static android.content.Context.WIFI_SERVICE;
 
 public class WifiScanReceiver extends BroadcastReceiver {
+    public static final String TAG = WifiScanReceiver.class.getSimpleName();
     private final String SSID;
     private static final AtomicBoolean isAvailable = new AtomicBoolean(false);
 
@@ -22,7 +23,7 @@ public class WifiScanReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("SonarApp", "onReceive");
+        Log.d(TAG, "onReceive: ");
         boolean success = intent.getBooleanExtra(
                 WifiManager.EXTRA_RESULTS_UPDATED, false);
         if (success) {
