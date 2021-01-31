@@ -33,7 +33,7 @@ public class WifiConnector {
     private final WifiManager wifiManager;
     private final Context ctx;
     private final AppCompatActivity activity;
-    final String TAG = "SonarApp";
+    final String TAG = WifiConnector.class.getSimpleName();
     private final Serializable lock = new ReentrantLock();
 
     public WifiConnector(Context applicationContext, AppCompatActivity mainActivity) {
@@ -41,7 +41,6 @@ public class WifiConnector {
         this.activity = mainActivity;
         this.wifiManager = (WifiManager) ctx.getApplicationContext().getSystemService(WIFI_SERVICE);
     }
-
 
     public void log(String log) {
         Log.d(TAG, log);
@@ -164,9 +163,9 @@ public class WifiConnector {
             try {
                 final boolean scanState = wifiManager.startScan();
                 if (scanState) {
-                    log("take lock");
+                    log("isAccessPointAvailable: take lock");
                     WifiScanReceiver.getLock().wait();
-                    log("WifiScanReceiver.getLock().get(): " + WifiScanReceiver.getLock().get());
+                    log("isAccessPointAvailable: WifiScanReceiver.getLock().get(): " + WifiScanReceiver.getLock().get());
                     return WifiScanReceiver.getLock().get();
                 }
                 log("scanState: " + scanState);
@@ -259,7 +258,7 @@ public class WifiConnector {
         for (final WifiConfiguration configuration : list) {
             if (ssidQuoted.equalsIgnoreCase(configuration.SSID)) {
                 log("Reconnect to " + configuration.SSID);
-                wifiManager.disconnect();
+                //wifiManager.disconnect();
                 wifiManager.enableNetwork(configuration.networkId, true);
                 log("Reconnected : " + wifiManager.reconnect());
 

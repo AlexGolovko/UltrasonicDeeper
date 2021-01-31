@@ -5,43 +5,46 @@ import {MapCoordinates} from '../DTO/MapCoordinates';
 declare var TrackingService: JavaScriptInterface;
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class AndroidBridgeService {
-  private readonly TrackingService: JavaScriptInterface;
+    private readonly TrackingService: JavaScriptInterface;
 
-  constructor() {
-    if (typeof TrackingService === 'undefined') {
-      this.TrackingService = new class implements JavaScriptInterface {
-        downloadMap(map: MapCoordinates): void {
-        }
+    constructor() {
+        if (typeof TrackingService === 'undefined') {
+            console.log('TrackingService is undefined');
+            this.TrackingService = new class implements JavaScriptInterface {
+                downloadMap(map: string): void {
+                }
 
-        getActivity(): string {
-          return 'mock';
-        }
+                getActivity(): string {
+                    return 'mock';
+                }
 
-        saveTrackingList(data: string): void {
+                saveTrackingList(data: string): void {
+                }
+            }();
+        } else {
+            this.TrackingService = TrackingService;
         }
-      }();
-    } else {
-      this.TrackingService = TrackingService;
     }
-  }
 
-  getActivity(): string {
-    return this.TrackingService.getActivity();
-  }
+    getActivity(): string {
+        return this.TrackingService.getActivity();
+    }
 
-  isAvailable() {
-    return typeof this.TrackingService !== 'undefined';
-  }
+    isAvailable() {
+        return typeof this.TrackingService !== 'undefined';
+    }
 
-  saveTrackingList(data: string) {
-    this.TrackingService.saveTrackingList(data);
-  }
+    saveTrackingList(data: string) {
+        this.TrackingService.saveTrackingList(data);
+    }
 
-  downloadMap(tiles: MapCoordinates) {
-    this.TrackingService.downloadMap(tiles);
-  }
+    // downloadMap(tiles: MapCoordinates) {
+    //     this.TrackingService.downloadMap(JSON.stringify(tiles));
+    // }
+
+
 }
 

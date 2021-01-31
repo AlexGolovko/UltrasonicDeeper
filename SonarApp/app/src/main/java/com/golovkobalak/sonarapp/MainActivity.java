@@ -8,6 +8,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,21 +37,19 @@ import java.util.concurrent.TimeoutException;
 import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
+    public static MainActivity activity;
+    public static WifiConnector wifiConnector;
+    public static WifiScanReceiver wifiScanReceiver;
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
-    private static final String MICROSONAR_SSID = "microsonar";
-    private static final String MICROSONAR_PASS = "microsonar";
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(2);
+    public static final String MICROSONAR_SSID = "microsonar";
+    public static final String MICROSONAR_PASS = "microsonar";
     public static final String CONNECTION_IN_PROGRESS = "Connection in progress";
 
     final String TAG = "SonarApp";
-    private TextView connStatus;
-    private WifiConnector wifiConnector;
-    private WifiScanReceiver wifiScanReceiver;
-    private Button connectButton;
-    private boolean isFirstClick = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        activity = this;
         Realm.init(this.getBaseContext());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -63,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        connStatus = findViewById(R.id.textDescription);
-        connectButton = findViewById(R.id.button_sonar);
-        wifiConnector = new WifiConnector(getApplicationContext(), this);
+        if (wifiConnector == null) {
+            wifiConnector = new WifiConnector(getApplicationContext(), this);
+        }
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -79,128 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
         wifiScanReceiver = new WifiScanReceiver(MICROSONAR_SSID);
         registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-    }
-
-    public void connect(View view) {
-        Toast.makeText(getApplicationContext(), CONNECTION_IN_PROGRESS, Toast.LENGTH_SHORT).show();
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectButton.setEnabled(false);
-                    }
-                });
-                final Future<Boolean> future = executorService.submit(new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() {
-                        {
-                            if (changeAccessPoint()) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
-                                        startActivity(intent);
-                                    }
-                                });
-                                return true;
-                            }
-                            return false;
-                        }
-                    }
-                });
-                try {
-                    future.get(60, TimeUnit.SECONDS);
-                    final Boolean isConnected = future.get(1, TimeUnit.DAYS);
-                    if (isConnected) {
-                        log("Completed successfully");
-                    } else {
-                        log("Connection problem");
-                    }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                } catch (TimeoutException e) {
-                    log("Timed out. Cancelling the runnable...");
-                    future.cancel(true);
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connectButton.setEnabled(true);
-                    }
-                });
-
-            }
-        });
-    }
-
-
-    public boolean changeAccessPoint() {
-        log("change Access Point");
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                connStatus.setText(R.string.inProcess);
-            }
-        });
-        if (wifiConnector.isWifiDisabled()) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connStatus.setText(R.string.WifiIsDisabled);
-                }
-            });
-            if (!wifiConnector.enableWifi()) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connStatus.setText("Wifi can't be enabled\n Please turn on WIFi yourself");
-                    }
-                });
-                return false;
-            }
-        }
-        if (wifiConnector.isConnectedTo(MICROSONAR_SSID)) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connStatus.setText(R.string.AlreadyConnected);
-                }
-            });
-            log((String) getText(R.string.AlreadyConnected));
-            return true;
-        }
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    connStatus.setText(R.string.NotPermit);
-                }
-            });
-            log((String) getText(R.string.NotPermit));
-            return false;
-        }
-        if (!(android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q))
-            wifiConnector.configureSonarAccessPoint(MICROSONAR_SSID, MICROSONAR_PASS);
-        if (wifiConnector.isAccessPointAvailable(MICROSONAR_SSID)) {
-            if (wifiConnector.connectTo(MICROSONAR_SSID, MICROSONAR_PASS)) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        connStatus.setText(R.string.SucessfullyConnected);
-                    }
-                });
-                return true;
-            }
-        }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                connStatus.setText(R.string.SonarIsUnavailable);
-            }
-        });
-        return false;
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -224,16 +102,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(wifiScanReceiver);
-    }
-
-    public void manualConnect(View view) {
-        connStatus.setText(R.string.manual_connect_description);
-        if (isFirstClick) {
-            isFirstClick = false;
-            return;
-        }
-        isFirstClick = true;
-        Intent intent = new Intent(MainActivity.this, SonarActivity.class);
-        startActivity(intent);
     }
 }

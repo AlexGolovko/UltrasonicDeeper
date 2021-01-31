@@ -8,12 +8,17 @@
     <string name="NotPermit">Wifi Permission is not allowed</string>
     <string name="AlreadyConnected">Already connected to Sonar</string>
     <string name="SucessfullyConnected">Successfully connected</string>
-    <string name="SonarIsUnavailable">Sonar is unavailable</string>
+    <string name="SonarIsUnavailable">Sonar is unavailable\nUse Manual Connection</string>
     <string name="WifiManagerIsUnavailable">Wifi Manager is unavailable</string>
     <string name="inProcess">Connection to Sonar in process</string>
     <string name="button_upload">UPLOAD</string>
     <string name="turnOnWifiManually">Android is not allowed to turn on the WIFI programmatically, turn on wifi manually.. </string>
     <string name="manual_connect">manual connect</string>
-    <string name="manual_connect_description">Turn on sonar\nTurn on wifi\nConnect to microsonar \n    password = microsonar\nClick button again</string>
+    <string name="manual_connect_description">Turn on sonar\nTurn on wifi\nConnect to microsonar\n\tpassword = microsonar\nClick button again</string>
     <string name="map">Map</string>
+    <string name="auto_connection">auto connect</string>
+    <string name="cancel">cancel</string>
+    <string name="download">download</string>
+    <string name="butInProgress">IN PROGRESS</string>
+    <string name="abort_connection">Connection took a too long time,\n use a manual connection.</string>
 </resources>
