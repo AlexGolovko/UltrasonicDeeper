@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
-import {MapCoordinates} from '../DTO/MapCoordinates';
 
 declare var TrackingService: JavaScriptInterface;
 
@@ -14,6 +13,9 @@ export class AndroidBridgeService {
         if (typeof TrackingService === 'undefined') {
             console.log('TrackingService is undefined');
             this.TrackingService = new class implements JavaScriptInterface {
+                getMapCacheDir(): string {
+                    return '';
+                }
                 downloadMap(map: string): void {
                 }
 
@@ -39,6 +41,10 @@ export class AndroidBridgeService {
 
     saveTrackingList(data: string) {
         this.TrackingService.saveTrackingList(data);
+    }
+
+    getMapCacheDir(): string {
+        return this.TrackingService.getMapCacheDir()
     }
 
     // downloadMap(tiles: MapCoordinates) {

@@ -1,7 +1,9 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
-import {Map, TileLayer} from 'leaflet';
+import {DivIcon, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
 import {MapService} from '../service/map.service';
 import {GeoService} from '../service/geo.service';
+import {AndroidBridgeService} from '../service/android-bridge.service';
+
 
 @Component({
     selector: 'app-root',
@@ -11,11 +13,12 @@ import {GeoService} from '../service/geo.service';
 export class MapLoadComponent implements OnInit, AfterViewInit {
     private map: Map;
     private tiles: TileLayer;
+    private cachedTiles: TileLayer;
     downloadStatus: string;
     private longitude: number;
     private latitude: number;
 
-    constructor(private mapService: MapService, private geoService: GeoService) {
+    constructor(private mapService: MapService, private geoService: GeoService, private androidService: AndroidBridgeService) {
         /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
         // 'assets/Tiles/{z}/{x}/{y}.png'
         this.tiles = new TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -26,6 +29,11 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 maxZoom: 19,
                 crossOrigin: true
             });
+        this.cachedTiles = new TileLayer(androidService.getMapCacheDir() + '/{z}/{x}/{y}.png', {
+            minZoom: 19,
+            maxZoom: 19,
+            crossOrigin: true
+        });
 
     }
 
@@ -68,6 +76,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
 
         });
         this.tiles.addTo(this.map);
+        this.cachedTiles.addTo(this.map)
         this.map.invalidateSize();
     }
 

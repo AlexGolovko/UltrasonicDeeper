@@ -95,6 +95,12 @@ public class TrackingInterface {
         return activity;
     }
 
+    @JavascriptInterface
+    public String getMapCacheDir(){
+        String filesPath = context.getFilesDir().getAbsolutePath();
+        return "file://" + filesPath + "/Tiles";
+    }
+
     public void cancelDownloadMap() {
         isCanceled = true;
         for (AsyncTask downloadTask : downloadTasks) {

@@ -3,5 +3,7 @@ export interface JavaScriptInterface {
 
     saveTrackingList(data: string): void
 
-    getActivity(): string;
+    getActivity(): string
+
+    getMapCacheDir(): string
 }
