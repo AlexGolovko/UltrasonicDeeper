@@ -20,6 +20,7 @@ public class DownloadTask extends AsyncTask<String, Integer, Boolean> {
 
     public interface DownloadListener {
         void onDownloadComplete(File filename);
+
         void onDownloadFailure(final String msg);
     }
 
@@ -48,9 +49,11 @@ public class DownloadTask extends AsyncTask<String, Integer, Boolean> {
             }
         }
         saveTo = new File(dir, fileName);
+
         if (saveTo.exists()) {
             return true;
         }
+        Log.d(TAG, "doInBackground: " + saveTo.getAbsolutePath());
         try {
             URL url = new URL(sUrl);
             URLConnection conn = url.openConnection();
@@ -75,6 +78,7 @@ public class DownloadTask extends AsyncTask<String, Integer, Boolean> {
 
         return false;
     }
+
     @Override
     protected void onPostExecute(Boolean result) {
         if (!result) {

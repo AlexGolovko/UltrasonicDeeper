@@ -1,12 +1,12 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
-import {DivIcon, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
+import {Circle, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
 import {MapService} from '../service/map.service';
 import {GeoService} from '../service/geo.service';
 import {AndroidBridgeService} from '../service/android-bridge.service';
 
 
 @Component({
-    selector: 'app-root',
+    selector: 'app-load',
     templateUrl: './map-load.component.html',
     styleUrls: ['./map-load.component.css']
 })
@@ -15,8 +15,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
     private tiles: TileLayer;
     private cachedTiles: TileLayer;
     downloadStatus: string;
-    private longitude: number;
-    private latitude: number;
 
     constructor(private mapService: MapService, private geoService: GeoService, private androidService: AndroidBridgeService) {
         /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
@@ -62,22 +60,58 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
     }
 
     private initMap(): void {
-        this.latitude = 49.957943;
-        this.longitude = 36.338340;
-        this.geoService.getLocation().subscribe(value => {
-            this.longitude = value.coords.longitude;
-            this.latitude = value.coords.longitude;
-        });
-
+        // this.latitude = 49.957943;
+        // this.longitude = 36.338340;
+        const subscription = this.geoService.getLocation().subscribe(value => {
+            this.map.setView(new LatLng(value.coords.latitude, value.coords.longitude), 12)
+            subscription.unsubscribe();
+        })
         this.map = new Map('map', {
-            center: [this.latitude, this.longitude],
             zoom: 12,
             maxZoom: 19
-
         });
         this.tiles.addTo(this.map);
         this.cachedTiles.addTo(this.map)
         this.map.invalidateSize();
+
+        // TODO new marker
+        // L.circle(new LatLng(this.latitude, this.longitude), {
+        //     color: 'red',
+        //     fillColor: '#f03',
+        //     fillOpacity: 0.5,
+        //     radius: 500
+        // }).addTo(this.map);
+        const greenIcon = new Icon({
+            iconUrl: 'assets/marker-icon-2x.png',
+            iconSize: [20, 32], // size of the icon
+            iconAnchor: [10, 32], // point of the icon which will correspond to marker's location
+        });
+        let marker: Marker;
+        let circle: Circle;
+        this.geoService.getLocation().subscribe(value => {
+            console.log(value.coords.latitude, value.coords.longitude, value.coords.accuracy)
+            if (typeof marker !== 'undefined') {
+                marker.remove()
+                circle.remove()
+            }
+            // const divIcon = new DivIcon({
+            //     className: 'my-div-icon',
+            //     html: '<img class="my-div-image" src="assets/marker-icon-2x.png"/>' +
+            //         '<span class="my-div-span">U R here</span>',
+            //     iconSize: [50, 85]
+            // })
+            marker = new Marker(new LatLng(value.coords.latitude, value.coords.longitude), {
+                icon: greenIcon
+            })
+            marker.addTo(this.map);
+            circle = new Circle(new LatLng(value.coords.latitude, value.coords.longitude), {
+                color: 'green',
+                fillColor: '#82e70c',
+                fillOpacity: 0.5,
+                radius: (value.coords.accuracy / 2)
+            })
+            circle.addTo(this.map);
+        });
     }
 
 

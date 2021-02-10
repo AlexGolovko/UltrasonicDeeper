@@ -9,132 +9,128 @@ import {environment} from '../../environments/environment';
 
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ClientService {
-  private readonly sonarInfo: BehaviorSubject<SonarState>;
-  private sonarClientData: BehaviorSubject<SonarClientData>;
-  private readonly endpoint: string;
-  private clientInterval: any;
-  private batteryLevels: Map<number, number> = new Map([
-    [4.2, 100],
-    [4.1, 90],
-    [4.0, 80],
-    [3.9, 70],
-    [3.8, 60],
-    [3.7, 50],
-    [3.6, 40],
-    [3.5, 30],
-    [3.4, 20],
-    [3.3, 10]
-  ]);
-  private wsService: WebSocketServiceImpl;
+    private readonly sonarInfo: BehaviorSubject<SonarState>;
+    private sonarClientData: BehaviorSubject<SonarClientData>;
+    private readonly endpoint: string;
+    private clientInterval: any;
+    //TODO Map level of VCC to battery level
+    private batteryLevels: Map<number, number> = new Map([
+        [4.2, 100],
+        [4.1, 90],
+        [4.0, 80],
+        [3.9, 70],
+        [3.8, 60],
+        [3.7, 50],
+        [3.6, 40],
+        [3.5, 30],
+        [3.4, 20],
+        [3.3, 10]
+    ]);
+    private wsService: WebSocketServiceImpl;
 
 
-  constructor(wsService: WebSocketServiceImpl) {
-    this.wsService = wsService;
-    const sonarClientData = new SonarClientData();
-    sonarClientData.batteryLevel = 0;
-    sonarClientData.waterTemp = 0;
-    sonarClientData.depth = 0;
-    sonarClientData.isSonarAvailable = false;
-    this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
-    this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
-      const data = new SonarClientData();
-      try {
-        data.isSonarAvailable = true;
-        data.batteryLevel = this.updateBatteryLevel(Number(message.battery));
-        data.waterTemp = Number(message.temperature);
-        if (200 === Number(message.status)) {
-          data.depth = Number(message.depth);
-          data.isMeasureSuccess = true; // 'SonarApp';
-        } else {
-          data.isMeasureSuccess = false; // 'Too deep/shallow';
-          console.log('Something wrong=' + message.status);
+    constructor(wsService: WebSocketServiceImpl) {
+        this.wsService = wsService;
+        const sonarClientData = new SonarClientData();
+        sonarClientData.batteryLevel = 0;
+        sonarClientData.waterTemp = 0;
+        sonarClientData.depth = 0;
+        sonarClientData.isSonarAvailable = false;
+        this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
+        this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
+            const data = new SonarClientData();
+            try {
+                data.isSonarAvailable = true;
+                data.batteryLevel = this.updateBatteryLevel(Number(message.battery));
+                data.waterTemp = Number(message.temperature);
+                if (200 === Number(message.status)) {
+                    data.depth = Number(message.depth);
+                    data.isMeasureSuccess = true; // 'SonarApp';
+                } else {
+                    data.isMeasureSuccess = false; // 'Too deep/shallow';
+                    console.log('Something wrong=' + message.status);
+                }
+            } catch (e) {
+                data.isSonarAvailable = false;
+                console.log(e);
+            }
+            this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
+            this.sonarClientData.next(data);
+        });
+
+        this.wsService.status.subscribe(isConnected => {
+            this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
+        });
+
+        this.endpoint = environment.url;
+        this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
+    }
+
+    public startConnection(): void {
+        if (this.clientInterval === undefined) {
+            console.log('startConnection')
+            this.clientInterval = setInterval(() => {
+                this.wsService.send(WS.SONAR, '1');
+            }, environment.interval);
         }
-      } catch (e) {
-        data.isSonarAvailable = false;
-        console.log(e);
-      }
-      this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
-      this.sonarClientData.next(data);
-    });
-
-    this.wsService.status.subscribe(isConnected => {
-      this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
-    });
-
-    this.endpoint = environment.url;
-    this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
-  }
-
-  public startConnection(): void {
-    this.clientInterval = setInterval(() => {
-      this.wsService.send(WS.SONAR, '1');
-    }, environment.interval);
-  }
-
-  public stopConnection(): void {
-    clearInterval(this.clientInterval);
-  }
-
-  getState(): Observable<SonarState> {
-    return this.sonarInfo.asObservable();
-  }
-
-  setState(newState: SonarState): void {
-    this.sonarInfo.next(newState);
-  }
-
-  getSonarClientData(): Observable<SonarClientData> {
-    return this.sonarClientData.asObservable();
-  }
-
-  async getSonarData(): Promise<SonarClientData> {
-    const sonarClientData: SonarClientData = new SonarClientData();
-    try {
-      const sonarData = await this.http<SonarData>(this.endpoint);
-      sonarClientData.depth = Number(sonarData.depth);
-      sonarClientData.batteryLevel = this.updateBatteryLevel(Number(sonarData.battery));
-      sonarClientData.waterTemp = Math.round(Number(sonarData.temperature) / 0.1) * 0.1;
-      sonarClientData.isSonarAvailable = true;
-      if (200 === Number(sonarData.status)) {
-        sonarClientData.isMeasureSuccess = true; // 'SonarApp';
-      } else {
-        sonarClientData.isMeasureSuccess = false; // 'Too deep/shallow';
-        console.log('Something wrong=' + sonarData.status);
-      }
-    } catch (e) {
-      sonarClientData.isSonarAvailable = false;
-      console.log(e);
     }
-    this.setState({isSonarAvailable: sonarClientData.isSonarAvailable, isMeasureSuccess: sonarClientData.isMeasureSuccess});
-    return sonarClientData;
-  }
 
-  private async http<T>(
-    request: RequestInfo
-  ): Promise<T> {
-    return await fetch(request).then(response => {
-      // this.isSonarAvailable = true;
-      return response.json();
-    }).catch(err => {
-        // this.isSonarAvailable = false;
-        throw new Error(err.statusText);
-      }
-    );
-  }
-
-  private updateBatteryLevel(batteryADC: number): number {
-    const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.1;
-    for (const [key, value] of this.batteryLevels.entries()) {
-      if (batteryVcc > key) {
-        return value;
-      } else {
-        return -1;
-      }
+    public stopConnection(): void {
+        clearInterval(this.clientInterval);
     }
-  }
 
+    getState(): Observable<SonarState> {
+        return this.sonarInfo.asObservable();
+    }
 
+    setState(newState: SonarState): void {
+        this.sonarInfo.next(newState);
+    }
+
+    getSonarClientData(): Observable<SonarClientData> {
+        return this.sonarClientData.asObservable();
+    }
+
+    async getSonarData(): Promise<SonarClientData> {
+        const sonarClientData: SonarClientData = new SonarClientData();
+        try {
+            const sonarData = await this.http<SonarData>(this.endpoint);
+            sonarClientData.depth = Number(sonarData.depth);
+            sonarClientData.batteryLevel = this.updateBatteryLevel(Number(sonarData.battery));
+            sonarClientData.waterTemp = Math.round(Number(sonarData.temperature) / 0.1) * 0.1;
+            sonarClientData.isSonarAvailable = true;
+            if (200 === Number(sonarData.status)) {
+                sonarClientData.isMeasureSuccess = true; // 'SonarApp';
+            } else {
+                sonarClientData.isMeasureSuccess = false; // 'Too deep/shallow';
+                console.log('Something wrong=' + sonarData.status);
+            }
+        } catch (e) {
+            sonarClientData.isSonarAvailable = false;
+            console.log(e);
+        }
+        this.setState({isSonarAvailable: sonarClientData.isSonarAvailable, isMeasureSuccess: sonarClientData.isMeasureSuccess});
+        return sonarClientData;
+    }
+
+    private async http<T>(
+        request: RequestInfo
+    ): Promise<T> {
+        return await fetch(request).then(response => {
+            // this.isSonarAvailable = true;
+            return response.json();
+        }).catch(err => {
+                // this.isSonarAvailable = false;
+                throw new Error(err.statusText);
+            }
+        );
+    }
+
+    private updateBatteryLevel(batteryADC: number): number {
+        const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.25
+        return Math.trunc(100 * batteryVcc - 320)
+    }
 }

@@ -64,9 +64,9 @@ public class TrackingInterface {
             for (int secondLevelTile = coordinate.leftTile; secondLevelTile < coordinate.rightTile; secondLevelTile++) {
                 if (isCanceled) return;
                 //download https://a.tile.openstreetmap.org/19/315066/177906.png "https://a.tile.openstreetmap.org/19/"+secondLevelTile+"/"+firstLevelTile+".png"
-                // /data/user/0/com.golovkobalak.sonarapp/files/Tiles
+                //file:///data/user/0/com.golovkobalak.sonarapp/files/Tiles/19/315066/177906.png
                 String url = "https://a.tile.openstreetmap.org/19/" + secondLevelTile + "/" + firstLevelTile + ".png";
-                String dir = context.getFilesDir() + "/Tiles/19/" + secondLevelTile + "/" + firstLevelTile;
+                String dir = context.getFilesDir() + "/Tiles/19/" + secondLevelTile;
                 String file = firstLevelTile + ".png";
                 downloadTasks.add(new DownloadTask(new DownloadTask.DownloadListener() {
                     @Override

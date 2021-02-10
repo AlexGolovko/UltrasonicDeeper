@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   url: /*'http://192.168.31.238/feature',// */'http://localhost:8080/sonar',
   wsEndpoint: 'ws://192.168.31.238:8080',
-  interval: 1000,
+  interval: 300,
   listSize: 10
 };
 
