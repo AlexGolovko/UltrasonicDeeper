@@ -13,11 +13,13 @@ import {AndroidBridgeService} from '../service/android-bridge.service';
 export class MapComponent implements OnInit, AfterViewInit {
     private map: Map;
     private tiles: TileLayer;
+    private cachedTiles: TileLayer;
     private isAvailable = false;
     private isMeasureSuccess = false;
     private marker: Marker = null
     private circle: Circle;
     private crd: Position;
+
 
     constructor(private clientService: ClientService, private geoService: GeoService, private androidService: AndroidBridgeService) {
         /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
@@ -26,6 +28,11 @@ export class MapComponent implements OnInit, AfterViewInit {
             attribution: '&copy; <a href=”http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             subdomains: 'abc',
             minZoom: 13,
+            maxZoom: 19,
+            crossOrigin: true
+        });
+        this.cachedTiles = new TileLayer(androidService.getMapCacheDir() + '/{z}/{x}/{y}.png', {
+            minZoom: 19,
             maxZoom: 19,
             crossOrigin: true
         });
@@ -68,7 +75,8 @@ export class MapComponent implements OnInit, AfterViewInit {
     }
 
     private initMap(): void {
-        this.tiles.addTo(this.map);
+        this.tiles.addTo(this.map)
+        this.cachedTiles.addTo(this.map)
         this.map.locate({setView: true, enableHighAccuracy: true});
         // let marker: Marker;
         // let circle: Circle;

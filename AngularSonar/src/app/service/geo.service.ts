@@ -51,6 +51,12 @@ export class GeoService {
         return new Observable<Position>(observer => {
             window.navigator.geolocation.watchPosition(position => {
                 observer.next(position)
+            }, error => {
+                console.log(error)
+            }, {
+                timeout: 5000,
+                enableHighAccuracy: true,
+                maximumAge: 0
             })
         })
     }
