@@ -1,5 +1,8 @@
 import {Injectable} from '@angular/core';
 import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
+import {SonarClientData} from './SonarClientData';
+import {AndroidData} from '../DTO/AndroidData';
+import {environment} from '../../environments/environment';
 
 declare var TrackingService: JavaScriptInterface;
 
@@ -8,6 +11,8 @@ declare var TrackingService: JavaScriptInterface;
 })
 export class AndroidBridgeService {
     private readonly TrackingService: JavaScriptInterface;
+    private androidDataList: Array<AndroidData>;
+    private androidListSendSize: number = environment.listSize;
 
     constructor() {
         if (typeof TrackingService === 'undefined') {
@@ -16,6 +21,7 @@ export class AndroidBridgeService {
                 getMapCacheDir(): string {
                     return '';
                 }
+
                 downloadMap(map: string): void {
                 }
 
@@ -45,6 +51,18 @@ export class AndroidBridgeService {
 
     getMapCacheDir(): string {
         return this.TrackingService.getMapCacheDir()
+    }
+
+    saveAndroidData(response: SonarClientData, crd: Position): void {
+        const data: AndroidData = new AndroidData(response.depth.toString(), response.batteryLevel.toString(), response.waterTemp.toString(), crd, String(Date.now()));
+        if (this.isAvailable()) {
+            if (this.androidDataList.length > this.androidListSendSize) {
+                this.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
+            }
+            this.androidDataList.push(data);
+        } else {
+            console.log('TrackingService is undefined');
+        }
     }
 
     // downloadMap(tiles: MapCoordinates) {

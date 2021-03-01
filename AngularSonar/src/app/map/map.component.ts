@@ -1,7 +1,8 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {ClientService} from '../service/client.service';
 import {GeoService} from '../service/geo.service';
-import {Circle, Icon, Map, Marker, TileLayer} from 'leaflet';
+import {Circle, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
+import {AndroidBridgeService} from '../service/android-bridge.service';
 
 
 @Component({
@@ -12,9 +13,13 @@ import {Circle, Icon, Map, Marker, TileLayer} from 'leaflet';
 export class MapComponent implements OnInit, AfterViewInit {
     private map: Map;
     private tiles: TileLayer;
+    private isAvailable = false;
+    private isMeasureSuccess = false;
+    private marker: Marker = null
+    private circle: Circle;
+    private crd: Position;
 
-    constructor(private clientService: ClientService, private geoService: GeoService) {
-
+    constructor(private clientService: ClientService, private geoService: GeoService, private androidService: AndroidBridgeService) {
         /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
         // 'assets/Tiles/{z}/{x}/{y}.png'
         this.tiles = new TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -24,7 +29,6 @@ export class MapComponent implements OnInit, AfterViewInit {
             maxZoom: 19,
             crossOrigin: true
         });
-
     }
 
     ngOnInit(): void {
@@ -34,6 +38,28 @@ export class MapComponent implements OnInit, AfterViewInit {
             maxZoom: 19
 
         });
+        this.clientService.getSonarClientData().subscribe(value => {
+            if (value.isMeasureSuccess) {
+                this.androidService.saveAndroidData(value, this.crd)
+            }
+            if (this.marker != null) {
+                this.marker.setIcon(new Icon({
+                    iconUrl: value.isSonarAvailable ? value.isMeasureSuccess ? 'assets/arrowGreen.png' : 'assets/arrowYellow.png' : 'assets/arrowRed.png',
+                    iconSize: [30, 30], // size of the icon
+                    iconAnchor: [15, 15], // point of the icon which will correspond to marker's location
+                }))
+            }
+        })
+        this.geoService.watchPosition().subscribe(value => {
+            this.crd = value
+            if (this.marker != null) {
+                const latlng = new LatLng(value.coords.latitude, value.coords.longitude)
+                this.marker.setLatLng(latlng)
+                this.circle.setLatLng(latlng)
+                this.circle.setRadius(value.coords.accuracy / 2)
+                this.map.panTo(latlng)
+            }
+        })
     }
 
     ngAfterViewInit(): void {
@@ -76,16 +102,20 @@ export class MapComponent implements OnInit, AfterViewInit {
         //     circle.addTo(this.map);
         // });
         this.map.on('locationfound', event => {
-            console.log('Location changed')
-            const greenIcon = new Icon({
-                iconUrl: 'assets/arrow.png',
+            console.log('locationfound')
+            const arrowIcon = new Icon({
+                iconUrl: this.isAvailable ? this.isMeasureSuccess ? 'assets/arrowGreen.png' : 'assets/arrowYellow.png' : 'assets/arrowRed.png',
                 iconSize: [30, 30], // size of the icon
                 iconAnchor: [15, 15], // point of the icon which will correspond to marker's location
             });
             const radius = event.accuracy / 2;
-            new Marker(event.latlng, {icon: greenIcon}).addTo(this.map)
-              //  .bindPopup('You are within ' + radius + ' meters from this point').openPopup();
-            new Circle(event.latlng, radius).addTo(this.map);
+            this.marker = new Marker(event.latlng, {icon: arrowIcon});
+            this.marker.addTo(this.map)
+            //  .bindPopup('You are within ' + radius + ' meters from this point').openPopup();
+            this.circle = new Circle(event.latlng, radius, {
+                color: 'green'
+            });
+            this.circle.addTo(this.map);
         });
     }
 }

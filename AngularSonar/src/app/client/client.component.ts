@@ -28,6 +28,10 @@ export class ClientComponent implements OnInit, OnDestroy {
 
 
     constructor(private clientService: ClientService, private geoService: GeoService, private androidBridge: AndroidBridgeService) {
+    }
+
+
+    ngOnInit(): void {
         this.clientService.getSonarClientData().subscribe(data => {
             this.isAvailable = data.isSonarAvailable;
             if (data.isSonarAvailable) {
@@ -42,10 +46,6 @@ export class ClientComponent implements OnInit, OnDestroy {
             }
         });
         this.geoService.getLocation().subscribe(value => this.crd = value);
-    }
-
-
-    ngOnInit(): void {
         this.androidDataList = new Array<AndroidData>();
         document.body.style.backgroundColor = 'black';
         this.intervalTime = environment.interval;
