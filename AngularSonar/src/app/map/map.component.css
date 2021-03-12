@@ -34,6 +34,7 @@ td {
     /*width: inherit;*/
     width: 50vh;
 }
+
 .map-container {
     /*position: absolute;*/
     /*top: 0;*/
@@ -60,4 +61,13 @@ td {
     height: 100vh;
     padding: 0;
     margin: 0;
+}
+
+.my-div-icon {
+    width: 30px;
+    height: 30px;
+    transform: rotate( -45deg);
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    transform-origin: 50% 50%
 }

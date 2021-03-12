@@ -12,25 +12,6 @@ import {environment} from '../../environments/environment';
     providedIn: 'root'
 })
 export class ClientService {
-    private readonly sonarInfo: BehaviorSubject<SonarState>;
-    private sonarClientData: BehaviorSubject<SonarClientData>;
-    private readonly endpoint: string;
-    private clientInterval: any;
-    //TODO Map level of VCC to battery level
-    private batteryLevels: Map<number, number> = new Map([
-        [4.2, 100],
-        [4.1, 90],
-        [4.0, 80],
-        [3.9, 70],
-        [3.8, 60],
-        [3.7, 50],
-        [3.6, 40],
-        [3.5, 30],
-        [3.4, 20],
-        [3.3, 10]
-    ]);
-    private wsService: WebSocketServiceImpl;
-
 
     constructor(wsService: WebSocketServiceImpl) {
         this.wsService = wsService;
@@ -44,7 +25,7 @@ export class ClientService {
             const data = new SonarClientData();
             try {
                 data.isSonarAvailable = true;
-                data.batteryLevel = this.updateBatteryLevel(Number(message.battery));
+                data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
                 data.waterTemp = Number(message.temperature);
                 if (200 === Number(message.status)) {
                     data.depth = Number(message.depth);
@@ -67,6 +48,16 @@ export class ClientService {
 
         this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
+    }
+    private readonly sonarInfo: BehaviorSubject<SonarState>;
+    private sonarClientData: BehaviorSubject<SonarClientData>;
+    private readonly endpoint: string;
+    private clientInterval: any;
+    private wsService: WebSocketServiceImpl;
+
+    static updateBatteryLevel(batteryADC: number): number {
+        const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.25
+        return Math.trunc(100 * batteryVcc - 300)
     }
 
     public startConnection(): void {
@@ -99,7 +90,7 @@ export class ClientService {
         try {
             const sonarData = await this.http<SonarData>(this.endpoint);
             sonarClientData.depth = Number(sonarData.depth);
-            sonarClientData.batteryLevel = this.updateBatteryLevel(Number(sonarData.battery));
+            sonarClientData.batteryLevel = ClientService.updateBatteryLevel(Number(sonarData.battery));
             sonarClientData.waterTemp = Math.round(Number(sonarData.temperature) / 0.1) * 0.1;
             sonarClientData.isSonarAvailable = true;
             if (200 === Number(sonarData.status)) {
@@ -127,10 +118,5 @@ export class ClientService {
                 throw new Error(err.statusText);
             }
         );
-    }
-
-    private updateBatteryLevel(batteryADC: number): number {
-        const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.25
-        return Math.trunc(100 * batteryVcc - 320)
     }
 }

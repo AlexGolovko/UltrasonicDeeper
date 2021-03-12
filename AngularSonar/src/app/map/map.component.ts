@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {ClientService} from '../service/client.service';
 import {GeoService} from '../service/geo.service';
-import {Circle, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
+import {Circle, DivIcon, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
 import {AndroidBridgeService} from '../service/android-bridge.service';
 
 
@@ -19,6 +19,10 @@ export class MapComponent implements OnInit, AfterViewInit {
     private marker: Marker = null
     private circle: Circle;
     private crd: Position;
+    public angle = -90
+    private prevLatLng: LatLng = null
+    private currLatLng: LatLng = null
+    private prevArrowIconHtml: string;
 
 
     constructor(private clientService: ClientService, private geoService: GeoService, private androidService: AndroidBridgeService) {
@@ -27,7 +31,7 @@ export class MapComponent implements OnInit, AfterViewInit {
         this.tiles = new TileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href=”http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
             subdomains: 'abc',
-            minZoom: 13,
+            minZoom: 15,
             maxZoom: 19,
             crossOrigin: true
         });
@@ -49,22 +53,44 @@ export class MapComponent implements OnInit, AfterViewInit {
             if (value.isMeasureSuccess) {
                 this.androidService.saveAndroidData(value, this.crd)
             }
-            if (this.marker != null) {
-                this.marker.setIcon(new Icon({
-                    iconUrl: value.isSonarAvailable ? value.isMeasureSuccess ? 'assets/arrowGreen.png' : 'assets/arrowYellow.png' : 'assets/arrowRed.png',
-                    iconSize: [30, 30], // size of the icon
-                    iconAnchor: [15, 15], // point of the icon which will correspond to marker's location
-                }))
+            if (this.marker !== null) {
+                const arrowAngle = this.getAngle(this.prevLatLng, this.currLatLng)
+                const arrowIcon: string = value.isSonarAvailable ? value.isMeasureSuccess ? 'assets/arrowGreen.png' : 'assets/arrowYellow.png' : 'assets/arrowRed.png'
+                const arrowIconHtml = '<img class="leaflet-marker-icon leaflet-zoom-animated" src="' + arrowIcon + '"  ' +
+                    'style="width: 30px; height: 30px;transform: rotate(' + arrowAngle + 'deg);' +
+                    '  -webkit-transform: rotate(' + arrowAngle + 'deg);' +
+                    ' -moz-transform:rotate(' + arrowAngle + 'deg);' +
+                    'transform-origin: 50% 50%" />'
+                if (this.prevArrowIconHtml === arrowIconHtml) {
+                    return
+                } else {
+                    this.prevArrowIconHtml = arrowIconHtml
+                }
+                const divIcon = new DivIcon({
+                    className: 'my-div-icon',
+                    html: arrowIconHtml,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+                this.marker.setIcon(divIcon)
             }
         })
         this.geoService.watchPosition().subscribe(value => {
             this.crd = value
-            if (this.marker != null) {
+            if (this.marker !== null) {
                 const latlng = new LatLng(value.coords.latitude, value.coords.longitude)
+                if (this.currLatLng == null) {
+                    this.currLatLng = latlng;
+                    this.prevLatLng = latlng
+                } else {
+                    this.prevLatLng = this.currLatLng
+                    this.currLatLng = latlng
+                }
                 this.marker.setLatLng(latlng)
                 this.circle.setLatLng(latlng)
                 this.circle.setRadius(value.coords.accuracy / 2)
                 this.map.panTo(latlng)
+
             }
         })
     }
@@ -78,52 +104,31 @@ export class MapComponent implements OnInit, AfterViewInit {
         this.tiles.addTo(this.map)
         this.cachedTiles.addTo(this.map)
         this.map.locate({setView: true, enableHighAccuracy: true});
-        // let marker: Marker;
-        // let circle: Circle;
-        // const greenIcon = new Icon({
-        //     iconUrl: 'assets/arrow.png',
-        //     iconSize: [30, 30], // size of the icon
-        //     iconAnchor: [10, 32], // point of the icon which will correspond to marker's location
-        // });
-        // this.geoService.getLocation().subscribe(value => {
-        //     console.log(value.coords.latitude, value.coords.longitude, value.coords.accuracy)
-        //     if (typeof marker !== 'undefined') {
-        //         marker.remove()
-        //         circle.remove()
-        //     }
-        //     // const divIcon = new DivIcon({
-        //     //     className: 'my-div-icon',
-        //     //     html: '<img class="my-div-image" src="assets/marker-icon-2x.png"/>' +
-        //     //         '<span class="my-div-span">U R here</span>',
-        //     //     iconSize: [50, 85]
-        //     // })
-        //     marker = new Marker(new LatLng(value.coords.latitude, value.coords.longitude), {
-        //         icon: greenIcon
-        //     })
-        //     marker.addTo(this.map);
-        //     circle = new Circle(new LatLng(value.coords.latitude, value.coords.longitude), {
-        //         color: 'green',
-        //         fillColor: '#82e70c',
-        //         fillOpacity: 0.5,
-        //         radius: (value.coords.accuracy / 2)
-        //     })
-        //     circle.addTo(this.map);
-        // });
         this.map.on('locationfound', event => {
-            console.log('locationfound')
-            const arrowIcon = new Icon({
-                iconUrl: this.isAvailable ? this.isMeasureSuccess ? 'assets/arrowGreen.png' : 'assets/arrowYellow.png' : 'assets/arrowRed.png',
-                iconSize: [30, 30], // size of the icon
-                iconAnchor: [15, 15], // point of the icon which will correspond to marker's location
-            });
+
+            const divIcon = new DivIcon({
+                className: 'my-div-icon',
+                html: '<img class="leaflet-marker-icon leaflet-zoom-animated" src="assets/arrowGreen.png"  style="width: 30px; height: 30px;transform: rotate(-45deg);  -webkit-transform: rotate(-45deg); -moz-transform:rotate(-45deg);transform-origin: 50% 50%" />',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            })
             const radius = event.accuracy / 2;
-            this.marker = new Marker(event.latlng, {icon: arrowIcon});
+            this.marker = new Marker(event.latlng, {icon: divIcon});
             this.marker.addTo(this.map)
-            //  .bindPopup('You are within ' + radius + ' meters from this point').openPopup();
             this.circle = new Circle(event.latlng, radius, {
                 color: 'green'
             });
             this.circle.addTo(this.map);
         });
+    }
+
+    public getAngle(from: LatLng, to: LatLng): number {
+        let angle: number;
+        angle = (Math.atan2(to.lat - from.lat, to.lng - from.lng) * 180 / Math.PI - 90) * -1
+        if (angle > 180) {
+            angle = (angle - 180) * -1
+        }
+        // Arrow already rotated at 45deg
+        return angle - 45
     }
 }

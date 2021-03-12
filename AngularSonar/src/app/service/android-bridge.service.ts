@@ -11,7 +11,7 @@ declare var TrackingService: JavaScriptInterface;
 })
 export class AndroidBridgeService {
     private readonly TrackingService: JavaScriptInterface;
-    private androidDataList: Array<AndroidData>;
+    private androidDataList: Array<AndroidData> = new Array<AndroidData>()
     private androidListSendSize: number = environment.listSize;
 
     constructor() {
@@ -54,7 +54,10 @@ export class AndroidBridgeService {
     }
 
     saveAndroidData(response: SonarClientData, crd: Position): void {
-        const data: AndroidData = new AndroidData(response.depth.toString(), response.batteryLevel.toString(), response.waterTemp.toString(), crd, String(Date.now()));
+        const data: AndroidData = new AndroidData(response.depth.toString(),
+            response.batteryLevel.toString(),
+            response.waterTemp.toString(),
+            crd, String(Date.now()));
         if (this.isAvailable()) {
             if (this.androidDataList.length > this.androidListSendSize) {
                 this.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));

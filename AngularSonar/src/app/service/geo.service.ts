@@ -12,6 +12,7 @@ const GEOLOCATION_ERRORS = {
     providedIn: 'root',
 })
 export class GeoService {
+    private watcher: Observable<Position> = null
 
     public getLocation(geoLocationOptions?: any): Observable<Position> {
         geoLocationOptions = geoLocationOptions || {timeout: 5000};
@@ -48,16 +49,19 @@ export class GeoService {
     }
 
     public watchPosition(): Observable<Position> {
-        return new Observable<Position>(observer => {
-            window.navigator.geolocation.watchPosition(position => {
-                observer.next(position)
-            }, error => {
-                console.log(error)
-            }, {
-                timeout: 5000,
-                enableHighAccuracy: true,
-                maximumAge: 0
+        if (this.watcher == null) {
+            this.watcher = new Observable<Position>(observer => {
+                window.navigator.geolocation.watchPosition(position => {
+                    observer.next(position)
+                }, error => {
+                    console.log(error)
+                }, {
+                    timeout: 5000,
+                    enableHighAccuracy: true,
+                    maximumAge: 0
+                })
             })
-        })
+        }
+        return this.watcher
     }
 }
