@@ -72,6 +72,7 @@ public class SonarFragment extends Fragment {
         if (trackingInterface == null) {
             trackingInterface = new TrackingInterface(this.getContext(), "sonar");
         }
+        trackingInterface.setActivity("sonar");
         webView.addJavascriptInterface(trackingInterface, "TrackingService");
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
         // Inflate the layout for this fragment

@@ -73,8 +73,10 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
     implementation 'com.google.code.gson:gson:2.8.6'
-    implementation 'org.jetbrains:annotations-java5:15.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.6'
+
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'

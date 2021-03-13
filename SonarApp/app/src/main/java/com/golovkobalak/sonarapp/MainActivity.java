@@ -37,15 +37,13 @@ import java.util.concurrent.TimeoutException;
 import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = MainActivity.class.getName();
     public static MainActivity activity;
     public static WifiConnector wifiConnector;
     public static WifiScanReceiver wifiScanReceiver;
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     public static final String MICROSONAR_SSID = "microsonar";
     public static final String MICROSONAR_PASS = "microsonar";
-    public static final String CONNECTION_IN_PROGRESS = "Connection in progress";
-
-    final String TAG = "SonarApp";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

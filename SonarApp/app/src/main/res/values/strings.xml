@@ -13,7 +13,7 @@
     <string name="inProcess">Connection to Sonar in process</string>
     <string name="button_upload">UPLOAD</string>
     <string name="turnOnWifiManually">Android is not allowed to turn on the WIFI programmatically, turn on wifi manually.. </string>
-    <string name="manual_connect">manual connect</string>
+    <string name="manual_connect">Feature</string>
     <string name="manual_connect_description">Turn on sonar\nTurn on wifi\nConnect to microsonar\n\tpassword = microsonar\nClick button again</string>
     <string name="map">Map</string>
     <string name="auto_connection">auto connect</string>
@@ -21,4 +21,6 @@
     <string name="download">download</string>
     <string name="butInProgress">IN PROGRESS</string>
     <string name="abort_connection">Connection took a too long time,\n use a manual connection.</string>
+    <string name="abort_connection_manual_connect_description">Connection took a too long time.\nTurn on sonar\nTurn on wifi\nConnect to microsonar\n\tpassword = microsonar\nClick button again</string>
+    <string name="connect">CONNECT</string>
 </resources>
