@@ -23,7 +23,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             {
                 attribution: '&copy; <a href=”http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
                 subdomains: 'abc',
-                minZoom: 5,
+                minZoom: 12,
                 maxZoom: 19,
                 crossOrigin: true
             });
@@ -67,7 +67,8 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             subscription.unsubscribe();
         })
         this.map = new Map('map', {
-            zoom: 12,
+            minZoom: 12,
+            zoom: 15,
             maxZoom: 19
         });
         this.tiles.addTo(this.map);

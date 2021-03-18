@@ -8,6 +8,7 @@ import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.golovkobalak.sonarapp.R;
 import com.golovkobalak.sonarapp.model.Coordinate;
@@ -54,7 +55,7 @@ public class TrackingInterface {
         }
     }
 
-    public void downloadMap(String tiles, final ProgressBar progressbar) {
+    public void downloadMap(final String tiles, final ProgressBar progressbar) {
         isCanceled.set(false);
         String formatTiles = tiles.substring(1, tiles.length() - 1).replaceAll("\\\\", "");
         Log.d(TAG, "downloadMap: formatTiles" + formatTiles);
@@ -70,6 +71,12 @@ public class TrackingInterface {
             return;
         }
         final int tilesSize = coordinate.getTilesNumber();
+        uiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(context, tilesSize+" tiles will be download and cached", Toast.LENGTH_LONG).show();
+            }
+        });
         progressbar.setMax(tilesSize);
         final Coordinate finalCoordinate = coordinate;
         for (int firstLevelTile = coordinate.topTile; firstLevelTile < coordinate.bottomTile; firstLevelTile++) {
