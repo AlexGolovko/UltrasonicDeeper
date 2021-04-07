@@ -77,7 +77,7 @@ export class MapComponent implements OnInit, AfterViewInit {
 
                     })
                     depthCircle.addTo(this.map)
-                    depthCircle.bringToBack()
+                    // depthCircle.bringToBack()
                 }
                 const divIcon = new DivIcon({
                     className: 'my-div-icon',
