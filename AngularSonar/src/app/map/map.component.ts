@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {ClientService} from '../service/client.service';
 import {GeoService} from '../service/geo.service';
-import {Circle, DivIcon, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
+import {Circle, DivIcon, LatLng, Map, Marker, Polyline, TileLayer} from 'leaflet';
 import {AndroidBridgeService} from '../service/android-bridge.service';
 
 
@@ -17,7 +17,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     private isAvailable = false;
     private isMeasureSuccess = false;
     private marker: Marker = null
-    private circle: Circle;
+    private сircle: Circle;
     private crd: Position;
     public angle = -90
     private prevLatLng: LatLng = null
@@ -66,6 +66,19 @@ export class MapComponent implements OnInit, AfterViewInit {
                 } else {
                     this.prevArrowIconHtml = arrowIconHtml
                 }
+                if (value.isSonarAvailable && value.isMeasureSuccess) {
+                    const depthCircle = new Circle(this.currLatLng, 10, {
+                        color: this.getColor(value.depth),
+                        weight: 2,
+                        fillColor: this.getColor(value.depth),
+                        fill: true,
+                        opacity: 10,
+                        fillOpacity: 100
+
+                    })
+                    depthCircle.addTo(this.map)
+                    depthCircle.bringToBack()
+                }
                 const divIcon = new DivIcon({
                     className: 'my-div-icon',
                     html: arrowIconHtml,
@@ -87,10 +100,16 @@ export class MapComponent implements OnInit, AfterViewInit {
                     this.currLatLng = latlng
                 }
                 this.marker.setLatLng(latlng)
-                this.circle.setLatLng(latlng)
-                this.circle.setRadius(value.coords.accuracy / 2)
+                this.сircle.setLatLng(latlng)
+                if (value.coords.accuracy / 2 < 3) {
+                    this.сircle.setRadius(0)
+                } else {
+                    this.сircle.setRadius(value.coords.accuracy / 2)
+                }
                 this.map.panTo(latlng)
-
+                const polyline = new Polyline([this.prevLatLng, this.currLatLng], {color: '#4394ef', weight: 1});
+                polyline.addTo(this.map)
+                polyline.bringToFront();
             }
         })
     }
@@ -108,17 +127,18 @@ export class MapComponent implements OnInit, AfterViewInit {
 
             const divIcon = new DivIcon({
                 className: 'my-div-icon',
-                html: '<img class="leaflet-marker-icon leaflet-zoom-animated" src="assets/arrowGreen.png"  style="width: 30px; height: 30px;transform: rotate(-45deg);  -webkit-transform: rotate(-45deg); -moz-transform:rotate(-45deg);transform-origin: 50% 50%" />',
+                html: '<img class="leaflet-marker-icon leaflet-zoom-animated" src="assets/arrowRed.png"  style="width: 30px; height: 30px;transform: rotate(-45deg);  -webkit-transform: rotate(-45deg); -moz-transform:rotate(-45deg);transform-origin: 50% 50%" />',
                 iconSize: [30, 30],
                 iconAnchor: [15, 15]
             })
             const radius = event.accuracy / 2;
             this.marker = new Marker(event.latlng, {icon: divIcon});
             this.marker.addTo(this.map)
-            this.circle = new Circle(event.latlng, radius, {
-                color: 'green'
+            this.сircle = new Circle(event.latlng, radius, {
+                color: 'green',
+                weight: 2
             });
-            this.circle.addTo(this.map);
+            this.сircle.addTo(this.map);
         });
     }
 
@@ -130,5 +150,17 @@ export class MapComponent implements OnInit, AfterViewInit {
         }
         // Arrow already rotated at 45deg
         return angle - 45
+    }
+
+    private getColor(d): string {
+        return d > 8 ? '#08306b' :
+            d > 7 ? '#08519c' :
+                d > 6 ? '#2171b5' :
+                    d > 5 ? '#4292c6' :
+                        d > 4 ? '#6baed6' :
+                            d > 3 ? '#9ecae1' :
+                                d > 2 ? '#c6dbef' :
+                                    d > 1 ? '#deebf7' :
+                                        '#f7fbff';
     }
 }

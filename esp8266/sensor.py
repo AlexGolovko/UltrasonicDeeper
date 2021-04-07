@@ -89,6 +89,10 @@ def temperature():
         ds_sensor.convert_temp()
         utime.sleep_ms(750)
         return ds_sensor.read_temp(roms[0])
+    except onewire.OneWireError as err:
+        print('onewire.OneWireError')
+        print(err)
+        return -273
     except Exception as err:
         print(err)
         return -273

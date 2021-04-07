@@ -1,6 +1,6 @@
 import gc
 
-import machine
+import machine, onewire
 import utime
 import uasyncio as asyncio
 import ujson
@@ -60,12 +60,15 @@ def serve(reader, writer):
 async def temperature():
     while True:
         try:
-            sensor.ds_sensor.convert_temp()
-            await asyncio.sleep_ms(750)
-            global ds_temperature
-            ds_temperature = sensor.ds_sensor.read_temp(sensor.roms[0])
+            ds_temperature = sensor.temperature()
+            # sensor.ds_sensor.convert_temp()
+            # await asyncio.sleep_ms(750)
+            # global ds_temperature
+            # ds_temperature = sensor.ds_sensor.read_temp(sensor.roms[0])
             logging.info('temperature= ' + str(ds_temperature))
             await asyncio.sleep(10)
+        # except onewire.OneWireError as err:
+        #     logging.debug(err)
         except Exception as err:
             logging.debug(err)
 

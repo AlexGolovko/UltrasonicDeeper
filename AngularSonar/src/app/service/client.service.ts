@@ -49,6 +49,7 @@ export class ClientService {
         this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
     }
+
     private readonly sonarInfo: BehaviorSubject<SonarState>;
     private sonarClientData: BehaviorSubject<SonarClientData>;
     private readonly endpoint: string;
@@ -57,7 +58,14 @@ export class ClientService {
 
     static updateBatteryLevel(batteryADC: number): number {
         const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.25
-        return Math.trunc(100 * batteryVcc - 300)
+        const batteryLevel = Math.trunc(100 * batteryVcc - 300)
+        if (batteryLevel > 100) {
+            return 100;
+        }
+        if (batteryLevel < 0) {
+            return 1;
+        }
+        return batteryLevel;
     }
 
     public startConnection(): void {
