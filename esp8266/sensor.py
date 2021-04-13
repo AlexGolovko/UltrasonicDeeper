@@ -60,6 +60,7 @@ def measure_depth():
         distance = 1482.7 * duration / 1000000 / 2
         t = ('t= {} us'.format(duration))
         d = ('d= {:1.3f} m'.format(distance))
+        utime.sleep_us(timeout - duration)
     else:
         print('measuring error' + str(duration))
     return distance

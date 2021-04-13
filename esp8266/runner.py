@@ -67,8 +67,6 @@ async def temperature():
             # ds_temperature = sensor.ds_sensor.read_temp(sensor.roms[0])
             logging.info('temperature= ' + str(ds_temperature))
             await asyncio.sleep(10)
-        # except onewire.OneWireError as err:
-        #     logging.debug(err)
         except Exception as err:
             logging.debug(err)
 
@@ -112,7 +110,7 @@ def isCorrect(depths):
         else:
             deltas[iter] = math.fabs(depths[iter] - depths[iter + 1])
     for delta in deltas:
-        if delta > 1:
+        if delta > 3:
             return False
     return True
 
@@ -163,16 +161,16 @@ def websocketHandle(reader, writer):
 
 def run():
     loop = asyncio.get_event_loop()
-    httpServer = asyncio.start_server(serve, host="0.0.0.0", port=http_server_port)
+    # httpServer = asyncio.start_server(serve, host="0.0.0.0", port=http_server_port)
     wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=ws_server_port)
-    loop.call_soon(httpServer)
+    # loop.create_task(httpServer)
     loop.create_task(wsServer)
     loop.create_task(blink())
     loop.create_task(temperature())
     try:
         loop.run_forever()
     except Exception as err:
-        httpServer.close()
+        # httpServer.close()
         wsServer.close()
         loop.close()
         raise err
