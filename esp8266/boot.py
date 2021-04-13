@@ -15,7 +15,8 @@ def do_connect(wifi_name, wifi_pass):
     password = 'microsonar'
     ap_if = network.WLAN(network.AP_IF)
     ap_if.active(True)
-    ap_if.config(essid=ssid, password=password)
+    # ap_if.config(essid=ssid, password=password)
+    ap_if.config(essid=ssid, authmode=network.AUTH_OPEN)
     while not ap_if.active():
         pass
     print('Access Point created')

@@ -134,7 +134,7 @@ public class WifiConnector {
         wfc.preSharedKey = passQuoted;
         wfc.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
         wfc.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-        wfc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        wfc.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);//WPA_PSK);
         wfc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         wfc.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
         wfc.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
@@ -149,7 +149,7 @@ public class WifiConnector {
         final WifiNetworkSuggestion suggestion =
                 new WifiNetworkSuggestion.Builder()
                         .setSsid(ssid)
-                        .setWpa2Passphrase(pass)
+//                        .setWpa2Passphrase(pass)
                         .build();
         final int status = wifiManager.addNetworkSuggestions(Collections.singletonList(suggestion));
 
@@ -197,7 +197,7 @@ public class WifiConnector {
             final WifiNetworkSpecifier wifiNetworkSpecifier = new WifiNetworkSpecifier
                     .Builder()
                     .setSsid(ssid)
-                    .setWpa2Passphrase(pass)
+//                    .setWpa2Passphrase(pass)
                     .build();
             final NetworkRequest nr = new NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
