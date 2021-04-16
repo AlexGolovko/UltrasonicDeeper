@@ -82,7 +82,9 @@ export class CanvasComponent implements OnInit, AfterViewInit {
         const currVal = this.measures[this.measures.length - 1];
         this.ctx.fillText(currVal.depth.toFixed(1) + ' m', this.ctx.canvas.width - 250, 85)
         this.ctx.font = 'small-caps bold 30px/1 sans-serif'
-        this.ctx.fillText(currVal.waterTemp.toFixed(1) + ' c' + String.fromCharCode(176), this.ctx.canvas.width - 100, 120)
+        if (currVal.waterTemp > -100) {
+            this.ctx.fillText(currVal.waterTemp.toFixed(1) + ' c' + String.fromCharCode(176), this.ctx.canvas.width - 100, 120)
+        }
         this.ctx.fillText(currVal.batteryLevel + ' %', this.ctx.canvas.width - 100, 150)
     }
 }

@@ -60,6 +60,7 @@ def serve(reader, writer):
 async def temperature():
     while True:
         try:
+            global ds_temperature
             ds_temperature = sensor.temperature()
             # sensor.ds_sensor.convert_temp()
             # await asyncio.sleep_ms(750)
@@ -162,13 +163,15 @@ def websocketHandle(reader, writer):
 def run():
     loop = asyncio.get_event_loop()
     # httpServer = asyncio.start_server(serve, host="0.0.0.0", port=http_server_port)
-    wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=ws_server_port)
     # loop.create_task(httpServer)
+    wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=ws_server_port)
     loop.create_task(wsServer)
     loop.create_task(blink())
     loop.create_task(temperature())
     try:
         loop.run_forever()
+    except ValueError as err:
+        logging.debug(err)
     except Exception as err:
         # httpServer.close()
         wsServer.close()

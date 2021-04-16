@@ -9,6 +9,7 @@ import {ClientComponent} from './client/client.component';
 import {MapLoadComponent} from './map-load/map-load.component';
 import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 import {CanvasComponent} from './canvas/canvas.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 const appRoutes: Routes = [
@@ -30,8 +31,8 @@ const appRoutes: Routes = [
         BrowserModule,
         ListViewModule,
         RouterModule.forRoot(appRoutes),
-        LeafletModule
-
+        LeafletModule,
+        HttpClientModule
     ],
     providers: [],
     bootstrap: [AppComponent]
