@@ -6,4 +6,6 @@ export interface JavaScriptInterface {
     getActivity(): string
 
     getMapCacheDir(): string
+
+    findMarkers(data: string): string;
 }

@@ -17,7 +17,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     private isAvailable = false;
     private isMeasureSuccess = false;
     private marker: Marker = null
-    private сircle: Circle;
+    private circle: Circle;
     private crd: Position;
     public angle = -90
     private prevLatLng: LatLng = null
@@ -100,11 +100,11 @@ export class MapComponent implements OnInit, AfterViewInit {
                     this.currLatLng = latlng
                 }
                 this.marker.setLatLng(latlng)
-                this.сircle.setLatLng(latlng)
+                this.circle.setLatLng(latlng)
                 if (value.coords.accuracy / 2 < 3) {
-                    this.сircle.setRadius(0)
+                    this.circle.setRadius(0)
                 } else {
-                    this.сircle.setRadius(value.coords.accuracy / 2)
+                    this.circle.setRadius(value.coords.accuracy / 2)
                 }
                 this.map.panTo(latlng)
                 const polyline = new Polyline([this.prevLatLng, this.currLatLng], {color: '#4394ef', weight: 1});
@@ -134,11 +134,11 @@ export class MapComponent implements OnInit, AfterViewInit {
             const radius = event.accuracy / 2;
             this.marker = new Marker(event.latlng, {icon: divIcon});
             this.marker.addTo(this.map)
-            this.сircle = new Circle(event.latlng, radius, {
+            this.circle = new Circle(event.latlng, radius, {
                 color: 'green',
                 weight: 2
             });
-            this.сircle.addTo(this.map);
+            this.circle.addTo(this.map);
         });
     }
 
@@ -152,7 +152,7 @@ export class MapComponent implements OnInit, AfterViewInit {
         return angle - 45
     }
 
-    private getColor(d): string {
+    public getColor(d): string {
         return d > 8 ? '#08306b' :
             d > 7 ? '#08519c' :
                 d > 6 ? '#2171b5' :

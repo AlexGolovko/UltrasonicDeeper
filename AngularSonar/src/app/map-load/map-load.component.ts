@@ -3,6 +3,9 @@ import {Circle, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
 import {MapService} from '../service/map.service';
 import {GeoService} from '../service/geo.service';
 import {AndroidBridgeService} from '../service/android-bridge.service';
+import {GeoSquare} from '../DTO/GeoSquare';
+import {DepthMarker} from '../DTO/DepthMarker';
+import {HahSet} from '../service/HahSet';
 
 
 @Component({
@@ -15,6 +18,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
     private tiles: TileLayer;
     private cachedTiles: TileLayer;
     downloadStatus: string;
+    private readonly cachedMarkers = new HahSet<DepthMarker>();
 
     constructor(private mapService: MapService, private geoService: GeoService, private androidService: AndroidBridgeService) {
         /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
@@ -73,7 +77,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
         });
         this.tiles.addTo(this.map);
         this.cachedTiles.addTo(this.map)
-        this.map.invalidateSize();
+        this.map.invalidateSize({debounceMoveend: true});
 
         // TODO new marker
         // L.circle(new LatLng(this.latitude, this.longitude), {
@@ -113,11 +117,56 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             })
             circle.addTo(this.map);
         });
+
+
+        this.map.on('moveend', () => {
+            if (this.map.getZoom() > 16) {
+                console.log('Moveend')
+                console.log(this.map.getZoom())
+                console.log(this.map.getBounds())
+                this.updateMarkers()
+            }
+        });
+
+    }
+
+    private updateMarkers() {
+        const latLngBounds = this.map.getBounds();
+        const geoSquare = new GeoSquare(latLngBounds.getNorth(), latLngBounds.getEast(), latLngBounds.getSouth(), latLngBounds.getWest())
+        for (const marker of this.androidService.getMarkers(geoSquare)) {
+            if (!this.cachedMarkers.contains(marker)) {
+                this.cachedMarkers.add(marker);
+                console.log('add: ' + marker)
+                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude), 2, {
+                    color: this.getColor(marker.depth),
+                    weight: 2,
+                    fillColor: this.getColor(marker.depth),
+                    fill: true,
+                    opacity: 10,
+                    fillOpacity: 100
+
+                })
+                depthCircle.addTo(this.map)
+            }
+        }
+
     }
 
 
     public getTilesFromJava(): string {
         const tiles = this.mapService.getTiles(this.map.getBounds());
         return JSON.stringify(tiles);
+    }
+
+    public getColor(d): string {
+        return d > 8 ? '#08306b' :
+            d > 7 ? '#08519c' :
+                d > 6 ? '#2171b5' :
+                    d > 5 ? '#4292c6' :
+                        d > 4 ? '#6baed6' :
+                            d > 3 ? '#9ecae1' :
+                                d > 2 ? '#c6dbef' :
+                                    d > 1 ? '#deebf7' :
+                                        '#f7fbff';
     }
 }
