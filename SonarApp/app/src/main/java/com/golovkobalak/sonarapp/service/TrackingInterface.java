@@ -12,11 +12,15 @@ import android.widget.Toast;
 
 import com.golovkobalak.sonarapp.R;
 import com.golovkobalak.sonarapp.model.Coordinate;
+import com.golovkobalak.sonarapp.model.GeoSquare;
+import com.golovkobalak.sonarapp.model.Marker;
 import com.golovkobalak.sonarapp.model.SonarData;
 import com.golovkobalak.sonarapp.repository.SonarDataRepository;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +37,7 @@ public class TrackingInterface {
     private static final Gson gson = new Gson();
     private static final SonarDataRepository repo = new SonarDataRepository();
     private static final int poolSize = Runtime.getRuntime().availableProcessors() * 4;
-    private static final ExecutorService pool =new ThreadPoolExecutor(2, poolSize, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());//Executors.newFixedThreadPool(poolSize);//
+    private static final ExecutorService pool = new ThreadPoolExecutor(2, poolSize, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());//Executors.newFixedThreadPool(poolSize);//
     private static final Handler uiHandler = new Handler(Looper.getMainLooper());
     private String activity;
     private static final AtomicBoolean isCanceled = new AtomicBoolean(false);
@@ -74,7 +78,7 @@ public class TrackingInterface {
         uiHandler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, tilesSize+" tiles will be download and cached", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, tilesSize + " tiles will be download and cached", Toast.LENGTH_LONG).show();
             }
         });
         progressbar.setMax(tilesSize);
@@ -100,6 +104,25 @@ public class TrackingInterface {
     public String getMapCacheDir() {
         String filesPath = context.getFilesDir().getAbsolutePath();
         return "file://" + filesPath + "/Tiles";
+    }
+
+    @JavascriptInterface
+    public String findMarkers(String data) {
+        final ArrayList<Marker> list = new ArrayList<>();
+        Log.d(TAG, "findMarkers: " + data);
+        //"{"north":49.960455723200724,"east":36.34042262789566,"south":49.955769014252176,"west":36.33620619532426}"
+        try {
+            final GeoSquare geoSquare = gson.fromJson(data, GeoSquare.class);
+            final List<SonarData> markers = repo.findByGeoSquare(geoSquare);
+            for (SonarData marker : markers) {
+                list.add(new Marker(marker.getDepth(), marker.getLatitude(), marker.getLongitude()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        final String response = gson.toJson(list);
+        Log.d(TAG, "response:" + response);
+        return response;
     }
 
     public void cancelDownloadMap() {

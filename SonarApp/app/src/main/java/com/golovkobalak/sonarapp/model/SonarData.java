@@ -14,8 +14,8 @@ public class SonarData extends RealmObject {
     private String altitude;
     private String altitudeAccuracy;
     private String heading;
-    private String latitude;
-    private String longitude;
+    private double latitude;
+    private double longitude;
     private String speed;
 
     public String getDepth() {
@@ -90,19 +90,19 @@ public class SonarData extends RealmObject {
         this.heading = heading;
     }
 
-    public String getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(String latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public String getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(String longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
@@ -112,5 +112,10 @@ public class SonarData extends RealmObject {
 
     public void setSpeed(String speed) {
         this.speed = speed;
+    }
+
+    public static class Field {
+        public static final String LATITUDE = "latitude";
+        public static final String LONGITUDE = "longitude";
     }
 }
