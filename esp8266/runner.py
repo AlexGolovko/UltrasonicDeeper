@@ -99,37 +99,27 @@ def response():
     return ujson.dumps(dict)
 
 
-def isCorrect(depths):
-    for depth in depths:
-        if depth == 0:
-            return False
-    deltas = [0 for i in range(3)]
-    depthsLen = len(depths)
-    for iter in range(depthsLen):
-        if iter == (depthsLen - 1):
-            deltas[iter] = math.fabs(depths[iter] - depths[0])
-        else:
-            deltas[iter] = math.fabs(depths[iter] - depths[iter + 1])
-    for delta in deltas:
-        if delta > 3:
-            return False
-    return True
+def get_depth():
+    depthPrev = sensor.measure_depth()
+    for idx in range(3):
+        depthCurr = sensor.measure_depth()
+        delta = math.fabs(depthCurr - depthPrev)
+        depthPrev = depthCurr
+        if delta < 1:
+            depthCurr = sensor.measure_depth()
+            delta = math.fabs(depthCurr - depthPrev)
+            if delta < 1:
+                return depthCurr, 200
+        depthPrev = depthCurr
+    return -1, 300
 
 
 def responseFeature():
     dictResponse = {}
     try:
-        depths = [sensor.measure_depth() for i in range(3)]
-        if isCorrect(depths):
-            dictResponse = {"event": SONAR,
-                            "data": {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
-                                     "temperature": str(ds_temperature)}}
-
-        else:
-            dictResponse = {"event": SONAR,
-                            "data": {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
-                                     "temperature": str(ds_temperature)}}
-
+        depth, status = get_depth()
+        dictResponse = {"event": SONAR, "data": {"status": status, "depth": depth, "battery": sensor.battery_level(),
+                                                 "temperature": str(ds_temperature)}}
     except Exception as err:
         logging.debug(err)
         pass
