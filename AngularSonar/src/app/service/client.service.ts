@@ -22,25 +22,37 @@ export class ClientService {
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
         this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
-            const data = new SonarClientData();
-            try {
-                data.isSonarAvailable = true;
-                data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
-                data.waterTemp = Number(message.temperature);
-                if (200 === Number(message.status)) {
-                    data.depth = Number(message.depth);
-                    data.isMeasureSuccess = true; // 'SonarApp';
+                const data = new SonarClientData();
+                if (message === undefined) {
+                    data.isSonarAvailable = false;
+                    data.isMeasureSuccess = false;
                 } else {
-                    data.isMeasureSuccess = false; // 'Too deep/shallow';
-                    console.log('Something wrong=' + message.status);
+                    try {
+                        data.isSonarAvailable = true;
+                        data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
+                        data.waterTemp = Number(message.temperature);
+                        if (200 === Number(message.status)) {
+                            data.depth = Number(message.depth);
+                            data.isMeasureSuccess = true; // 'SonarApp';
+                        } else {
+                            data.isMeasureSuccess = false; // 'Too deep/shallow';
+                            console.log('Something wrong=' + message.status);
+                        }
+                    } catch (e) {
+                        data.isSonarAvailable = false;
+                        console.log(e);
+                    }
                 }
-            } catch (e) {
+                this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
+                this.sonarClientData.next(data);
+            },
+            err => {
+                console.log(err)
+                const data = new SonarClientData();
                 data.isSonarAvailable = false;
-                console.log(e);
-            }
-            this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
-            this.sonarClientData.next(data);
-        });
+                data.isMeasureSuccess = false;
+                this.sonarClientData.next(data)
+            });
 
         this.wsService.status.subscribe(isConnected => {
             this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
@@ -72,7 +84,12 @@ export class ClientService {
         if (this.clientInterval === undefined) {
             console.log('startConnection')
             this.clientInterval = setInterval(() => {
-                this.wsService.send(WS.SONAR, '1');
+                try {
+                    this.wsService.send(WS.SONAR, '1')
+                } catch (e) {
+                    console.log(e)
+                }
+                // this.wsService.send(WS.SONAR, '1');
             }, environment.interval);
         }
     }
