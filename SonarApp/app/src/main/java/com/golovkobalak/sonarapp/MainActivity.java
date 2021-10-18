@@ -6,11 +6,10 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -26,13 +25,8 @@ import com.golovkobalak.sonarapp.service.WifiConnector;
 import com.golovkobalak.sonarapp.service.WifiScanReceiver;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.io.File;
+import java.io.IOException;
 
 import io.realm.Realm;
 
@@ -50,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
         activity = this;
         Realm.init(this.getBaseContext());
         super.onCreate(savedInstanceState);
+        initLogcatCaptureLogs();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -77,6 +72,19 @@ public class MainActivity extends AppCompatActivity {
         wifiScanReceiver = new WifiScanReceiver(MICROSONAR_SSID);
         registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    private void initLogcatCaptureLogs() {
+        try {
+            File filename = new File(Environment.getExternalStorageDirectory() + "/LogCatLog.log");
+            if (!filename.exists()) {
+                filename.createNewFile();
+            }
+            String cmd = "logcat -d -f" + filename.getAbsolutePath();
+            Runtime.getRuntime().exec(cmd);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
