@@ -13,17 +13,22 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Logger {
-    private static final Logger INSTANCE = new Logger();
+    private static Logger INSTANCE;
 
     private Logger() {
 
     }
 
     public static void init(File externalFilesDir) {
-        final File logFile = new File(externalFilesDir.getAbsolutePath() + "/"+System.currentTimeMillis()+"_cat.log");
-        Log.i(Logger.class.getName(), logFile.getAbsolutePath());
-        INSTANCE.syncLog(logFile);
-        INSTANCE.initLogcatCaptureLogs(logFile);
+        if (INSTANCE == null) {
+            synchronized (Logger.class) {
+                INSTANCE = new Logger();
+                final File logFile = new File(externalFilesDir.getAbsolutePath() + "/" + System.currentTimeMillis() + "_cat.log");
+                Log.i(Logger.class.getName(), logFile.getAbsolutePath());
+                INSTANCE.syncLog(logFile);
+                INSTANCE.initLogcatCaptureLogs(logFile);
+            }
+        }
     }
 
     private void initLogcatCaptureLogs(File file) {
