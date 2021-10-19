@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         activity = this;
         Realm.init(this.getBaseContext());
-        Logger.init();
+        Logger.init(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
