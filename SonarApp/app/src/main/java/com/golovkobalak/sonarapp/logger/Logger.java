@@ -5,13 +5,23 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+
+import tech.gusavila92.websocketclient.WebSocketClient;
 
 public class Logger {
-
     private static final Logger INSTANCE = new Logger();
+    public static final String WEB_SOCKET = "WebSocket";
+    private URI uri;
+    private WebSocketClient webSocketClient;
 
     private Logger() {
         initLogcatCaptureLogs();
+        initWebSocketLogging();
+    }
+
+    public static void init() {
+        Log.i(Logger.class.getName(), "init: " + INSTANCE);
     }
 
     private void initLogcatCaptureLogs() {
@@ -29,6 +39,5 @@ public class Logger {
     }
 
     private void initWebSocketLogging() {
-
     }
 }
