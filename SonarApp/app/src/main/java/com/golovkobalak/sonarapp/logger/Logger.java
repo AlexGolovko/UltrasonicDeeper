@@ -20,7 +20,7 @@ public class Logger {
     }
 
     public static void init(File externalFilesDir) {
-        final File logFile = new File(externalFilesDir.getAbsolutePath() + "/cat.log");
+        final File logFile = new File(externalFilesDir.getAbsolutePath() + "/"+System.currentTimeMillis()+"_cat.log");
         Log.i(Logger.class.getName(), logFile.getAbsolutePath());
         INSTANCE.syncLog(logFile);
         INSTANCE.initLogcatCaptureLogs(logFile);
@@ -32,7 +32,7 @@ public class Logger {
                 file.createNewFile();
             }
             Log.i(Logger.class.getName(), file.getAbsolutePath());
-            String cmd = "logcat -d -f" + file.getAbsolutePath();
+            String cmd = "logcat -f" + file.getAbsolutePath();//-d
             Runtime.getRuntime().exec(cmd);
         } catch (IOException e) {
             e.printStackTrace();
