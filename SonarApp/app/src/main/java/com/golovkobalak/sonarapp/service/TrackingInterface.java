@@ -51,6 +51,7 @@ public class TrackingInterface {
 
     @JavascriptInterface
     public void saveTrackingList(String data) {
+        Log.i(TAG, "saveTrackingList: " + data);
         try {
             final SonarData[] sonarDataArray = gson.fromJson(data, SonarData[].class);
             repo.saveList(Arrays.asList(sonarDataArray));

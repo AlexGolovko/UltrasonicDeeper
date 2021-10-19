@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         activity = this;
         Realm.init(this.getBaseContext());
         super.onCreate(savedInstanceState);
-        initLogcatCaptureLogs();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -74,19 +73,6 @@ public class MainActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
-    private void initLogcatCaptureLogs() {
-        try {
-            File filename = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/LogCatLog.log");
-            if (!filename.exists()) {
-                filename.createNewFile();
-            }
-            Log.i(TAG, "filename.getAbsolutePath(): " + filename.getAbsolutePath());
-            String cmd = "logcat -d -f" + filename.getAbsolutePath();
-            Runtime.getRuntime().exec(cmd);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
