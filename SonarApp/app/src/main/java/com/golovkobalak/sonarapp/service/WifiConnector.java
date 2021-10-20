@@ -218,11 +218,10 @@ public class WifiConnector {
                         @Override
                         public void onUnavailable() {
                             super.onUnavailable();
-                            Log.d(TAG, "unAvailable");
+                            Log.d(TAG, "Network is unavailable");
                             synchronized (lock) {
                                 lock.notifyAll();
                             }
-                            throw new RuntimeException("Network is unavailable");
                         }
                     };
             try {
