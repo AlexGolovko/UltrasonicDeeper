@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class Logger {
@@ -19,11 +20,12 @@ public class Logger {
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static void init(File externalFilesDir) {
         if (INSTANCE == null) {
             synchronized (Logger.class) {
                 INSTANCE = new Logger();
-                final File logFile = new File(externalFilesDir.getAbsolutePath() + "/" + System.currentTimeMillis() + "_cat.log");
+                final File logFile = new File(externalFilesDir.getAbsolutePath() + "/" + LocalDateTime.now().toString() + "_cat.log");
                 Log.i(Logger.class.getName(), logFile.getAbsolutePath());
                 INSTANCE.syncLog(logFile);
                 INSTANCE.initLogcatCaptureLogs(logFile);
