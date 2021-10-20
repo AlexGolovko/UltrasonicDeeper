@@ -22,6 +22,7 @@ export class ClientService {
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
         this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
+                console.log('wsService.on<SonarData>(WS.SONAR)' + JSON.stringify(message))
                 const data = new SonarClientData();
                 if (message === undefined) {
                     data.isSonarAvailable = false;

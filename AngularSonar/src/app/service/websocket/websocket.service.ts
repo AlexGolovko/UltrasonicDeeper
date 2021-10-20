@@ -85,9 +85,10 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
 
 
     /*
-    * connect to WebSocked
+    * connect to WebSocket
     * */
     private connect(): void {
+        console.log('connect to WebSocket')
         this.websocket$ = new WebSocketSubject(this.config);
 
         this.websocket$.subscribe(
@@ -95,6 +96,7 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
             (error: Event) => {
                 if (!this.websocket$) {
                     // run reconnect if errors
+                    console.log(error)
                     this.reconnect();
                 }
             });
@@ -110,7 +112,7 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
 
         this.reconnection$.subscribe(
             () => this.connect(),
-            null,
+            e => console.error(e),
             () => {
                 // Subject complete if reconnect attempts ending
                 this.reconnection$ = null;
@@ -132,15 +134,18 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
         }
     }
 
-
     /*
     * on message to server
     * */
     public send(event: string, data: any = {}): void {
         if (event && this.isConnected) {
-            this.websocket$.next(JSON.stringify({event, data}) as any);
+            const message = JSON.stringify({event, data}) as any;
+            console.log('to websocket$' + message)
+            this.websocket$.next(message);
         } else {
-            this.wsMessages$.next(JSON.stringify({event, data}) as any)
+            const message = JSON.stringify({event, data}) as any;
+            console.log('to wsMessages$' + message)
+            this.wsMessages$.next(message)
         }
     }
 
