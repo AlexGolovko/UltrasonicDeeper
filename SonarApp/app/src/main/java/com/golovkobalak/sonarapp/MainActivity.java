@@ -27,7 +27,6 @@ import com.golovkobalak.sonarapp.service.WifiScanReceiver;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.File;
-import java.io.IOException;
 
 import io.realm.Realm;
 
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         activity = this;
         Realm.init(this.getBaseContext());
-        Logger.init(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS));
+        Logger.init(new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/logs"));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);

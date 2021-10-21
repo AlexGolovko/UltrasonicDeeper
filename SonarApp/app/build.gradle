@@ -29,7 +29,7 @@ android {
 
     defaultConfig {
         applicationId "com.golovkobalak.sonarapp"
-        minSdkVersion 23
+        minSdkVersion 26
         targetSdkVersion 29
         versionCode 1
         versionName "0.2.0"
