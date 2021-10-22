@@ -32,25 +32,26 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
     private readonly reconnectAttempts: number;
     private isConnected: boolean;
 
-
     public status: Observable<boolean>;
 
     constructor(private wsConfig: WebSocketConfig) {
         this.wsMessages$ = new Subject<WsMessage<any>>();
-        this.reconnectInterval = wsConfig.reconnectInterval || 5000; // pause between connections
+        this.reconnectInterval = wsConfig.reconnectInterval || 3000; // pause between connections
         this.reconnectAttempts = wsConfig.reconnectAttempts || 10000; // number of connection attempts
 
         this.config = {
             url: wsConfig.url,
             closeObserver: {
                 next: (event: CloseEvent) => {
+                    console.log('close websocket:' + JSON.stringify(event))
                     this.websocket$ = null;
                     this.connection$.next(false);
+                    this.connect();
                 }
             },
             openObserver: {
                 next: (event: Event) => {
-                    console.log('WebSocket connected!');
+                    console.log('WebSocket connected: ' + JSON.stringify(event));
                     this.connection$.next(true);
                 }
             }
@@ -66,9 +67,9 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
             .subscribe((isConnected) => {
                 this.isConnected = isConnected;
 
-                if (!this.reconnection$ && typeof (isConnected) === 'boolean' && !isConnected) {
-                    this.reconnect();
-                }
+                // if (!this.reconnection$ && typeof (isConnected) === 'boolean' && !isConnected) {
+                //     this.reconnect();
+                // }
             });
 
         this.websocketSub = this.wsMessages$.subscribe(
@@ -90,14 +91,13 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
     private connect(): void {
         console.log('connect to WebSocket')
         this.websocket$ = new WebSocketSubject(this.config);
-
         this.websocket$.subscribe(
             (message) => this.wsMessages$.next(message),
             (error: Event) => {
                 if (!this.websocket$) {
                     // run reconnect if errors
                     console.log(error)
-                    this.reconnect();
+                    // this.reconnect();
                 }
             });
     }
@@ -107,13 +107,27 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
     * reconnect if not connecting or errors
     * */
     private reconnect(): void {
+        console.log('this.reconnectInterval:' + this.reconnectInterval)
+        console.log('this.reconnectAttempts:' + this.reconnectAttempts)
         this.reconnection$ = interval(this.reconnectInterval)
-            .pipe(takeWhile((v, index) => index < this.reconnectAttempts && !this.websocket$));
+            .pipe(takeWhile((v, index) => {
+                console.log('index:' + index)
+                console.log('!this.websocket$:' + !this.websocket$)
+                return index < this.reconnectAttempts
+                // && !this.websocket$
+            }));
 
         this.reconnection$.subscribe(
-            () => this.connect(),
-            e => console.error(e),
             () => {
+                console.log('reconnection$.next')
+                this.connect()
+            },
+            e => {
+                console.log('reconnection$.error')
+                console.error(e)
+            },
+            () => {
+                console.log('reconnection$.complete')
                 // Subject complete if reconnect attempts ending
                 this.reconnection$ = null;
 
