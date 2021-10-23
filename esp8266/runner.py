@@ -99,27 +99,37 @@ def response():
     return ujson.dumps(dict)
 
 
-def get_depth():
-    depthPrev = sensor.measure_depth()
-    for idx in range(3):
-        depthCurr = sensor.measure_depth()
-        delta = math.fabs(depthCurr - depthPrev)
-        depthPrev = depthCurr
-        if delta < 1:
-            depthCurr = sensor.measure_depth()
-            delta = math.fabs(depthCurr - depthPrev)
-            if delta < 1:
-                return depthCurr, 200
-        depthPrev = depthCurr
-    return -1, 300
+def isCorrect(depths):
+    for depth in depths:
+        if depth == 0:
+            return False
+    deltas = [0 for i in range(3)]
+    depthsLen = len(depths)
+    for iter in range(depthsLen):
+        if iter == (depthsLen - 1):
+            deltas[iter] = math.fabs(depths[iter] - depths[0])
+        else:
+            deltas[iter] = math.fabs(depths[iter] - depths[iter + 1])
+    for delta in deltas:
+        if delta > 3:
+            return False
+    return True
 
 
 def responseFeature():
     dictResponse = {}
     try:
-        depth, status = get_depth()
-        dictResponse = {"event": SONAR, "data": {"status": status, "depth": depth, "battery": sensor.battery_level(),
-                                                 "temperature": str(ds_temperature)}}
+        depths = [sensor.measure_depth() for i in range(3)]
+        if isCorrect(depths):
+            dictResponse = {"event": SONAR,
+                            "data": {"status": 200, "depth": str(depths[0]), "battery": sensor.battery_level(),
+                                     "temperature": str(ds_temperature)}}
+
+        else:
+            dictResponse = {"event": SONAR,
+                            "data": {"status": 300, "depth": "-1", "battery": sensor.battery_level(),
+                                     "temperature": str(ds_temperature)}}
+
     except Exception as err:
         logging.debug(err)
         pass
@@ -153,15 +163,13 @@ def websocketHandle(reader, writer):
 def run():
     loop = asyncio.get_event_loop()
     # httpServer = asyncio.start_server(serve, host="0.0.0.0", port=http_server_port)
-    # loop.create_task(httpServer)
     wsServer = asyncio.start_server(websocketHandle, host="0.0.0.0", port=ws_server_port)
+    # loop.create_task(httpServer)
     loop.create_task(wsServer)
     loop.create_task(blink())
     loop.create_task(temperature())
     try:
         loop.run_forever()
-    except ValueError as err:
-        logging.debug(err)
     except Exception as err:
         # httpServer.close()
         wsServer.close()
