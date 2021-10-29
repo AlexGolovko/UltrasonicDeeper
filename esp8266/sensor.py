@@ -1,5 +1,6 @@
 import machine, utime, onewire, ds18x20
 import uasyncio as asyncio
+import logger
 
 # global trig, echo, ds_pin, ds_sensor, timeout, roms
 
@@ -19,15 +20,15 @@ global ds_sensor, roms
 # D3-GPIO0
 
 def init():
-    print("In init")
+    logger.info("In init")
     global ds_sensor
     global roms
     try:
         ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
         roms = ds_sensor.scan()
-        print('Found DS devices: ', roms)
+        logger.info('Found DS devices: ' + str(roms))
     except Exception as err:
-        print(err)
+        logger.error(err)
 
 
 init()
@@ -62,7 +63,7 @@ def measure_depth():
         d = ('d= {:1.3f} m'.format(distance))
         utime.sleep_us(timeout - duration)
     else:
-        print('measuring error' + str(duration))
+        logger.info('measuring error' + str(duration))
     return distance
 
 
@@ -80,20 +81,21 @@ def measure_air_distance():
         d = ('d= {:1.3f} m'.format(distance))
         print(t, d)
     else:
-        print('measuring error' + str(duration))
+        logger.info('measuring error' + str(duration))
 
     return distance, duration
 
 
 def temperature():
     try:
+        if len(roms) == 0:
+            return
         ds_sensor.convert_temp()
         utime.sleep_ms(750)
         return ds_sensor.read_temp(roms[0])
     except onewire.OneWireError as err:
-        print('onewire.OneWireError')
-        print(err)
+        logger.error(err)
         return -273
     except Exception as err:
-        print(err)
+        logger.error(err)
         return -273
