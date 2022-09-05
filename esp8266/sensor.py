@@ -1,3 +1,5 @@
+import uasyncio
+
 import machine, utime, onewire, ds18x20
 import uasyncio as asyncio
 import logger
@@ -8,11 +10,12 @@ import logger
 # Echo-D5-GPIO14
 # trig = machine.Pin(12, machine.Pin.OUT)
 # echo = machine.Pin(14, machine.Pin.IN)
-trig = machine.Pin(12, machine.Pin.OUT)
-echo = machine.Pin(14, machine.Pin.IN)
+trig = machine.Pin(12, machine.Pin.OUT, pull=None)
+trig.value(0)
+echo = machine.Pin(14, machine.Pin.IN, pull=None)
 
 timeout = 60000
-ds_pin = machine.Pin(13, machine.Pin.PULL_UP)
+ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
 
 global ds_sensor, roms
 
@@ -50,7 +53,7 @@ def battery_level():
 # The function will return -2 if there was timeout waiting for condition marked (*) above,
 # and -1 if there was timeout during the main measurement, marked (**) above.
 # The timeout is the same for both cases and given by timeout_us (which is in microseconds).
-def measure_depth():
+def measure_depth_old():
     trig.value(1)
     utime.sleep_us(1)
     trig.value(0)
@@ -59,11 +62,38 @@ def measure_depth():
     if duration > 0:
         # d = v * t / 2
         distance = 1482.7 * duration / 1000000 / 2
-        t = ('t= {} us'.format(duration))
-        d = ('d= {:1.3f} m'.format(distance))
-        utime.sleep_us(timeout - duration)
+        # t = ('t= {} us'.format(duration))
+        # d = ('d= {:1.3f} m'.format(distance))
+        # utime.sleep_us(timeout - duration)
     else:
         logger.info('measuring error' + str(duration))
+    return distance
+
+
+def test():
+    while True:
+        depths = [measure_depth() for i in range(10)]
+        print(str(depths))
+        utime.sleep(3)
+
+
+def measure_depth():
+    trig.value(0)
+    utime.sleep_ms(100)
+    trig.value(1)
+    utime.sleep_us(20)
+    trig.value(0)
+    duration = machine.time_pulse_us(echo, 1, timeout)
+    distance = 0
+    if duration > 0:
+        # d = v * t / 2
+        distance = 1482.7 * duration / 1000000 / 2
+        # t = ('t= {} us'.format(duration))
+        # d = ('d= {:1.3f} m'.format(distance))
+        # utime.sleep_us(timeout - duration)
+    else:
+        logger.info('measuring error' + str(duration))
+    trig.value(0)
     return distance
 
 

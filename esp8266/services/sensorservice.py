@@ -1,4 +1,4 @@
-import ujson
+import ujson, utime
 import logger
 import math
 import sensor
