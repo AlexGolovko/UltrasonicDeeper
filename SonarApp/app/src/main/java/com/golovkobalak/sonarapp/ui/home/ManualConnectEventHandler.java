@@ -10,7 +10,6 @@ import com.golovkobalak.sonarapp.R;
 import com.golovkobalak.sonarapp.ui.SonarFragment;
 
 public class ManualConnectEventHandler implements View.OnClickListener {
-    private boolean isFirstClick = true;
     private FragmentManager fragmentManager;
 
     public ManualConnectEventHandler(FragmentManager fragmentManager) {
@@ -21,13 +20,6 @@ public class ManualConnectEventHandler implements View.OnClickListener {
     public void onClick(View v) {
         final TextView description = v.getRootView().findViewById(R.id.textDescription);
         description.setText(R.string.manual_connect_description);
-        if (isFirstClick) {
-            isFirstClick = false;
-            return;
-        }
-        isFirstClick = true;
-        description.setText(R.string.text_description);
-
         final FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.nav_host_fragment, new SonarFragment());
         fragmentTransaction.commit();

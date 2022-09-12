@@ -1,10 +1,7 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -12,7 +9,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -22,8 +18,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.golovkobalak.sonarapp.logger.Logger;
-import com.golovkobalak.sonarapp.service.WifiConnector;
-import com.golovkobalak.sonarapp.service.WifiScanReceiver;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import io.realm.Realm;
@@ -31,11 +25,8 @@ import io.realm.Realm;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getName();
     public static MainActivity activity;
-    public static WifiConnector wifiConnector;
-    public static WifiScanReceiver wifiScanReceiver;
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     public static final String MICROSONAR_SSID = "microsonar";
-    public static final String MICROSONAR_PASS = "microsonar";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,9 +44,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        if (wifiConnector == null) {
-            wifiConnector = new WifiConnector(getApplicationContext(), this);
-        }
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -67,20 +55,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
         }
 
-        wifiScanReceiver = new WifiScanReceiver(MICROSONAR_SSID);
-        registerReceiver(wifiScanReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        log("request code: " + requestCode);
-        if (requestCode == 1) {
-            synchronized (wifiConnector.getLock()) {
-                wifiConnector.getLock().notifyAll();
-            }
-        }
     }
 
     public void upload(View view) {
@@ -93,6 +68,5 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(wifiScanReceiver);
     }
 }
