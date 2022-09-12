@@ -20,7 +20,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.golovkobalak.sonarapp.R;
-import com.golovkobalak.sonarapp.service.TrackingInterface;
+import com.golovkobalak.sonarapp.service.TrackingService;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,7 +29,7 @@ import com.golovkobalak.sonarapp.service.TrackingInterface;
 public class SonarFragment extends Fragment {
     private WebView webView;
     private WebSettings settings;
-    private TrackingInterface trackingInterface;
+    private TrackingService trackingInterface;
 
     public SonarFragment() {
         // Required empty public constructor
@@ -78,11 +78,6 @@ public class SonarFragment extends Fragment {
         webView.getSettings().setGeolocationDatabasePath(this.getActivity().getFilesDir().getPath());
         this.getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 //        webView.loadUrl("file:///android_asset/index.html");
-        if (trackingInterface == null) {
-            trackingInterface = new TrackingInterface(this.getContext(), "sonar");
-        }
-        trackingInterface.setActivity("sonar");
-        webView.addJavascriptInterface(trackingInterface, "TrackingService");
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
         // Inflate the layout for this fragment
         return root;

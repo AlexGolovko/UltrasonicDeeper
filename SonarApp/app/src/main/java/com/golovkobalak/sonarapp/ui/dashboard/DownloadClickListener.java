@@ -1,6 +1,5 @@
 package com.golovkobalak.sonarapp.ui.dashboard;
 
-import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.webkit.ValueCallback;
@@ -9,14 +8,14 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.golovkobalak.sonarapp.R;
-import com.golovkobalak.sonarapp.service.TrackingInterface;
+import com.golovkobalak.sonarapp.service.MapService;
 
 public class DownloadClickListener implements View.OnClickListener {
     private static final String TAG = DownloadClickListener.class.getSimpleName();
-    private final TrackingInterface trackingService;
+    private final MapService mapService;
 
-    public DownloadClickListener(TrackingInterface trackingService) {
-        this.trackingService = trackingService;
+    public DownloadClickListener(MapService mapService) {
+        this.mapService = mapService;
     }
 
     @Override
@@ -39,7 +38,7 @@ public class DownloadClickListener implements View.OnClickListener {
             @Override
             public void onReceiveValue(String value) {
                 Log.d(TAG, value);
-                trackingService.downloadMap(value, progressbar);
+                mapService.downloadMap(value, progressbar);
             }
         });
 
@@ -50,6 +49,6 @@ public class DownloadClickListener implements View.OnClickListener {
         final ProgressBar progressbar = (ProgressBar) mapFragment.getRootView().findViewById(R.id.download_progress);
         progressbar.setVisibility(View.INVISIBLE);
         progressbar.setProgress(0);
-        trackingService.cancelDownloadMap();
+        mapService.cancelDownloadMap();
     }
 }
