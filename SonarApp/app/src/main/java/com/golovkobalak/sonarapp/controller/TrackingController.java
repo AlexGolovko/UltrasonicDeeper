@@ -46,6 +46,10 @@ public class TrackingController {
 
             ctx.result(gson.toJson(markers));
         });
+        app.after(ctx -> {
+            Log.d(TAG, ctx.fullUrl());
+            Log.d(TAG, ctx.body());
+        });
     }
 
 
