@@ -1,7 +1,6 @@
-package com.golovkobalak.sonarapp.logger;
+package com.golovkobalak.sonarapp.config;
 
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
 
 import androidx.annotation.RequiresApi;

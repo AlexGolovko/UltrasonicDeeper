@@ -17,8 +17,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.TrackingController;
-import com.golovkobalak.sonarapp.logger.Logger;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import io.realm.Realm;
