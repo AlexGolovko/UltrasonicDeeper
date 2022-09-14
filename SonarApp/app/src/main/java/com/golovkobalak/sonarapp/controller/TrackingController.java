@@ -34,7 +34,7 @@ public class TrackingController {
             ctx.status(201);
         });
         //GET http://localhost:8080/system/map/cache/dir
-        app.get("/system/map/cache/dir", ctx -> {
+        app.get("/system/mapCacheDir", ctx -> {
             final String mapCacheDir = trackingService.getMapCacheDir();
             ctx.result(mapCacheDir);
         });
