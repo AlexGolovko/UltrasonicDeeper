@@ -1,6 +1,5 @@
 package com.golovkobalak.sonarapp.controller;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.golovkobalak.sonarapp.model.GeoSquare;
@@ -21,9 +20,9 @@ public class TrackingController {
     private final Javalin app;
     private final TrackingService trackingService;
 
-    public TrackingController(Context context) {
+    public TrackingController() {
         this.app = Javalin.create().start(PORT);
-        this.trackingService = new TrackingService(context);
+        this.trackingService = new TrackingService();
         app.before(ctx -> {
             Log.d(TAG, ctx.fullUrl());
             Log.d(TAG, ctx.body());

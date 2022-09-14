@@ -1,8 +1,8 @@
 package com.golovkobalak.sonarapp.service;
 
-import android.content.Context;
 import android.util.Log;
 
+import com.golovkobalak.sonarapp.SonarContext;
 import com.golovkobalak.sonarapp.model.GeoSquare;
 import com.golovkobalak.sonarapp.model.Marker;
 import com.golovkobalak.sonarapp.model.SonarData;
@@ -15,13 +15,8 @@ import java.util.List;
 
 public class TrackingService {
     private static final String TAG = TrackingService.class.getSimpleName();
-    private final Context context;
     private static final Gson gson = new Gson();
     private static final SonarDataRepository repo = new SonarDataRepository();
-
-    public TrackingService(Context context) {
-        this.context = context;
-    }
 
     public void saveTrackingList(String data) {
         Log.i(TAG, "saveTrackingList: " + data);
@@ -34,8 +29,7 @@ public class TrackingService {
     }
 
     public String getMapCacheDir() {
-        String filesPath = context.getFilesDir().getAbsolutePath();
-        return "file://" + filesPath + "/Tiles";
+        return "file://" + SonarContext.FILES_DIR_ABS_PATH + "/Tiles";
     }
 
     public List<Marker> getMarkers(GeoSquare geoSquare) {
