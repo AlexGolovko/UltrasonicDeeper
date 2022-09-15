@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.javalin.Javalin;
+import io.javalin.core.JavalinConfig;
 
 public class TrackingController {
 
@@ -22,7 +23,7 @@ public class TrackingController {
     private final TrackingService trackingService;
 
     public TrackingController() {
-        this.app = Javalin.create().start(PORT);
+        this.app = Javalin.create(JavalinConfig::enableCorsForAllOrigins).start(PORT);
         this.trackingService = new TrackingService();
         app.before(ctx -> {
             Log.d(TAG, ctx.fullUrl());
