@@ -1,4 +1,4 @@
-package com.golovkobalak.sonarapp.ui.dashboard;
+package com.golovkobalak.sonarapp.ui.map;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -25,9 +25,9 @@ import com.golovkobalak.sonarapp.R;
 import com.golovkobalak.sonarapp.SonarContext;
 import com.golovkobalak.sonarapp.service.MapService;
 
-public class DashboardFragment extends Fragment {
-    public static final String TAG = DashboardFragment.class.getSimpleName();
-    private DashboardViewModel dashboardViewModel;
+public class MapFragment extends Fragment {
+    public static final String TAG = MapFragment.class.getSimpleName();
+    private MapViewModel dashboardViewModel;
     private WebSettings settings;
     private WebView webView;
     private MapService mapService;
@@ -36,8 +36,8 @@ public class DashboardFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         dashboardViewModel =
-                ViewModelProviders.of(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
+                ViewModelProviders.of(this).get(MapViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_map, container, false);
         webView = root.findViewById(R.id.map_view);
 //        webView = (WebView) findViewById(R.id.webViewJS);
         settings = webView.getSettings();

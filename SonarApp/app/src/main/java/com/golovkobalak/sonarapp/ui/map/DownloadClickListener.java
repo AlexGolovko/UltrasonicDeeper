@@ -1,4 +1,4 @@
-package com.golovkobalak.sonarapp.ui.dashboard;
+package com.golovkobalak.sonarapp.ui.map;
 
 import android.util.Log;
 import android.view.View;
