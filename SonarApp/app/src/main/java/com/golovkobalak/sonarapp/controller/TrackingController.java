@@ -2,6 +2,7 @@ package com.golovkobalak.sonarapp.controller;
 
 import android.util.Log;
 
+import com.golovkobalak.sonarapp.SonarContext;
 import com.golovkobalak.sonarapp.model.GeoSquare;
 import com.golovkobalak.sonarapp.model.Marker;
 import com.golovkobalak.sonarapp.service.TrackingService;
@@ -45,6 +46,9 @@ public class TrackingController {
             final List<Marker> markers = trackingService.getMarkers(geoSquare);
 
             ctx.result(gson.toJson(markers));
+        });
+        app.get("/activity", ctx -> {
+            ctx.result("{\"activity\":\"" + SonarContext.CURRENT_ACTIVITY + "\"}");
         });
         app.after(ctx -> {
             Log.d(TAG, ctx.fullUrl());

@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.golovkobalak.sonarapp.R;
+import com.golovkobalak.sonarapp.SonarContext;
 import com.golovkobalak.sonarapp.service.MapService;
 
 public class DashboardFragment extends Fragment {
@@ -71,6 +72,7 @@ public class DashboardFragment extends Fragment {
         });
         webView.getSettings().setGeolocationDatabasePath(this.getActivity().getFilesDir().getPath());
         this.getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        SonarContext.CURRENT_ACTIVITY = SonarContext.Activity.LOAD;
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
         final Button downloadButton = (Button) root.findViewById(R.id.download_button);
         if (mapService == null) {
