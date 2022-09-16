@@ -30,7 +30,7 @@ public class TrackingController {
             Log.d(TAG, ctx.body());
         });
         //POST http://localhost:8080/tracking/save
-        app.post("/tracking/save", ctx -> {
+        app.post("/tracking", ctx -> {
             final String body = ctx.body();
             trackingService.saveTrackingList(body);
             ctx.status(201);
@@ -38,7 +38,7 @@ public class TrackingController {
         //GET http://localhost:8080/system/map/cache/dir
         app.get("/system/mapCacheDir", ctx -> {
             final String mapCacheDir = trackingService.getMapCacheDir();
-            ctx.result(mapCacheDir);
+            ctx.result(gson.toJson(mapCacheDir));
         });
         //GET http://localhost:8080/marker?north=49.960455723200724&east=36.34042262789566&south=49.955769014252176&west=36.33620619532426
         app.get("/marker", ctx -> {

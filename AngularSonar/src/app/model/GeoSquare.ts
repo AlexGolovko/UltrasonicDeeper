@@ -1,3 +1,5 @@
+import {HttpParams} from '@angular/common/http';
+
 export class GeoSquare {
     constructor(north: number, east: number, south: number, west: number) {
         this.north = north
@@ -10,4 +12,12 @@ export class GeoSquare {
     public south: number
     public east: number
     public west: number
+
+    toHttpParams(): HttpParams {
+        return new HttpParams()
+            .append('north', String(this.north))
+            .append('east', String(this.east))
+            .append('south', String(this.south))
+            .append('west', String(this.west))
+    }
 }

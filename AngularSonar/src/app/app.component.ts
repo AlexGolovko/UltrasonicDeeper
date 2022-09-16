@@ -1,6 +1,7 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {ActivityType, AndroidService} from './service/android.service';
+import {ActivityType} from './model/Activity';
+import {AndroidBridgeService} from './service/android-bridge.service';
 
 @Component({
     selector: 'app-root',
@@ -9,7 +10,7 @@ import {ActivityType, AndroidService} from './service/android.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-    constructor(private router: Router, private androidService: AndroidService) {
+    constructor(private router: Router, private androidService: AndroidBridgeService) {
 
     }
 

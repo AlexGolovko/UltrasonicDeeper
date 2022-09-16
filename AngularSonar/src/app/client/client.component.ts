@@ -41,7 +41,7 @@ export class ClientComponent implements OnInit, OnDestroy {
                 if (data.isMeasureSuccess) {
                     this.sonarClientData.depth = data.depth;
                     this.increaseTrackArray(data.depth);
-                    this.saveAndroidData(data, this.crd)
+                    this.androidBridge.saveAndroidData(data, this.crd)
                 }
             }
         });
@@ -71,18 +71,6 @@ export class ClientComponent implements OnInit, OnDestroy {
         }
         array.splice(0, 0, depth.toFixed(2));
         this.trackArray = array;
-    }
-
-    private saveAndroidData(response: SonarClientData, crd: Position) {
-        const data: AndroidData = new AndroidData(response.depth.toString(), response.batteryLevel.toString(), response.waterTemp.toString(), crd, String(Date.now()));
-        if (this.androidBridge.isAvailable()) {
-            if (this.androidDataList.length > this.androidListSendSize) {
-                this.androidBridge.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
-            }
-            this.androidDataList.push(data);
-        } else {
-            console.log('TrackingService is undefined');
-        }
     }
 }
 

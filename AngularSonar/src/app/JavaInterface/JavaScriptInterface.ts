@@ -3,8 +3,6 @@ export interface JavaScriptInterface {
 
     saveTrackingList(data: string): void
 
-    getActivity(): string
-
     getMapCacheDir(): string
 
     findMarkers(data: string): string;

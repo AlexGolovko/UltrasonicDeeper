@@ -35,11 +35,16 @@ export class MapComponent implements OnInit, AfterViewInit {
             maxZoom: 19,
             crossOrigin: true
         });
-        this.cachedTiles = new TileLayer(androidService.getMapCacheDir() + '/{z}/{x}/{y}.png', {
-            minZoom: 19,
-            maxZoom: 19,
-            crossOrigin: true
-        });
+
+        androidService.getMapCacheDir().subscribe(response => {
+            console.log('androidService.getMapCacheDir():' + response)
+            this.cachedTiles = new TileLayer(response + '/{z}/{x}/{y}.png', {
+                minZoom: 19,
+                maxZoom: 19,
+                crossOrigin: true
+            });
+            this.cachedTiles.addTo(this.map)
+        })
     }
 
     ngOnInit(): void {
@@ -121,7 +126,6 @@ export class MapComponent implements OnInit, AfterViewInit {
 
     private initMap(): void {
         this.tiles.addTo(this.map)
-        this.cachedTiles.addTo(this.map)
         this.map.locate({setView: true, enableHighAccuracy: true});
         this.map.on('locationfound', event => {
 

@@ -31,11 +31,15 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 maxZoom: 19,
                 crossOrigin: true
             });
-        this.cachedTiles = new TileLayer(androidService.getMapCacheDir() + '/{z}/{x}/{y}.png', {
-            minZoom: 19,
-            maxZoom: 19,
-            crossOrigin: true
-        });
+        androidService.getMapCacheDir().subscribe(response => {
+            console.log('androidService.getMapCacheDir():' + response)
+            this.cachedTiles = new TileLayer(response + '/{z}/{x}/{y}.png', {
+                minZoom: 19,
+                maxZoom: 19,
+                crossOrigin: true
+            });
+            this.cachedTiles.addTo(this.map)
+        })
 
     }
 
@@ -76,7 +80,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             maxZoom: 19
         });
         this.tiles.addTo(this.map);
-        this.cachedTiles.addTo(this.map)
         this.map.invalidateSize({debounceMoveend: true});
 
         // TODO new marker
@@ -133,7 +136,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
     private updateMarkers() {
         const latLngBounds = this.map.getBounds();
         const geoSquare = new GeoSquare(latLngBounds.getNorth(), latLngBounds.getEast(), latLngBounds.getSouth(), latLngBounds.getWest())
-        for (const marker of this.androidService.getMarkers(geoSquare)) {
+        this.androidService.getMarkers(geoSquare).subscribe(marker => {
             if (!this.cachedMarkers.contains(marker)) {
                 this.cachedMarkers.add(marker);
                 console.log('add: ' + marker)
@@ -148,8 +151,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 })
                 depthCircle.addTo(this.map)
             }
-        }
-
+        })
     }
 
 
