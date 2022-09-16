@@ -1,4 +1,4 @@
-import {SonarData} from '../SonarData';
+import {SonarData} from './SonarData';
 
 export class AndroidData extends SonarData {
   public time: string;

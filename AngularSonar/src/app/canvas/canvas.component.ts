@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {ClientService} from '../service/client.service';
-import {SonarClientData} from '../service/SonarClientData';
+import {SonarClientData} from '../model/SonarClientData';
 
 @Component({
     selector: 'app-canvas',

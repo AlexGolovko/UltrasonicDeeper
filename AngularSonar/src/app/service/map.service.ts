@@ -1,7 +1,7 @@
 import {LatLngBounds} from 'leaflet';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Injectable} from '@angular/core';
-import {MapCoordinates} from '../DTO/MapCoordinates';
+import {MapCoordinates} from '../model/MapCoordinates';
 import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
 import {AndroidBridgeService} from './android-bridge.service';
 

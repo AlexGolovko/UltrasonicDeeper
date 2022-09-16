@@ -3,9 +3,9 @@ import {Circle, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
 import {MapService} from '../service/map.service';
 import {GeoService} from '../service/geo.service';
 import {AndroidBridgeService} from '../service/android-bridge.service';
-import {GeoSquare} from '../DTO/GeoSquare';
-import {DepthMarker} from '../DTO/DepthMarker';
-import {HahSet} from '../service/HahSet';
+import {GeoSquare} from '../model/GeoSquare';
+import {DepthMarker} from '../model/DepthMarker';
+import {HahSet} from '../model/HahSet';
 
 
 @Component({

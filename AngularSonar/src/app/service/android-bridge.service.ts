@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
-import {SonarClientData} from './SonarClientData';
-import {AndroidData} from '../DTO/AndroidData';
+import {SonarClientData} from '../model/SonarClientData';
+import {AndroidData} from '../model/AndroidData';
 import {environment} from '../../environments/environment';
-import {GeoSquare} from '../DTO/GeoSquare';
-import {DepthMarker} from '../DTO/DepthMarker';
+import {GeoSquare} from '../model/GeoSquare';
+import {DepthMarker} from '../model/DepthMarker';
 
 declare var TrackingService: JavaScriptInterface;
 

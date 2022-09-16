@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ClientService} from '../service/client.service';
-import {SonarClientData} from '../service/SonarClientData';
+import {SonarClientData} from '../model/SonarClientData';
 import {GeoService} from '../service/geo.service';
 import {environment} from '../../environments/environment';
-import {AndroidData} from '../DTO/AndroidData';
+import {AndroidData} from '../model/AndroidData';
 import {AndroidBridgeService} from '../service/android-bridge.service';
 
 @Component({
