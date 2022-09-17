@@ -1,7 +1,7 @@
-import {SonarData} from '../SonarData';
-import {SonarClientData} from './SonarClientData';
+import {SonarData} from '../model/SonarData';
+import {SonarClientData} from '../model/SonarClientData';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {SonarState} from '../SonarState';
+import {SonarState} from '../model/SonarState';
 import {Injectable} from '@angular/core';
 import {WebSocketServiceImpl} from './websocket/websocket.service';
 import {WS} from './websocket/wsmessage';

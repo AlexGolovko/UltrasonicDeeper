@@ -17,7 +17,8 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.golovkobalak.sonarapp.logger.Logger;
+import com.golovkobalak.sonarapp.config.Logger;
+import com.golovkobalak.sonarapp.controller.TrackingController;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import io.realm.Realm;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     public static MainActivity activity;
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     public static final String MICROSONAR_SSID = "microsonar";
+    private static final TrackingController trackingController = new TrackingController();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         Realm.init(this.getBaseContext());
         Logger.init(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS));
         super.onCreate(savedInstanceState);
+        saveFileDirPath();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -56,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    private void saveFileDirPath() {
+        SonarContext.FILES_DIR_ABS_PATH = this.getBaseContext().getFilesDir().getAbsolutePath();
     }
 
     public void upload(View view) {

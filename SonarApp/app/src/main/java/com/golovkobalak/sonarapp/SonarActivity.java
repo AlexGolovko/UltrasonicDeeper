@@ -1,7 +1,6 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,9 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.golovkobalak.sonarapp.service.TrackingInterface;
-
-public class SonarActivity extends Activity {
+public class SonarActivity extends android.app.Activity {
     private static final String ID = "SONAR_ACTIVITY";
     private static final String TAG = SonarActivity.class.getCanonicalName();
     private WebView webView;
@@ -81,7 +78,7 @@ public class SonarActivity extends Activity {
         webView.getSettings().setGeolocationDatabasePath(this.getFilesDir().getPath());
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 //        webView.loadUrl("file:///android_asset/index.html");
-        webView.addJavascriptInterface(new TrackingInterface(this, "map"), "TrackingService");
+        SonarContext.CURRENT_ACTIVITY = SonarContext.Activity.MAP;
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
     }
 

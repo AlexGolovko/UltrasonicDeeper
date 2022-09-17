@@ -1,4 +1,4 @@
-package com.golovkobalak.sonarapp.ui.dashboard;
+package com.golovkobalak.sonarapp.ui.map;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -14,32 +14,30 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.golovkobalak.sonarapp.R;
-import com.golovkobalak.sonarapp.service.TrackingInterface;
+import com.golovkobalak.sonarapp.SonarContext;
+import com.golovkobalak.sonarapp.service.MapService;
 
-public class DashboardFragment extends Fragment {
-    public static final String TAG = DashboardFragment.class.getSimpleName();
-    private DashboardViewModel dashboardViewModel;
+public class MapFragment extends Fragment {
+    public static final String TAG = MapFragment.class.getSimpleName();
+    private MapViewModel dashboardViewModel;
     private WebSettings settings;
     private WebView webView;
-    private TrackingInterface trackingService;
+    private MapService mapService;
     private DownloadClickListener downloadClickListener;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         dashboardViewModel =
-                ViewModelProviders.of(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
+                ViewModelProviders.of(this).get(MapViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_map, container, false);
         webView = root.findViewById(R.id.map_view);
 //        webView = (WebView) findViewById(R.id.webViewJS);
         settings = webView.getSettings();
@@ -74,15 +72,14 @@ public class DashboardFragment extends Fragment {
         });
         webView.getSettings().setGeolocationDatabasePath(this.getActivity().getFilesDir().getPath());
         this.getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        if (trackingService == null) {
-            trackingService = new TrackingInterface(this.getContext(), "load");
-        }
-        trackingService.setActivity("load");
-        webView.addJavascriptInterface(trackingService, "TrackingService");
+        SonarContext.CURRENT_ACTIVITY = SonarContext.Activity.LOAD;
         webView.loadUrl("file:///android_asset/AngularSonar/index.html");
         final Button downloadButton = (Button) root.findViewById(R.id.download_button);
+        if (mapService == null) {
+            mapService = new MapService(this.getContext());
+        }
         if (downloadClickListener == null)
-            downloadClickListener = new DownloadClickListener(trackingService);
+            downloadClickListener = new DownloadClickListener(mapService);
         downloadButton.setOnClickListener(downloadClickListener);
         return root;
     }
@@ -91,6 +88,6 @@ public class DashboardFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         webView.destroy();
-        trackingService.cancelDownloadMap();
+        mapService.cancelDownloadMap();
     }
 }

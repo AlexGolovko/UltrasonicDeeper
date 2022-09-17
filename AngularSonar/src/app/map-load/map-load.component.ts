@@ -3,9 +3,9 @@ import {Circle, Icon, LatLng, Map, Marker, TileLayer} from 'leaflet';
 import {MapService} from '../service/map.service';
 import {GeoService} from '../service/geo.service';
 import {AndroidBridgeService} from '../service/android-bridge.service';
-import {GeoSquare} from '../DTO/GeoSquare';
-import {DepthMarker} from '../DTO/DepthMarker';
-import {HahSet} from '../service/HahSet';
+import {GeoSquare} from '../model/GeoSquare';
+import {DepthMarker} from '../model/DepthMarker';
+import {HahSet} from '../model/HahSet';
 
 
 @Component({
@@ -31,11 +31,15 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 maxZoom: 19,
                 crossOrigin: true
             });
-        this.cachedTiles = new TileLayer(androidService.getMapCacheDir() + '/{z}/{x}/{y}.png', {
-            minZoom: 19,
-            maxZoom: 19,
-            crossOrigin: true
-        });
+        androidService.getMapCacheDir().subscribe(response => {
+            console.log('androidService.getMapCacheDir():' + response)
+            this.cachedTiles = new TileLayer(response + '/{z}/{x}/{y}.png', {
+                minZoom: 19,
+                maxZoom: 19,
+                crossOrigin: true
+            });
+            this.cachedTiles.addTo(this.map)
+        })
 
     }
 
@@ -44,28 +48,11 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
         this.downloadStatus = 'Download';
     }
 
-    // download() {
-    //     this.downloadStatus = 'In Progress';
-    //     const bounds = this.map.getBounds();
-    //     const north = bounds.getNorth();
-    //     const south = bounds.getSouth();
-    //     const east = bounds.getEast();
-    //     const west = bounds.getWest();
-    //     console.log(bounds);
-    //     console.log('download= ' + this.mapService.getTileNumber(bounds));
-    //     const observableDownloadState = this.mapService.downloadMap(bounds);
-    //     observableDownloadState.subscribe(value => {
-    //         this.downloadStatus = value;
-    //     });
-    // }
-
     ngAfterViewInit(): void {
         this.initMap();
     }
 
     private initMap(): void {
-        // this.latitude = 49.957943;
-        // this.longitude = 36.338340;
         const subscription = this.geoService.getLocation().subscribe(value => {
             this.map.setView(new LatLng(value.coords.latitude, value.coords.longitude), 12)
             subscription.unsubscribe();
@@ -76,16 +63,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             maxZoom: 19
         });
         this.tiles.addTo(this.map);
-        this.cachedTiles.addTo(this.map)
         this.map.invalidateSize({debounceMoveend: true});
-
-        // TODO new marker
-        // L.circle(new LatLng(this.latitude, this.longitude), {
-        //     color: 'red',
-        //     fillColor: '#f03',
-        //     fillOpacity: 0.5,
-        //     radius: 500
-        // }).addTo(this.map);
         const greenIcon = new Icon({
             iconUrl: 'assets/marker-icon-2x.png',
             iconSize: [20, 32], // size of the icon
@@ -99,12 +77,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 marker.remove()
                 circle.remove()
             }
-            // const divIcon = new DivIcon({
-            //     className: 'my-div-icon',
-            //     html: '<img class="my-div-image" src="assets/marker-icon-2x.png"/>' +
-            //         '<span class="my-div-span">U R here</span>',
-            //     iconSize: [50, 85]
-            // })
             marker = new Marker(new LatLng(value.coords.latitude, value.coords.longitude), {
                 icon: greenIcon
             })
@@ -127,17 +99,17 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 this.updateMarkers()
             }
         });
-
     }
 
     private updateMarkers() {
         const latLngBounds = this.map.getBounds();
         const geoSquare = new GeoSquare(latLngBounds.getNorth(), latLngBounds.getEast(), latLngBounds.getSouth(), latLngBounds.getWest())
-        for (const marker of this.androidService.getMarkers(geoSquare)) {
+        this.androidService.getMarkers(geoSquare).subscribe(marker => {
             if (!this.cachedMarkers.contains(marker)) {
                 this.cachedMarkers.add(marker);
                 console.log('add: ' + marker)
-                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude), 2, {
+                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude),  {
+                    radius: 2,
                     color: this.getColor(marker.depth),
                     weight: 2,
                     fillColor: this.getColor(marker.depth),
@@ -148,8 +120,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 })
                 depthCircle.addTo(this.map)
             }
-        }
-
+        })
     }
 
 

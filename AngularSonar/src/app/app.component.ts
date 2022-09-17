@@ -1,5 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
+import {ActivityType} from './model/Activity';
 import {AndroidBridgeService} from './service/android-bridge.service';
 
 @Component({
@@ -9,17 +10,19 @@ import {AndroidBridgeService} from './service/android-bridge.service';
 })
 export class AppComponent implements OnInit, OnDestroy {
 
-    constructor(private router: Router, private androidBridge: AndroidBridgeService) {
+    constructor(private router: Router, private androidService: AndroidBridgeService) {
 
     }
 
     ngOnInit(): void {
-        if (this.androidBridge.getActivity() === 'load') {
-            this.router.navigate(['load']);
-        }
-        if (this.androidBridge.getActivity() === 'map') {
-            this.router.navigate(['map'])
-        }
+        this.androidService.getActivity().subscribe(activity => {
+            if (activity.activity === ActivityType.LOAD) {
+                this.router.navigate(['load']);
+            }
+            if (activity.activity === ActivityType.MAP) {
+                this.router.navigate(['map']);
+            }
+        })
     }
 
     ngOnDestroy(): void {

@@ -1,4 +1,4 @@
-import {Comparable} from '../service/HahSet';
+import {Comparable} from './HahSet';
 
 export class DepthMarker implements Comparable {
     readonly depth: string;

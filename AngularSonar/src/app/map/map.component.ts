@@ -35,11 +35,16 @@ export class MapComponent implements OnInit, AfterViewInit {
             maxZoom: 19,
             crossOrigin: true
         });
-        this.cachedTiles = new TileLayer(androidService.getMapCacheDir() + '/{z}/{x}/{y}.png', {
-            minZoom: 19,
-            maxZoom: 19,
-            crossOrigin: true
-        });
+
+        androidService.getMapCacheDir().subscribe(response => {
+            console.log('androidService.getMapCacheDir():' + response)
+            this.cachedTiles = new TileLayer(response + '/{z}/{x}/{y}.png', {
+                minZoom: 19,
+                maxZoom: 19,
+                crossOrigin: true
+            });
+            this.cachedTiles.addTo(this.map)
+        })
     }
 
     ngOnInit(): void {
@@ -67,7 +72,8 @@ export class MapComponent implements OnInit, AfterViewInit {
                     this.prevArrowIconHtml = arrowIconHtml
                 }
                 if (value.isSonarAvailable && value.isMeasureSuccess) {
-                    const depthCircle = new Circle(this.currLatLng, 2, {
+                    const depthCircle = new Circle(this.currLatLng, {
+                        radius: 2,
                         color: this.getColor(value.depth),
                         weight: 2,
                         fillColor: this.getColor(value.depth),
@@ -121,7 +127,6 @@ export class MapComponent implements OnInit, AfterViewInit {
 
     private initMap(): void {
         this.tiles.addTo(this.map)
-        this.cachedTiles.addTo(this.map)
         this.map.locate({setView: true, enableHighAccuracy: true});
         this.map.on('locationfound', event => {
 
@@ -131,10 +136,11 @@ export class MapComponent implements OnInit, AfterViewInit {
                 iconSize: [30, 30],
                 iconAnchor: [15, 15]
             })
-            const radius = event.accuracy / 2;
+            const rad = event.accuracy / 2;
             this.marker = new Marker(event.latlng, {icon: divIcon});
             this.marker.addTo(this.map)
-            this.circle = new Circle(event.latlng, radius, {
+            this.circle = new Circle(event.latlng, {
+                radius: rad,
                 color: 'green',
                 weight: 2
             });

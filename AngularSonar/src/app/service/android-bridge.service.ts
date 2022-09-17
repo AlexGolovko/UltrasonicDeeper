@@ -1,62 +1,35 @@
 import {Injectable} from '@angular/core';
-import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
-import {SonarClientData} from './SonarClientData';
-import {AndroidData} from '../DTO/AndroidData';
+import {SonarClientData} from '../model/SonarClientData';
+import {AndroidData} from '../model/AndroidData';
 import {environment} from '../../environments/environment';
-import {GeoSquare} from '../DTO/GeoSquare';
-import {DepthMarker} from '../DTO/DepthMarker';
+import {GeoSquare} from '../model/GeoSquare';
+import {DepthMarker} from '../model/DepthMarker';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {Activity} from '../model/Activity';
 
-declare var TrackingService: JavaScriptInterface;
 
 @Injectable({
     providedIn: 'root'
 })
 export class AndroidBridgeService {
-    private readonly TrackingService: JavaScriptInterface;
     private androidDataList: Array<AndroidData> = new Array<AndroidData>()
     private androidListSendSize: number = environment.listSize;
 
-    constructor() {
-        if (typeof TrackingService === 'undefined') {
-            console.log('TrackingService is undefined');
-            this.TrackingService = new class implements JavaScriptInterface {
-                findMarkers(s: string): string {
-                    return '[{"depth":"3.14777","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14481","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14406","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14555","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14406","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14481","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14481","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14481","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14629","latitude":49.9582452,"longitude":36.3384585},{"depth":"3.14481","latitude":49.9580404,"longitude":36.3384029},{"depth":"3.14555","latitude":49.9580404,"longitude":36.3384029},{"depth":"3.14629","latitude":49.9580404,"longitude":36.3384029},{"depth":"3.14777","latitude":49.9579778,"longitude":36.3382165},{"depth":"3.14703","latitude":49.9579778,"longitude":36.3382165},{"depth":"3.14555","latitude":49.9579778,"longitude":36.3382165},{"depth":"3.14555","latitude":49.9579865,"longitude":36.3382168},{"depth":"3.14481","latitude":49.9579865,"longitude":36.3382168},{"depth":"3.14481","latitude":49.9579865,"longitude":36.3382168},{"depth":"3.14406","latitude":49.9580323,"longitude":36.3382749},{"depth":"3.14999","latitude":49.9580323,"longitude":36.3382749},{"depth":"3.14629","latitude":49.9580323,"longitude":36.3382749},{"depth":"3.14555","latitude":49.9580746,"longitude":36.3383187},{"depth":"3.14406","latitude":49.9580746,"longitude":36.3383187},{"depth":"3.14555","latitude":49.9580746,"longitude":36.3383187},{"depth":"3.14629","latitude":49.9581091,"longitude":36.3383654},{"depth":"3.14629","latitude":49.9581091,"longitude":36.3383654},{"depth":"3.14481","latitude":49.9581264,"longitude":36.3383966},{"depth":"3.14555","latitude":49.9581264,"longitude":36.3383966},{"depth":"3.14629","latitude":49.9581264,"longitude":36.3383966},{"depth":"3.14481","latitude":49.9581408,"longitude":36.3384053},{"depth":"3.14481","latitude":49.9581408,"longitude":36.3384053},{"depth":"3.14555","latitude":49.9581408,"longitude":36.3384053},{"depth":"3.14406","latitude":49.9581435,"longitude":36.3384056},{"depth":"3.14555","latitude":49.9581435,"longitude":36.3384056},{"depth":"3.14406","latitude":49.9581435,"longitude":36.3384056},{"depth":"3.14703","latitude":49.9581582,"longitude":36.338415},{"depth":"3.14629","latitude":49.9581582,"longitude":36.338415},{"depth":"3.14629","latitude":49.9581582,"longitude":36.338415},{"depth":"3.14332","latitude":49.9581636,"longitude":36.3384265},{"depth":"3.14481","latitude":49.9581636,"longitude":36.3384265},{"depth":"3.14332","latitude":49.9581636,"longitude":36.3384265},{"depth":"3.14481","latitude":49.9581664,"longitude":36.3384365},{"depth":"3.14777","latitude":49.9581664,"longitude":36.3384365},{"depth":"3.14406","latitude":49.9581664,"longitude":36.3384365},{"depth":"3.14629","latitude":49.9581718,"longitude":36.338444},{"depth":"3.14555","latitude":49.9581718,"longitude":36.338444},{"depth":"3.14406","latitude":49.9581718,"longitude":36.338444},{"depth":"3.14629","latitude":49.9581745,"longitude":36.3384495},{"depth":"3.14629","latitude":49.9581745,"longitude":36.3384495},{"depth":"3.14555","latitude":49.9581745,"longitude":36.3384495},{"depth":"3.14555","latitude":49.9581798,"longitude":36.3384518},{"depth":"3.14332","latitude":49.9581798,"longitude":36.3384518},{"depth":"3.14629","latitude":49.9581798,"longitude":36.3384518},{"depth":"3.14555","latitude":49.9581813,"longitude":36.3384557},{"depth":"3.14629","latitude":49.9581813,"longitude":36.3384557},{"depth":"3.14629","latitude":49.9581813,"longitude":36.3384557},{"depth":"3.14703","latitude":49.9581805,"longitude":36.3384588},{"depth":"3.01359","latitude":49.9581805,"longitude":36.3384588},{"depth":"3.14999","latitude":49.9581804,"longitude":36.3384635},{"depth":"3.14999","latitude":49.9581804,"longitude":36.3384635},{"depth":"3.14703","latitude":49.9581801,"longitude":36.3384631}]';
-                }
+    private http: HttpClient;
+    private baseUrl: string;
 
-                getMapCacheDir(): string {
-                    return '';
-                }
-
-                downloadMap(map: string): void {
-                }
-
-                getActivity(): string {
-                    return 'mock';
-                }
-
-                saveTrackingList(data: string): void {
-                }
-            }();
-        } else {
-            this.TrackingService = TrackingService;
-        }
+    constructor(http: HttpClient) {
+        this.http = http
+        this.baseUrl = 'http://' + environment.androidHost + ':8080';
     }
 
-    getActivity(): string {
-        return this.TrackingService.getActivity();
+    getActivity(): Observable<Activity> {
+        return this.http.get<Activity>(this.baseUrl + '/activity', {observe: 'body', responseType: 'json'});
     }
 
-    isAvailable() {
-        return typeof this.TrackingService !== 'undefined';
-    }
-
-    saveTrackingList(data: string) {
-        this.TrackingService.saveTrackingList(data);
-    }
-
-    getMapCacheDir(): string {
-        return this.TrackingService.getMapCacheDir()
+    getMapCacheDir(): Observable<string> {
+        return this.http.get<string>(this.baseUrl + '/system/mapCacheDir');
     }
 
     saveAndroidData(response: SonarClientData, crd: Position): void {
@@ -64,29 +37,23 @@ export class AndroidBridgeService {
             response.batteryLevel.toString(),
             response.waterTemp.toString(),
             crd, String(Date.now()));
-        if (this.isAvailable()) {
-            if (this.androidDataList.length > this.androidListSendSize) {
-                this.saveTrackingList(JSON.stringify(this.androidDataList.splice(0)));
-            }
-            this.androidDataList.push(data);
-        } else {
-            console.log('TrackingService is undefined');
+        if (this.androidDataList.length > this.androidListSendSize) {
+            this.http.post(this.baseUrl + '/tracking', JSON.stringify(this.androidDataList.splice(0)))
         }
+        this.androidDataList.push(data);
     }
 
-    // downloadMap(tiles: MapCoordinates) {
-    //     this.TrackingService.downloadMap(JSON.stringify(tiles));
-    // }
-
-
-    getMarkers(geoSquare: GeoSquare): Array<DepthMarker> {
-        const array = new Array<DepthMarker>();
-        const markers = this.TrackingService.findMarkers(JSON.stringify(geoSquare));
-        // const parse: Array<DepthMarker> = ;
-        for (const parseElement of JSON.parse(markers) as Array<DepthMarker>) {
-            array.push(new DepthMarker(parseElement.depth, parseElement.latitude, parseElement.longitude))
-        }
-        return array;
+    getMarkers(geoSquare: GeoSquare): Observable<DepthMarker> {
+        return new Observable((observer) => {
+            const markerObservable = this.http.get<Array<DepthMarker>>(this.baseUrl + '/marker', {
+                params: geoSquare.toHttpParams()
+            });
+            markerObservable.subscribe(resp => {
+                resp.forEach(depthMarker => {
+                    observer.next(new DepthMarker(depthMarker.depth, depthMarker.latitude, depthMarker.longitude))
+                })
+            })
+        })
     }
 }
 

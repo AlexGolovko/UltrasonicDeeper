@@ -6,6 +6,7 @@ export const environment = {
   production: false,
   url: /*'http://192.168.31.238/feature',// */'http://localhost:8080/sonar',
   wsEndpoint: 'ws://192.168.31.79:8080',
+  androidHost: '192.168.31.34',
   interval: 300,
   listSize: 10
 };

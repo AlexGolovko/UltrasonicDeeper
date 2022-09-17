@@ -154,11 +154,11 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
     public send(event: string, data: any = {}): void {
         if (event && this.isConnected) {
             const message = JSON.stringify({event, data}) as any;
-            console.log('to websocket$' + message)
+            // console.log('to websocket$' + message)
             this.websocket$.next(message);
         } else {
             const message = JSON.stringify({event, data}) as any;
-            console.log('to wsMessages$' + message)
+            // console.log('to wsMessages$' + message)
             this.wsMessages$.next(message)
         }
     }
