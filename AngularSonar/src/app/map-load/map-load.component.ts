@@ -108,7 +108,8 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             if (!this.cachedMarkers.contains(marker)) {
                 this.cachedMarkers.add(marker);
                 console.log('add: ' + marker)
-                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude), 2, {
+                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude),  {
+                    radius: 2,
                     color: this.getColor(marker.depth),
                     weight: 2,
                     fillColor: this.getColor(marker.depth),

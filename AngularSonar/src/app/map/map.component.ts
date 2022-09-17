@@ -72,7 +72,8 @@ export class MapComponent implements OnInit, AfterViewInit {
                     this.prevArrowIconHtml = arrowIconHtml
                 }
                 if (value.isSonarAvailable && value.isMeasureSuccess) {
-                    const depthCircle = new Circle(this.currLatLng, 2, {
+                    const depthCircle = new Circle(this.currLatLng, {
+                        radius: 2,
                         color: this.getColor(value.depth),
                         weight: 2,
                         fillColor: this.getColor(value.depth),
@@ -135,10 +136,11 @@ export class MapComponent implements OnInit, AfterViewInit {
                 iconSize: [30, 30],
                 iconAnchor: [15, 15]
             })
-            const radius = event.accuracy / 2;
+            const rad = event.accuracy / 2;
             this.marker = new Marker(event.latlng, {icon: divIcon});
             this.marker.addTo(this.map)
-            this.circle = new Circle(event.latlng, radius, {
+            this.circle = new Circle(event.latlng, {
+                radius: rad,
                 color: 'green',
                 weight: 2
             });
