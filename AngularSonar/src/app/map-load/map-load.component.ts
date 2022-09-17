@@ -48,28 +48,11 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
         this.downloadStatus = 'Download';
     }
 
-    // download() {
-    //     this.downloadStatus = 'In Progress';
-    //     const bounds = this.map.getBounds();
-    //     const north = bounds.getNorth();
-    //     const south = bounds.getSouth();
-    //     const east = bounds.getEast();
-    //     const west = bounds.getWest();
-    //     console.log(bounds);
-    //     console.log('download= ' + this.mapService.getTileNumber(bounds));
-    //     const observableDownloadState = this.mapService.downloadMap(bounds);
-    //     observableDownloadState.subscribe(value => {
-    //         this.downloadStatus = value;
-    //     });
-    // }
-
     ngAfterViewInit(): void {
         this.initMap();
     }
 
     private initMap(): void {
-        // this.latitude = 49.957943;
-        // this.longitude = 36.338340;
         const subscription = this.geoService.getLocation().subscribe(value => {
             this.map.setView(new LatLng(value.coords.latitude, value.coords.longitude), 12)
             subscription.unsubscribe();
@@ -81,14 +64,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
         });
         this.tiles.addTo(this.map);
         this.map.invalidateSize({debounceMoveend: true});
-
-        // TODO new marker
-        // L.circle(new LatLng(this.latitude, this.longitude), {
-        //     color: 'red',
-        //     fillColor: '#f03',
-        //     fillOpacity: 0.5,
-        //     radius: 500
-        // }).addTo(this.map);
         const greenIcon = new Icon({
             iconUrl: 'assets/marker-icon-2x.png',
             iconSize: [20, 32], // size of the icon
@@ -102,12 +77,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 marker.remove()
                 circle.remove()
             }
-            // const divIcon = new DivIcon({
-            //     className: 'my-div-icon',
-            //     html: '<img class="my-div-image" src="assets/marker-icon-2x.png"/>' +
-            //         '<span class="my-div-span">U R here</span>',
-            //     iconSize: [50, 85]
-            // })
             marker = new Marker(new LatLng(value.coords.latitude, value.coords.longitude), {
                 icon: greenIcon
             })
@@ -130,7 +99,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 this.updateMarkers()
             }
         });
-
     }
 
     private updateMarkers() {

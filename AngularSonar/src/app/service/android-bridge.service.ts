@@ -1,5 +1,4 @@
 import {Injectable} from '@angular/core';
-import {JavaScriptInterface} from '../JavaInterface/JavaScriptInterface';
 import {SonarClientData} from '../model/SonarClientData';
 import {AndroidData} from '../model/AndroidData';
 import {environment} from '../../environments/environment';
@@ -9,7 +8,6 @@ import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {Activity} from '../model/Activity';
 
-declare var TrackingService: JavaScriptInterface;
 
 @Injectable({
     providedIn: 'root'
