@@ -1,3 +1,6 @@
 /SonarApp/.gradle/
 /SonarApp/.idea/
 /esp8266/.idea/
+SonarApp/build/
+package-lock.json
+SonarApp/secrets/

@@ -1,0 +1,23 @@
+name: sonarqube UI
+on:
+  push:
+    paths:
+      - "AngularSonar/**"
+      - ".github/workflows/**"
+    branches:
+      - 17-add-sonarcloud-support
+
+jobs:
+  sonarcloud:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: AngularSonar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}

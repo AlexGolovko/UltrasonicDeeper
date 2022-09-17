@@ -11,22 +11,34 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.2'
         classpath 'com.google.firebase:firebase-appdistribution-gradle:3.0.3'
-        classpath 'com.google.gms:google-services:4.3.13'
-        classpath "io.realm:realm-gradle-plugin:7.0.1"
+        classpath 'com.google.gms:google-services:4.3.14'
+        classpath "io.realm:realm-gradle-plugin:7.0.8"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
+}
+plugins {
+    id "org.sonarqube" version "3.4.0.2513"
 }
 
 allprojects {
     repositories {
         google()
         jcenter()
-        
+
     }
 }
 
+
+
+sonarqube {
+    properties {
+        property "sonar.projectKey", "alexgolovko_UltrasonicDeeper_Android"
+        property "sonar.organization", "alexgolovko"
+        property "sonar.host.url", "https://sonarcloud.io"
+    }
+}
 
 task clean(type: Delete) {
     delete rootProject.buildDir
