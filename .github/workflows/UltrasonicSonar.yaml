@@ -1,6 +1,8 @@
 name: CI/CD
 
-on: [push]
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   build:
@@ -12,7 +14,6 @@ jobs:
       KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ALIAS: ${{ secrets.ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-
     steps:
       - uses: actions/checkout@v1
       - name: set up JDK 11
@@ -39,7 +40,9 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
 
       - name: Build with Gradle
-        run: ./gradlew build
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_ANDROID }}
+        run: ./gradlew build sonarqube --no-daemon
 
       - name: Build with Gradle and assemble debug APk
         run: ./gradlew assembleDebug --stacktrace

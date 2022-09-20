@@ -1,10 +1,12 @@
 import static java.lang.System.getenv
 
-apply plugin: 'com.android.application'
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.appdistribution'
-apply plugin: 'realm-android'
-
+plugins {
+    id "org.sonarqube"
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.appdistribution'
+    id 'realm-android'
+}
 
 android {
     signingConfigs {
@@ -64,6 +66,8 @@ android {
         exclude 'org/eclipse/jetty/http/encoding.properties'
     }
 }
+
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
