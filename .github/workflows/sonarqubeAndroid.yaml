@@ -4,8 +4,6 @@ on:
     paths:
       - "SonarApp/**"
       - ".github/workflows/**"
-    branches:
-      - 17-add-sonarcloud-support
 jobs:
   build:
     name: Build

@@ -4,9 +4,6 @@ on:
     paths:
       - "AngularSonar/**"
       - ".github/workflows/**"
-    branches:
-      - 17-add-sonarcloud-support
-
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest
