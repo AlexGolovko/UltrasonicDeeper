@@ -14,18 +14,17 @@ import {AndroidBridgeService} from '../service/android-bridge.service';
 export class ClientComponent implements OnInit, OnDestroy {
     public readonly title = 'SonarApp';
     public readonly fail = 'Too deep/shallow';
-    private readonly firstElement = 'Wait a second';
     public sonarClientData: SonarClientData = new SonarClientData();
-    private interval: any;
     public trackArray: Array<string>;
     public crd: Position;
+    public isAvailable = false;
+    public isMeasureSuccess = false;
+    private readonly firstElement = 'Wait a second';
+    private interval: any;
     private intervalTime: number;
     private watchPosition: number;
     private androidDataList: Array<AndroidData>;
     private androidListSendSize: number = environment.listSize;
-    public isAvailable = false;
-    public isMeasureSuccess = false;
-
 
     constructor(private clientService: ClientService, private geoService: GeoService, private androidBridge: AndroidBridgeService) {
     }

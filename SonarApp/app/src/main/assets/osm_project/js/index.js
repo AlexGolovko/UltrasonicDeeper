@@ -4,8 +4,8 @@ import Geolocation from './res/ol/src/ol/Geolocation';
 import Map from './res/ol/src/ol/Map';
 import View from './res/ol/src/ol/View';
 import Point from './res/ol/src/ol/geom/Point';
-import { Tile as TileLayer, Vector as VectorLayer } from './res/ol/src/ol/layer';
-import { OSM, Vector as VectorSource } from './res/ol/src/ol/source';
+import { Tile as TileLayer } from './res/ol/src/ol/layer';
+import { OSM } from './res/ol/src/ol/source';
 import { Circle as CircleStyle, Fill, Stroke, Style } from './res/ol/src/ol/style';
 
 var view = new View({
@@ -78,11 +78,4 @@ geolocation.on('change:position', function () {
     var coordinates = geolocation.getPosition();
     positionFeature.setGeometry(coordinates ?
         new Point(coordinates) : null);
-});
-
-new VectorLayer({
-    map: map,
-    source: new VectorSource({
-        features: [accuracyFeature, positionFeature]
-    })
 });

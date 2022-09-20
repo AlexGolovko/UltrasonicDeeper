@@ -3,14 +3,14 @@ import {TestBed} from '@angular/core/testing';
 import {WebSocketServiceImpl} from './websocket.service';
 
 describe('WebSocketService', () => {
-  let service: WebSocketServiceImpl;
+    let service: WebSocketServiceImpl;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(WebSocketServiceImpl);
-  });
+    beforeEach(() => {
+        TestBed.configureTestingModule({});
+        service = TestBed.inject(WebSocketServiceImpl);
+    });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 });

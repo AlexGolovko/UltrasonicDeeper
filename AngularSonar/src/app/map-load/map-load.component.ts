@@ -6,6 +6,7 @@ import {AndroidBridgeService} from '../service/android-bridge.service';
 import {GeoSquare} from '../model/GeoSquare';
 import {DepthMarker} from '../model/DepthMarker';
 import {HahSet} from '../model/HahSet';
+import {Depth2Color} from '../model/depth2.color';
 
 
 @Component({
@@ -14,11 +15,12 @@ import {HahSet} from '../model/HahSet';
     styleUrls: ['./map-load.component.css']
 })
 export class MapLoadComponent implements OnInit, AfterViewInit {
+    downloadStatus: string;
     private map: Map;
     private tiles: TileLayer;
     private cachedTiles: TileLayer;
-    downloadStatus: string;
     private readonly cachedMarkers = new HahSet<DepthMarker>();
+    private depth2color: Depth2Color = new Depth2Color();
 
     constructor(private mapService: MapService, private geoService: GeoService, private androidService: AndroidBridgeService) {
         /*https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png*/
@@ -50,6 +52,11 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
 
     ngAfterViewInit(): void {
         this.initMap();
+    }
+
+    public getTilesFromJava(): string {
+        const tiles = this.mapService.getTiles(this.map.getBounds());
+        return JSON.stringify(tiles);
     }
 
     private initMap(): void {
@@ -108,11 +115,11 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             if (!this.cachedMarkers.contains(marker)) {
                 this.cachedMarkers.add(marker);
                 console.log('add: ' + marker)
-                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude),  {
+                const depthCircle = new Circle(new LatLng(marker.latitude, marker.longitude), {
                     radius: 2,
-                    color: this.getColor(marker.depth),
+                    color: this.depth2color.getColor(marker.depth),
                     weight: 2,
-                    fillColor: this.getColor(marker.depth),
+                    fillColor: this.depth2color.getColor(marker.depth),
                     fill: true,
                     opacity: 10,
                     fillOpacity: 100
@@ -122,22 +129,5 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             }
         })
     }
-
-
-    public getTilesFromJava(): string {
-        const tiles = this.mapService.getTiles(this.map.getBounds());
-        return JSON.stringify(tiles);
-    }
-
-    public getColor(d): string {
-        return d > 8 ? '#08306b' :
-            d > 7 ? '#08519c' :
-                d > 6 ? '#2171b5' :
-                    d > 5 ? '#4292c6' :
-                        d > 4 ? '#6baed6' :
-                            d > 3 ? '#9ecae1' :
-                                d > 2 ? '#c6dbef' :
-                                    d > 1 ? '#deebf7' :
-                                        '#f7fbff';
-    }
 }
+

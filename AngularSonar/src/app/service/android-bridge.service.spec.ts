@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
+import {TestBed} from '@angular/core/testing';
 
-import { AndroidBridgeService } from './android-bridge.service';
+import {AndroidBridgeService} from './android-bridge.service';
 
 describe('AndroidBridgeService', () => {
-  let service: AndroidBridgeService;
+    let service: AndroidBridgeService;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(AndroidBridgeService);
-  });
+    beforeEach(() => {
+        TestBed.configureTestingModule({});
+        service = TestBed.inject(AndroidBridgeService);
+    });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
-  });
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 });

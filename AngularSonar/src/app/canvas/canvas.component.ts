@@ -19,7 +19,6 @@ export class CanvasComponent implements OnInit, AfterViewInit {
     constructor(private clientService: ClientService) {
         clientService.getSonarClientData().subscribe(data => {
             if (data.isSonarAvailable) {
-// TODO change color
                 if (data.isMeasureSuccess) {
                     if (this.measures.push(data) > this.canvas.nativeElement.width / 2) {
                         this.measures.shift()
@@ -44,7 +43,6 @@ export class CanvasComponent implements OnInit, AfterViewInit {
 
     draw() {
         console.log(' draw canvas size: width+height ', this.ctx.canvas.width, this.ctx.canvas.height)
-        // TODO dirty hack to rotate screen
         this.canvas.nativeElement.width = 100
         this.canvas.nativeElement.height = 100
     }

@@ -13,6 +13,12 @@ import {environment} from '../../environments/environment';
 })
 export class ClientService {
 
+    private readonly sonarInfo: BehaviorSubject<SonarState>;
+    private sonarClientData: BehaviorSubject<SonarClientData>;
+    private readonly endpoint: string;
+    private clientInterval: any;
+    private wsService: WebSocketServiceImpl;
+
     constructor(wsService: WebSocketServiceImpl) {
         this.wsService = wsService;
         const sonarClientData = new SonarClientData();
@@ -62,12 +68,6 @@ export class ClientService {
         this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
     }
-
-    private readonly sonarInfo: BehaviorSubject<SonarState>;
-    private sonarClientData: BehaviorSubject<SonarClientData>;
-    private readonly endpoint: string;
-    private clientInterval: any;
-    private wsService: WebSocketServiceImpl;
 
     static updateBatteryLevel(batteryADC: number): number {
         const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.25
