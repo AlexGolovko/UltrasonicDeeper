@@ -32,10 +32,10 @@ jobs:
 
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
-      - run: ./gradlew build sonarqube --no-daemon
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
+      - run: ./gradlew build sonarqube --no-daemon --parallel
 
       - name: Build with Gradle and assemble debug APk
         run: ./gradlew assembleDebug --stacktrace
