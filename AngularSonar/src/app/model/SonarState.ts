@@ -1,4 +1,4 @@
 export class SonarState {
-  isSonarAvailable: boolean;
-  isMeasureSuccess: boolean;
+    isSonarAvailable: boolean;
+    isMeasureSuccess: boolean;
 }

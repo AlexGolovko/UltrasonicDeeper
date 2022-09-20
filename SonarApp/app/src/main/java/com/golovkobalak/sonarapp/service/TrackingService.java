@@ -24,7 +24,7 @@ public class TrackingService {
             final SonarData[] sonarDataArray = gson.fromJson(data, SonarData[].class);
             repo.saveList(Arrays.asList(sonarDataArray));
         } catch (Exception e) {
-            e.printStackTrace();
+           Log.w(this.getClass().getName(), e);
         }
     }
 
@@ -40,7 +40,7 @@ public class TrackingService {
                 list.add(new Marker(marker.getDepth(), marker.getLatitude(), marker.getLongitude()));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.w(this.getClass().getName(), e);
         }
         return list;
     }

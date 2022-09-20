@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -31,9 +31,9 @@ public class DownloadAction implements Runnable {
     private final ProgressBar progressbar;
     private final Handler uiHandler;
     private final AtomicBoolean isCanceled;
-    private ConcurrentHashMap<Thread, OkHttpClient> threadOkHttpClientConcurrentHashMap;
+    private ConcurrentMap<Thread, OkHttpClient> threadOkHttpClientConcurrentHashMap;
 
-    public DownloadAction(String url, String dir, String file, ProgressBar progressbar, Handler uiHandler, AtomicBoolean isCanceled, ConcurrentHashMap<Thread, OkHttpClient> threadOkHttpClientConcurrentHashMap) {
+    public DownloadAction(String url, String dir, String file, ProgressBar progressbar, Handler uiHandler, AtomicBoolean isCanceled, ConcurrentMap<Thread, OkHttpClient> threadOkHttpClientConcurrentHashMap) {
         this.url = url;
         this.dir = dir;
         this.file = file;
@@ -49,11 +49,9 @@ public class DownloadAction implements Runnable {
             return;
         }
         final File folder = new File(dir);
-        if (!folder.exists()) {
-            if (!folder.mkdirs()) {
-                Log.i(TAG, "directory cannot be created");
-                return;
-            }
+        if (!folder.exists() && !folder.mkdirs()) {
+            Log.i(TAG, "directory cannot be created");
+            return;
         }
         final File saveTo = new File(dir, file);
         if (saveTo.exists()) {
@@ -68,13 +66,13 @@ public class DownloadAction implements Runnable {
             final InputStream is = getTile(url);
             FileUtils.copyInputStreamToFile(is, saveTo);
             updateProgressBar();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+           Log.w(this.getClass().getName(), e);
         }
     }
 
     @NotNull
-    public InputStream getTile(final String url) throws IOException, InterruptedException {
+    public InputStream getTile(final String url) throws IOException {
         final Request request = new Request.Builder()
                 .url(url)
                 .header("User-Agent", "OkHttp Sonar")
@@ -98,16 +96,13 @@ public class DownloadAction implements Runnable {
     }
 
     private void updateProgressBar() {
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                progressbar.incrementProgressBy(1);
-                if (progressbar.getProgress() >= progressbar.getMax() - 3) {
-                    progressbar.setVisibility(View.INVISIBLE);
-                    progressbar.setProgress(0);
-                    final Button button = progressbar.getRootView().findViewById(R.id.download_button);
-                    button.setText(R.string.download);
-                }
+        uiHandler.post(() -> {
+            progressbar.incrementProgressBy(1);
+            if (progressbar.getProgress() >= progressbar.getMax() - 3) {
+                progressbar.setVisibility(View.INVISIBLE);
+                progressbar.setProgress(0);
+                final Button button = progressbar.getRootView().findViewById(R.id.download_button);
+                button.setText(R.string.download);
             }
         });
     }

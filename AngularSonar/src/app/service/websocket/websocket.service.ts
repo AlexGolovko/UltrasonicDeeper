@@ -18,21 +18,17 @@ export interface WebsocketService {
 })
 export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
 
+    public status: Observable<boolean>;
     private config: WebSocketSubjectConfig<WsMessage<any>>;
-
     private websocketSub: SubscriptionLike;
     private statusSub: SubscriptionLike;
-
     private reconnection$: Observable<number>;
     private websocket$: WebSocketSubject<WsMessage<any>>;
     private connection$: Observer<boolean>;
     private wsMessages$: Subject<WsMessage<any>>;
-
     private reconnectInterval: number;
     private readonly reconnectAttempts: number;
     private isConnected: boolean;
-
-    public status: Observable<boolean>;
 
     constructor(private wsConfig: WebSocketConfig) {
         this.wsMessages$ = new Subject<WsMessage<any>>();
@@ -84,6 +80,29 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
         this.statusSub.unsubscribe();
     }
 
+    /*
+    * on message event
+    * */
+    public on<T>(event: string): Observable<T> {
+        if (event) {
+            return this.wsMessages$.pipe(map((message: WsMessage<T>) => message.data));
+        }
+    }
+
+    /*
+    * on message to server
+    * */
+    public send(event: string, data: any = {}): void {
+        if (event && this.isConnected) {
+            const message = JSON.stringify({event, data}) as any;
+            // console.log('to websocket$' + message)
+            this.websocket$.next(message);
+        } else {
+            const message = JSON.stringify({event, data}) as any;
+            // console.log('to wsMessages$' + message)
+            this.wsMessages$.next(message)
+        }
+    }
 
     /*
     * connect to WebSocket
@@ -101,7 +120,6 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
                 }
             });
     }
-
 
     /*
     * reconnect if not connecting or errors
@@ -136,31 +154,6 @@ export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
                     this.connection$.complete();
                 }
             });
-    }
-
-
-    /*
-    * on message event
-    * */
-    public on<T>(event: string): Observable<T> {
-        if (event) {
-            return this.wsMessages$.pipe(map((message: WsMessage<T>) => message.data));
-        }
-    }
-
-    /*
-    * on message to server
-    * */
-    public send(event: string, data: any = {}): void {
-        if (event && this.isConnected) {
-            const message = JSON.stringify({event, data}) as any;
-            // console.log('to websocket$' + message)
-            this.websocket$.next(message);
-        } else {
-            const message = JSON.stringify({event, data}) as any;
-            // console.log('to wsMessages$' + message)
-            this.wsMessages$.next(message)
-        }
     }
 
 }
