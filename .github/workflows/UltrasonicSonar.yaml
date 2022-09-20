@@ -15,12 +15,9 @@ jobs:
       KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ALIAS: ${{ secrets.ALIAS }}
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_ANDROID }}
     steps:
-      - uses: actions/checkout@v1
-      - name: set up JDK 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: "11"
+      - uses: actions/checkout@v3
 
       - name: Setup nodejs
         uses: actions/setup-node@v2
@@ -33,17 +30,12 @@ jobs:
           npm install
           npm run build
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
+      - uses: actions/setup-java@v3
         with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-
-      - name: Build with Gradle
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_ANDROID }}
-        run: ./gradlew build sonarqube --no-daemon
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+      - run: ./gradlew build sonarqube --no-daemon
 
       - name: Build with Gradle and assemble debug APk
         run: ./gradlew assembleDebug --stacktrace
