@@ -46,7 +46,7 @@ export class MapComponent implements OnInit, AfterViewInit {
     private isMeasureSuccess = false;
     private marker: Marker = null
     private circle: Circle;
-    private crd: Position;
+    private crd: GeolocationPosition;
     private prevLatLng: LatLng = null
     private currLatLng: LatLng = null
     private prevArrowIconHtml: string;

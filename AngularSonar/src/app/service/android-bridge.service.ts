@@ -32,7 +32,7 @@ export class AndroidBridgeService {
         return this.http.get<string>(this.baseUrl + '/system/mapCacheDir');
     }
 
-    saveAndroidData(response: SonarClientData, crd: Position): void {
+    saveAndroidData(response: SonarClientData, crd: GeolocationPosition): void {
         const data: AndroidData = new AndroidData(response.depth.toString(),
             response.batteryLevel.toString(),
             response.waterTemp.toString(),

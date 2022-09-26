@@ -12,9 +12,9 @@ const GEOLOCATION_ERRORS = {
     providedIn: 'root',
 })
 export class GeoService {
-    private watcher: Observable<Position> = null
+    private watcher: Observable<GeolocationPosition> = null
 
-    public getLocation(geoLocationOptions?: any): Observable<Position> {
+    public getLocation(geoLocationOptions?: any): Observable<GeolocationPosition> {
         geoLocationOptions = geoLocationOptions || {timeout: 5000};
 
         return Observable.create(observer => {
@@ -48,9 +48,9 @@ export class GeoService {
 
     }
 
-    public watchPosition(): Observable<Position> {
+    public watchPosition(): Observable<GeolocationPosition> {
         if (this.watcher == null) {
-            this.watcher = new Observable<Position>(observer => {
+            this.watcher = new Observable<GeolocationPosition>(observer => {
                 window.navigator.geolocation.watchPosition(position => {
                     observer.next(position)
                 }, error => {

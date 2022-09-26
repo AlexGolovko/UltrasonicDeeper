@@ -16,7 +16,7 @@ export class ClientComponent implements OnInit, OnDestroy {
     public readonly fail = 'Too deep/shallow';
     public sonarClientData: SonarClientData = new SonarClientData();
     public trackArray: Array<string>;
-    public crd: Position;
+    public crd: GeolocationPosition;
     public isAvailable = false;
     public isMeasureSuccess = false;
     private readonly firstElement = 'Wait a second';
