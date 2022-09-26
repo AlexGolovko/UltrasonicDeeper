@@ -1,14 +1,21 @@
 package com.golovkobalak.sonarapp;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import android.content.Context;
 
-import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
+
+import com.golovkobalak.sonarapp.controller.TrackingController;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -22,5 +29,23 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         assertEquals("com.golovkobalak.sonarapp", appContext.getPackageName());
+    }
+
+    @Test
+    public void testContrller() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        final TrackingController trackingController = new TrackingController();
+        URL url = null;
+        try {
+            url = new URL("http://localhost:8080/system/mapCacheDir");
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            con.setRequestMethod("GET");
+            final int responseCode = con.getResponseCode();
+            assertEquals(200, responseCode);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 }
