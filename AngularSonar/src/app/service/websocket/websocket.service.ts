@@ -1,9 +1,9 @@
 import {Injectable, OnDestroy} from '@angular/core';
-import {WebSocketSubject, WebSocketSubjectConfig} from 'rxjs/internal-compatibility';
 import {interval, Observable, Observer, Subject, SubscriptionLike} from 'rxjs';
 import {distinctUntilChanged, map, share, takeWhile} from 'rxjs/operators';
 import {WsMessage} from './wsmessage';
 import {WebSocketConfig} from './websoketconfig';
+import {WebSocketSubject, WebSocketSubjectConfig} from 'rxjs/webSocket';
 
 export interface WebsocketService {
     status: Observable<boolean>;
