@@ -10,7 +10,7 @@ export class AndroidData extends SonarData {
     readonly longitude: number;
     readonly speed: number | null;
 
-    constructor(depth: string, battery: string, temperature: string, position: Position, date: string) {
+    constructor(depth: string, battery: string, temperature: string, position: GeolocationPosition, date: string) {
         super(depth, battery, temperature);
         this.time = date;
         if (position) {
