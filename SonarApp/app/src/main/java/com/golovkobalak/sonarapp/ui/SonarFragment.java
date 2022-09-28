@@ -20,7 +20,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.golovkobalak.sonarapp.R;
-import com.golovkobalak.sonarapp.SonarContext;
 import com.golovkobalak.sonarapp.service.TrackingService;
 
 /**
@@ -78,9 +77,7 @@ public class SonarFragment extends Fragment {
         });
         webView.getSettings().setGeolocationDatabasePath(this.getActivity().getFilesDir().getPath());
         this.getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        webView.loadUrl("file:///android_asset/index.html");
-        SonarContext.CURRENT_ACTIVITY = SonarContext.Activity.MAP;
-        webView.loadUrl("file:///android_asset/AngularSonar/index.html");
+        webView.loadUrl("http://localhost:4242/map");
         // Inflate the layout for this fragment
         return root;
 

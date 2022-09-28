@@ -4,6 +4,11 @@ on:
     paths:
       - "AngularSonar/**"
       - ".github/workflows/**"
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "AngularSonar/**"
+      - ".github/workflows/**"
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest

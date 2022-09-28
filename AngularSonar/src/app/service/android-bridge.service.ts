@@ -6,7 +6,6 @@ import {GeoSquare} from '../model/GeoSquare';
 import {DepthMarker} from '../model/DepthMarker';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {Activity} from '../model/Activity';
 
 
 @Injectable({
@@ -22,10 +21,6 @@ export class AndroidBridgeService {
     constructor(http: HttpClient) {
         this.http = http
         this.baseUrl = 'http://' + environment.androidHost + ':8080';
-    }
-
-    getActivity(): Observable<Activity> {
-        return this.http.get<Activity>(this.baseUrl + '/activity', {observe: 'body', responseType: 'json'});
     }
 
     getMapCacheDir(): Observable<string> {

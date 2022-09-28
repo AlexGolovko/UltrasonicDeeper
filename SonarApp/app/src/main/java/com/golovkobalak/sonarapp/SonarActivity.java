@@ -77,9 +77,7 @@ public class SonarActivity extends android.app.Activity {
 
         webView.getSettings().setGeolocationDatabasePath(this.getFilesDir().getPath());
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//        webView.loadUrl("file:///android_asset/index.html");
-        SonarContext.CURRENT_ACTIVITY = SonarContext.Activity.MAP;
-        webView.loadUrl("file:///android_asset/AngularSonar/index.html");
+        webView.loadUrl("http://localhost:4242/map");
     }
 
     @Override

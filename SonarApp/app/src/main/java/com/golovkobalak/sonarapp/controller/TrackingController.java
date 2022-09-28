@@ -2,7 +2,6 @@ package com.golovkobalak.sonarapp.controller;
 
 import android.util.Log;
 
-import com.golovkobalak.sonarapp.SonarContext;
 import com.golovkobalak.sonarapp.model.GeoSquare;
 import com.golovkobalak.sonarapp.model.Marker;
 import com.golovkobalak.sonarapp.service.TrackingService;
@@ -19,12 +18,11 @@ public class TrackingController {
     private static final String TAG = TrackingController.class.getName();
     private static final Gson gson = new Gson();
     public static final int PORT = 8080;
-    private final Javalin app;
-    private final TrackingService trackingService;
+    private Javalin app;
 
-    public TrackingController() {
+    public void start() {
         this.app = Javalin.create(JavalinConfig::enableCorsForAllOrigins).start(PORT);
-        this.trackingService = new TrackingService();
+        TrackingService trackingService = new TrackingService();
         app.before(ctx -> {
             Log.d(TAG, ctx.fullUrl());
             Log.d(TAG, ctx.body());
@@ -48,13 +46,11 @@ public class TrackingController {
 
             ctx.result(gson.toJson(markers));
         });
-        app.get("/activity", ctx -> {
-            ctx.result("{\"activity\":\"" + SonarContext.CURRENT_ACTIVITY + "\"}");
-        });
         app.after(ctx -> {
             Log.d(TAG, ctx.fullUrl());
             Log.d(TAG, ctx.body());
         });
+        Log.i(this.getClass().getName(), "end creation");
     }
 
     public void destroy() {

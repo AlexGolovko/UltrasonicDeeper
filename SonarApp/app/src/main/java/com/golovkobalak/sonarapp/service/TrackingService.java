@@ -29,7 +29,7 @@ public class TrackingService {
     }
 
     public String getMapCacheDir() {
-        return "file://" + SonarContext.FILES_DIR_ABS_PATH + "/Tiles";
+        return "file://" + SonarContext.getFilesDirAbsPath() + "/Tiles";
     }
 
     public List<Marker> getMarkers(GeoSquare geoSquare) {
