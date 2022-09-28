@@ -5,7 +5,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -18,6 +17,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.golovkobalak.sonarapp.config.Logger;
+import com.golovkobalak.sonarapp.controller.SonarController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -25,18 +25,19 @@ import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getName();
-    public static MainActivity activity;
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
-    public static final String MICROSONAR_SSID = "microsonar";
-    private static final TrackingController trackingController = new TrackingController();
+    private final TrackingController trackingController = new TrackingController();
+    private final SonarController sonarController = new SonarController();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        activity = this;
         Realm.init(this.getBaseContext());
         Logger.init(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS));
         super.onCreate(savedInstanceState);
         saveFileDirPath();
+        SonarContext.setAssetManager(getAssets());
+        trackingController.start();
+        sonarController.start();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -57,15 +58,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
         }
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     private void saveFileDirPath() {
-        SonarContext.FILES_DIR_ABS_PATH = this.getBaseContext().getFilesDir().getAbsolutePath();
-    }
-
-    public void upload(View view) {
+        SonarContext.setFilesDirAbsPath(this.getBaseContext().getFilesDir().getAbsolutePath());
     }
 
     public void log(String log) {
@@ -76,5 +73,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         trackingController.destroy();
+        sonarController.destroy();
     }
 }

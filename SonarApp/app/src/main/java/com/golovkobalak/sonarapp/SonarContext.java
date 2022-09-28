@@ -1,10 +1,27 @@
 package com.golovkobalak.sonarapp;
 
-public class SonarContext {
-    public static Activity CURRENT_ACTIVITY = Activity.LOAD;
-    public static String FILES_DIR_ABS_PATH;
+import android.content.res.AssetManager;
 
-    public enum Activity {
-        LOAD, MAP
+public class SonarContext {
+    public static AssetManager getAssetManager() {
+        return assetManager;
+    }
+
+    public static void setAssetManager(AssetManager assetManager) {
+        SonarContext.assetManager = assetManager;
+    }
+
+    public static String getFilesDirAbsPath() {
+        return filesDirAbsPath;
+    }
+
+    public static void setFilesDirAbsPath(String filesDirAbsPath) {
+        SonarContext.filesDirAbsPath = filesDirAbsPath;
+    }
+
+    private static AssetManager assetManager;
+    private static String filesDirAbsPath;
+
+    private SonarContext() {
     }
 }
