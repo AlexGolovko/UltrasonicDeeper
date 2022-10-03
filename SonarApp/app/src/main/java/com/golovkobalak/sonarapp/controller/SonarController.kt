@@ -1,101 +1,95 @@
-package com.golovkobalak.sonarapp.controller;
+package com.golovkobalak.sonarapp.controller
 
-import android.content.res.AssetManager;
-import android.util.Log;
+import android.content.res.AssetManager
+import android.util.Log
+import com.golovkobalak.sonarapp.SonarContext
+import com.golovkobalak.sonarapp.model.Config
+import io.javalin.Javalin
+import io.javalin.core.JavalinConfig
+import io.javalin.http.ContentType
+import io.javalin.http.ContentType.Companion.getContentTypeByExtension
+import io.javalin.http.Context
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.IOException
 
-import androidx.annotation.NonNull;
-
-import com.golovkobalak.sonarapp.SonarContext;
-import com.golovkobalak.sonarapp.model.Config;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.javalin.Javalin;
-import io.javalin.core.JavalinConfig;
-import io.javalin.http.ContentType;
-
-public class SonarController {
-
-    private static final int PORT = 4242;
-    private Javalin app;
-
-    public void start() {
-        this.app = Javalin.create(this::updateConfig).start(PORT);
+class SonarController {
+    private var app: Javalin? = null
+    fun start() {
+        app = Javalin.create { javalinConfig: JavalinConfig -> updateConfig(javalinConfig) }.start(PORT)
     }
 
-
-    public void updateConfig(JavalinConfig javalinConfig) {
-        javalinConfig.enableCorsForAllOrigins();
-        final AssetManager assetManager = SonarContext.getAssetManager();
-        final List<Config> configs = new ArrayList<>();
+    fun updateConfig(javalinConfig: JavalinConfig) {
+        javalinConfig.enableCorsForAllOrigins()
+        val assetManager = SonarContext.assetManager
+        val configs: MutableList<Config> = ArrayList()
         try {
-            final String assetFolderName = "AngularSonar";
-            collectConfigFromAsset(assetManager, configs, assetFolderName);
-            configs.stream()//
-                    .sorted((a, b) -> b.getHostedPath().length() - (a.getHostedPath().length()))//
-                    .forEachOrdered(config -> {
-                        Log.i(this.getClass().getName(), "path:" + config.getHostedPath());
-                        Log.i(this.getClass().getName(), "contentType:" + config.getContentType().getMimeType());
-                        javalinConfig.addSinglePageHandler(config.getHostedPath(), ctx -> {
-                            ctx.result(config.getFileBody());
-                            ctx.contentType(config.getContentType());
-                        });
-                    });
-        } catch (IOException e) {
-            Log.e(this.getClass().getName(), e.getMessage(), e);
+            val assetFolderName = "AngularSonar"
+            collectConfigFromAsset(assetManager!!, configs, assetFolderName)
+            configs.stream() //
+                    .sorted { a: Config, b: Config -> b.hostedPath.length - a.hostedPath.length } //
+                    .forEachOrdered { config: Config ->
+                        Log.i(this.javaClass.name, "path:" + config.hostedPath)
+                        Log.i(this.javaClass.name, "contentType:" + config.contentType.mimeType)
+                        javalinConfig.addSinglePageHandler(config.hostedPath) { ctx: Context ->
+                            ctx.result(config.fileBody)
+                            ctx.contentType(config.contentType)
+                        }
+                    }
+        } catch (e: IOException) {
+            Log.e(this.javaClass.name, e.message, e)
         }
     }
 
-    private void collectConfigFromAsset(AssetManager assetManager, List<Config> configs, String assetFolderName) throws IOException {
-        for (String asset : assetManager.list(assetFolderName)) {
+    @Throws(IOException::class)
+    private fun collectConfigFromAsset(assetManager: AssetManager, configs: MutableList<Config>, assetFolderName: String) {
+        for (asset in assetManager.list(assetFolderName)!!) {
             if (asset.contains(".")) {
-                final ContentType contentType = getContentType(asset);
-                final String fileName = assetFolderName + File.separator + asset;
-                String hostedPath = getHostedPath(assetFolderName, asset);
-
-                final byte[] fileBody = getFileBody(assetManager, fileName);
-                configs.add(new Config(hostedPath, fileBody, contentType));
+                val contentType = getContentType(asset)
+                val fileName = assetFolderName + File.separator + asset
+                val hostedPath = getHostedPath(assetFolderName, asset)
+                val fileBody = getFileBody(assetManager, fileName)
+                configs.add(Config(hostedPath, fileBody, contentType))
             } else {
-                collectConfigFromAsset(assetManager, configs, assetFolderName + File.separator + asset);
+                collectConfigFromAsset(assetManager, configs, assetFolderName + File.separator + asset)
             }
         }
     }
 
-    @NonNull
-    private String getHostedPath(String assetFolderName, String asset) {
-        final int separatorIndex = assetFolderName.indexOf(File.separator);
-        String hostedRoot = "";
+    private fun getHostedPath(assetFolderName: String, asset: String): String {
+        val separatorIndex = assetFolderName.indexOf(File.separator)
+        var hostedRoot = ""
         if (separatorIndex > 0) {
-            hostedRoot = assetFolderName.substring(separatorIndex);
+            hostedRoot = assetFolderName.substring(separatorIndex)
         }
-        String hostedPath = hostedRoot + File.separator + asset;
-        if (asset.equalsIgnoreCase("index.html")) {
-            hostedPath = File.separator;
+        var hostedPath = hostedRoot + File.separator + asset
+        if (asset.equals("index.html", ignoreCase = true)) {
+            hostedPath = File.separator
         }
-        return hostedPath;
+        return hostedPath
     }
 
-    @NonNull
-    private byte[] getFileBody(AssetManager assetManager, String fileName) throws IOException {
-        final byte[] bytes;
-        try (BufferedInputStream bis = new BufferedInputStream(assetManager.open(fileName))) {
-            bytes = new byte[bis.available()];
+    @Throws(IOException::class)
+    private fun getFileBody(assetManager: AssetManager, fileName: String): ByteArray {
+        val bytes: ByteArray
+        BufferedInputStream(assetManager.open(fileName)).use { bis ->
+            bytes = ByteArray(bis.available())
             if (bis.read(bytes) == -1) {
-                Log.w(this.getClass().getName(), "The file:" + fileName + " is empty");
+                Log.w(this.javaClass.name, "The file:$fileName is empty")
             }
         }
-        return bytes;
+        return bytes
     }
 
-    private ContentType getContentType(String asset) {
-        return ContentType.getContentTypeByExtension(asset.substring(asset.lastIndexOf(".") + 1));
+    private fun getContentType(asset: String): ContentType {
+        return getContentTypeByExtension(asset.substring(asset.lastIndexOf(".") + 1))!!
     }
 
-    public void destroy() {
-        app.close();
+    fun destroy() {
+        app!!.close()
+    }
+
+    companion object {
+        private const val PORT = 4242
     }
 }
