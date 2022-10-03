@@ -52,7 +52,7 @@ public class SonarActivity extends android.app.Activity {
         settings.setAllowUniversalAccessFromFileURLs(true);
         settings.setGeolocationEnabled(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        settings.setAppCacheEnabled(true);
+//        settings.setAppCacheEnabled(true);
         settings.setDatabaseEnabled(true);
         // adb reverse tcp:8080 tcp:8080
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
