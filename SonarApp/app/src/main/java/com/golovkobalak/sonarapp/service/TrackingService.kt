@@ -6,7 +6,6 @@ import com.golovkobalak.sonarapp.model.GeoSquare
 import com.golovkobalak.sonarapp.model.Marker
 import com.golovkobalak.sonarapp.model.SonarData
 import com.golovkobalak.sonarapp.repository.SonarDataRepository
-import com.golovkobalak.sonarapp.service.TrackingService
 import com.google.gson.Gson
 import java.util.*
 
