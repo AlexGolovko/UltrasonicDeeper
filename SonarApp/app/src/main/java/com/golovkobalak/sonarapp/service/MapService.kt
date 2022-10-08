@@ -1,98 +1,82 @@
-package com.golovkobalak.sonarapp.service;
+package com.golovkobalak.sonarapp.service
 
-import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
-import android.widget.Toast;
+import android.content.Context
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.widget.ProgressBar
+import android.widget.Toast
+import com.golovkobalak.sonarapp.model.Coordinate
+import com.google.gson.Gson
+import okhttp3.OkHttpClient
+import java.util.concurrent.*
+import java.util.concurrent.atomic.AtomicBoolean
 
-import com.golovkobalak.sonarapp.R;
-import com.golovkobalak.sonarapp.model.Coordinate;
-import com.golovkobalak.sonarapp.repository.SonarDataRepository;
-import com.google.gson.Gson;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import okhttp3.OkHttpClient;
-
-public class MapService {
-    private static final String TAG = MapService.class.getSimpleName();
-    private final Context context;
-    private static final Gson gson = new Gson();
-    private static final SonarDataRepository repo = new SonarDataRepository();
-    private static final int poolSize = Runtime.getRuntime().availableProcessors() * 4;
-    private static final ExecutorService pool = new ThreadPoolExecutor(2, poolSize, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<Runnable>());//Executors.newFixedThreadPool(poolSize);//
-    private static final Handler uiHandler = new Handler(Looper.getMainLooper());
-    private static final AtomicBoolean isCanceled = new AtomicBoolean(false);
-    private static final ConcurrentHashMap<Thread, OkHttpClient> THREAD_OK_HTTP_CLIENT_CONCURRENT_HASH_MAP = new ConcurrentHashMap<>();
-
-    public MapService(Context context) {
-        this.context = context;
-    }
-
-    public void downloadMap(final String tiles, final ProgressBar progressbar) {
-        isCanceled.set(false);
-        String formatTiles = tiles.substring(1, tiles.length() - 1).replaceAll("\\\\", "");
-        Log.d(TAG, "downloadMap: formatTiles" + formatTiles);
+class MapService(private val context: Context) {
+    fun downloadMap(tiles: String, progressbar: ProgressBar) {
+        isCanceled.set(false)
+        val formatTiles = tiles.substring(1, tiles.length - 1).replace("\\\\".toRegex(), "")
+        Log.d(TAG, "downloadMap: formatTiles$formatTiles")
         //topTile: 178065, leftTile: 315293, bottomTile: 178339, rightTile: 315499
-        Coordinate coordinate = null;
+        var coordinate: Coordinate? = null
         try {
-            coordinate = gson.fromJson(formatTiles, Coordinate.class);
-        } catch (Exception e) {
-            Log.e(TAG, "downloadMap: " + formatTiles, e);
+            coordinate = gson.fromJson(formatTiles, Coordinate::class.java)
+        } catch (e: Exception) {
+            Log.e(TAG, "downloadMap: $formatTiles", e)
         }
         if (coordinate == null) {
-            cancelDownloadMap();
-            return;
+            cancelDownloadMap()
+            return
         }
-        final int tilesSize = coordinate.getTilesNumber();
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(context, tilesSize + " tiles will be download and cached", Toast.LENGTH_LONG).show();
-            }
-        });
-        progressbar.setMax(tilesSize);
-        final Coordinate finalCoordinate = coordinate;
-        for (int firstLevelTile = coordinate.topTile; firstLevelTile < coordinate.bottomTile; firstLevelTile++) {
-            for (int secondLevelTile = coordinate.leftTile; secondLevelTile < coordinate.rightTile; secondLevelTile++) {
+        val tilesSize = coordinate.tilesNumber
+        uiHandler.post {
+            Toast.makeText(
+                context,
+                "$tilesSize tiles will be download and cached",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        progressbar.max = tilesSize
+        for (firstLevelTile in coordinate.topTile until coordinate.bottomTile) {
+            for (secondLevelTile in coordinate.leftTile until coordinate.rightTile) {
                 //download https://a.tile.openstreetmap.org/19/315066/177906.png "https://a.tile.openstreetmap.org/19/"+secondLevelTile+"/"+firstLevelTile+".png"
                 //file:///data/user/0/com.golovkobalak.sonarapp/files/Tiles/19/315066/177906.png
-                final String url = "https://a.tile.openstreetmap.org/19/" + secondLevelTile + "/" + firstLevelTile + ".png";
-                final String dir = context.getFilesDir() + "/Tiles/19/" + secondLevelTile;
-                final String file = firstLevelTile + ".png";
-                pool.submit(new DownloadAction(url, dir, file, progressbar, uiHandler, isCanceled, THREAD_OK_HTTP_CLIENT_CONCURRENT_HASH_MAP));
+                val url = "https://a.tile.openstreetmap.org/19/$secondLevelTile/$firstLevelTile.png"
+                val dir = context.filesDir.toString() + "/Tiles/19/" + secondLevelTile
+                val file = "$firstLevelTile.png"
+                pool.submit(
+                    DownloadAction(
+                        url,
+                        dir,
+                        file,
+                        progressbar,
+                        uiHandler,
+                        isCanceled,
+                        THREAD_OK_HTTP_CLIENT_CONCURRENT_HASH_MAP
+                    )
+                )
             }
         }
     }
 
-
-    public void cancelDownloadMap() {
-        isCanceled.set(true);
-//        CLIENT.dispatcher().cancelAll();
+    fun cancelDownloadMap() {
+        isCanceled.set(true)
     }
 
-
-    private void updateProgressBar(final ProgressBar progressbar) {
-        uiHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                progressbar.incrementProgressBy(1);
-                if (progressbar.getProgress() >= progressbar.getMax() - 3) {
-                    progressbar.setVisibility(View.INVISIBLE);
-                    progressbar.setProgress(0);
-                    final Button button = progressbar.getRootView().findViewById(R.id.download_button);
-                    button.setText(R.string.download);
-                }
-            }
-        });
+    companion object {
+        private val TAG = MapService::class.java.simpleName
+        private val gson = Gson()
+        private val poolSize = Runtime.getRuntime().availableProcessors() * 4
+        private val pool: ExecutorService = ThreadPoolExecutor(
+            2,
+            poolSize,
+            5,
+            TimeUnit.MINUTES,
+            LinkedBlockingQueue()
+        ) //Executors.newFixedThreadPool(poolSize);//
+        private val uiHandler = Handler(Looper.getMainLooper())
+        private val isCanceled = AtomicBoolean(false)
+        private val THREAD_OK_HTTP_CLIENT_CONCURRENT_HASH_MAP =
+            ConcurrentHashMap<Thread, OkHttpClient>()
     }
 }
