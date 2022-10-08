@@ -1,12 +1,10 @@
-package com.golovkobalak.sonarapp.model;
+package com.golovkobalak.sonarapp.model
 
-public class Coordinate {
-    public int topTile;
-    public int leftTile;
-    public int bottomTile;
-    public int rightTile;
-
-    public int getTilesNumber() {
-        return Math.abs((bottomTile - topTile) * (rightTile - leftTile));
-    }
+class Coordinate {
+    var topTile = 0
+    var leftTile = 0
+    var bottomTile = 0
+    var rightTile = 0
+    val tilesNumber: Int
+        get() = Math.abs((bottomTile - topTile) * (rightTile - leftTile))
 }
