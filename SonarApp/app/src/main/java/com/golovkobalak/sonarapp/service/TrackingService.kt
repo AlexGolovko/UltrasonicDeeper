@@ -29,7 +29,7 @@ class TrackingService {
         try {
             val markers = repo.findByGeoSquare(geoSquare)
             for (marker in markers) {
-                list.add(Marker(marker.depth, marker.latitude, marker.longitude))
+                list.add(Marker(marker.depth!!, marker.latitude, marker.longitude))
             }
         } catch (e: Exception) {
             Log.w(this.javaClass.name, e)
