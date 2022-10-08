@@ -1,20 +1,23 @@
-package com.golovkobalak.sonarapp.model;
+package com.golovkobalak.sonarapp.model
 
-import java.util.List;
-import java.util.Map;
+class GeoSquare(queryParamMap: Map<String, List<String>>) {
+    @JvmField
+    var north: Double
 
-public class GeoSquare {
-    public double north;
-    public double east;
-    public double south;
-    public double west;
+    @JvmField
+    var east: Double
 
-    public GeoSquare(Map<String, List<String>> queryParamMap) {
-        if (queryParamMap == null) return;
+    @JvmField
+    var south: Double
+
+    @JvmField
+    var west: Double
+
+    init {
         //"{"north":49.960455723200724,"east":36.34042262789566,"south":49.955769014252176,"west":36.33620619532426}"
-        north = Double.parseDouble(queryParamMap.get("north").get(0));
-        east = Double.parseDouble(queryParamMap.get("east").get(0));
-        south = Double.parseDouble(queryParamMap.get("south").get(0));
-        west = Double.parseDouble(queryParamMap.get("west").get(0));
+        north = queryParamMap["north"]!![0].toDouble()
+        east = queryParamMap["east"]!![0].toDouble()
+        south = queryParamMap["south"]!![0].toDouble()
+        west = queryParamMap["west"]!![0].toDouble()
     }
 }
