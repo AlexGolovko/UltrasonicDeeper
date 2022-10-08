@@ -1,36 +1,22 @@
-package com.golovkobalak.sonarapp.model;
+package com.golovkobalak.sonarapp.model
 
-import java.nio.charset.StandardCharsets;
+import io.javalin.http.ContentType
+import java.nio.charset.StandardCharsets
 
-import io.javalin.http.ContentType;
+class Config {
+    val hostedPath: String
+    val fileBody: ByteArray
+    val contentType: ContentType
 
-public class Config {
-    private String hostedPath;
-    private byte[] fileBody;
-    private ContentType contentType;
-
-    public Config(String hostedPath, byte[] fileBody, ContentType contentType) {
-        this.hostedPath = hostedPath;
-        this.fileBody = fileBody;
-        this.contentType = contentType;
+    constructor(hostedPath: String, fileBody: ByteArray, contentType: ContentType) {
+        this.hostedPath = hostedPath
+        this.fileBody = fileBody
+        this.contentType = contentType
     }
 
-    public Config(String hostedPath, String fileBody, ContentType contentType) {
-        this.hostedPath = hostedPath;
-        this.fileBody = fileBody.getBytes(StandardCharsets.UTF_8);
-        this.contentType = contentType;
-    }
-
-
-    public String getHostedPath() {
-        return hostedPath;
-    }
-
-    public byte[] getFileBody() {
-        return fileBody;
-    }
-
-    public ContentType getContentType() {
-        return contentType;
+    constructor(hostedPath: String, fileBody: String, contentType: ContentType) {
+        this.hostedPath = hostedPath
+        this.fileBody = fileBody.toByteArray(StandardCharsets.UTF_8)
+        this.contentType = contentType
     }
 }
