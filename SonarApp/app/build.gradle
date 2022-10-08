@@ -89,8 +89,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation group: 'commons-io', name: 'commons-io', version: '2.6'
-    implementation group: 'io.javalin', name: 'javalin', version: '4.6.4'
-//    implementation group: 'io.javalin', name: 'javalin', version: '5.0.1'
+    implementation group: 'io.javalin', name: 'javalin', version: '4.6.6'
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
