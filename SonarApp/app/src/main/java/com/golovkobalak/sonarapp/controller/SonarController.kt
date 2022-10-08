@@ -5,9 +5,10 @@ import android.util.Log
 import com.golovkobalak.sonarapp.SonarContext
 import com.golovkobalak.sonarapp.model.Config
 import io.javalin.Javalin
-import io.javalin.config.JavalinConfig
+import io.javalin.core.JavalinConfig
 import io.javalin.http.ContentType
 import io.javalin.http.ContentType.Companion.getContentTypeByExtension
+import io.javalin.http.Context
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
@@ -15,42 +16,33 @@ import java.io.IOException
 class SonarController {
     private var app: Javalin? = null
     fun start() {
-        app = Javalin.create { javalinConfig: JavalinConfig -> updateConfig(javalinConfig) }
-            .start(PORT)
+        app = Javalin.create { javalinConfig: JavalinConfig -> updateConfig(javalinConfig) }.start(PORT)
     }
 
     fun updateConfig(javalinConfig: JavalinConfig) {
-        javalinConfig.plugins.enableCors { cors ->
-            cors.add { it ->
-                it.anyHost()
-            }
-        }
+        javalinConfig.enableCorsForAllOrigins()
         val assetManager = SonarContext.assetManager
         val configs: MutableList<Config> = ArrayList()
         try {
             val assetFolderName = "AngularSonar"
             collectConfigFromAsset(assetManager!!, configs, assetFolderName)
             configs.stream() //
-                .sorted { a: Config, b: Config -> b.hostedPath.length - a.hostedPath.length } //
-                .forEachOrdered { config: Config ->
-                    Log.i(this.javaClass.name, "path:" + config.hostedPath)
-                    Log.i(this.javaClass.name, "contentType:" + config.contentType.mimeType)
-                    javalinConfig.spaRoot.addHandler(config.hostedPath, customHandler = {
-                        it.result(config.fileBody)
-                        it.contentType(config.contentType)
-                    })
-                }
+                    .sorted { a: Config, b: Config -> b.hostedPath.length - a.hostedPath.length } //
+                    .forEachOrdered { config: Config ->
+                        Log.i(this.javaClass.name, "path:" + config.hostedPath)
+                        Log.i(this.javaClass.name, "contentType:" + config.contentType.mimeType)
+                        javalinConfig.addSinglePageHandler(config.hostedPath) { ctx: Context ->
+                            ctx.result(config.fileBody)
+                            ctx.contentType(config.contentType)
+                        }
+                    }
         } catch (e: IOException) {
             Log.e(this.javaClass.name, e.message, e)
         }
     }
 
     @Throws(IOException::class)
-    private fun collectConfigFromAsset(
-        assetManager: AssetManager,
-        configs: MutableList<Config>,
-        assetFolderName: String
-    ) {
+    private fun collectConfigFromAsset(assetManager: AssetManager, configs: MutableList<Config>, assetFolderName: String) {
         for (asset in assetManager.list(assetFolderName)!!) {
             if (asset.contains(".")) {
                 val contentType = getContentType(asset)
@@ -59,11 +51,7 @@ class SonarController {
                 val fileBody = getFileBody(assetManager, fileName)
                 configs.add(Config(hostedPath, fileBody, contentType))
             } else {
-                collectConfigFromAsset(
-                    assetManager,
-                    configs,
-                    assetFolderName + File.separator + asset
-                )
+                collectConfigFromAsset(assetManager, configs, assetFolderName + File.separator + asset)
             }
         }
     }
