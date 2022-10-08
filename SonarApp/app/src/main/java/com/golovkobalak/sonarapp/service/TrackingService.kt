@@ -1,47 +1,45 @@
-package com.golovkobalak.sonarapp.service;
+package com.golovkobalak.sonarapp.service
 
-import android.util.Log;
+import android.util.Log
+import com.golovkobalak.sonarapp.SonarContext.filesDirAbsPath
+import com.golovkobalak.sonarapp.model.GeoSquare
+import com.golovkobalak.sonarapp.model.Marker
+import com.golovkobalak.sonarapp.model.SonarData
+import com.golovkobalak.sonarapp.repository.SonarDataRepository
+import com.golovkobalak.sonarapp.service.TrackingService
+import com.google.gson.Gson
+import java.util.*
 
-import com.golovkobalak.sonarapp.SonarContext;
-import com.golovkobalak.sonarapp.model.GeoSquare;
-import com.golovkobalak.sonarapp.model.Marker;
-import com.golovkobalak.sonarapp.model.SonarData;
-import com.golovkobalak.sonarapp.repository.SonarDataRepository;
-import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class TrackingService {
-    private static final String TAG = TrackingService.class.getSimpleName();
-    private static final Gson gson = new Gson();
-    private static final SonarDataRepository repo = new SonarDataRepository();
-
-    public void saveTrackingList(String data) {
-        Log.i(TAG, "saveTrackingList: " + data);
+class TrackingService {
+    fun saveTrackingList(data: String) {
+        Log.i(TAG, "saveTrackingList: $data")
         try {
-            final SonarData[] sonarDataArray = gson.fromJson(data, SonarData[].class);
-            repo.saveList(Arrays.asList(sonarDataArray));
-        } catch (Exception e) {
-           Log.w(this.getClass().getName(), e);
+            val sonarDataArray = gson.fromJson(data, Array<SonarData>::class.java)
+            repo.saveList(Arrays.asList(*sonarDataArray))
+        } catch (e: Exception) {
+            Log.w(this.javaClass.name, e)
         }
     }
 
-    public String getMapCacheDir() {
-        return "file://" + SonarContext.getFilesDirAbsPath() + "/Tiles";
-    }
+    val mapCacheDir: String
+        get() = "file://" + filesDirAbsPath + "/Tiles"
 
-    public List<Marker> getMarkers(GeoSquare geoSquare) {
-        final ArrayList<Marker> list = new ArrayList<>();
+    fun getMarkers(geoSquare: GeoSquare?): List<Marker> {
+        val list = ArrayList<Marker>()
         try {
-            final List<SonarData> markers = repo.findByGeoSquare(geoSquare);
-            for (SonarData marker : markers) {
-                list.add(new Marker(marker.getDepth(), marker.getLatitude(), marker.getLongitude()));
+            val markers = repo.findByGeoSquare(geoSquare)
+            for (marker in markers) {
+                list.add(Marker(marker.depth, marker.latitude, marker.longitude))
             }
-        } catch (Exception e) {
-            Log.w(this.getClass().getName(), e);
+        } catch (e: Exception) {
+            Log.w(this.javaClass.name, e)
         }
-        return list;
+        return list
+    }
+
+    companion object {
+        private val TAG = TrackingService::class.java.simpleName
+        private val gson = Gson()
+        private val repo = SonarDataRepository()
     }
 }
