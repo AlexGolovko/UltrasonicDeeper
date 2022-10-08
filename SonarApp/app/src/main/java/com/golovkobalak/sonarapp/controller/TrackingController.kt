@@ -5,14 +5,21 @@ import com.golovkobalak.sonarapp.model.GeoSquare
 import com.golovkobalak.sonarapp.service.TrackingService
 import com.google.gson.Gson
 import io.javalin.Javalin
-import io.javalin.core.JavalinConfig
+import io.javalin.config.JavalinConfig
 import io.javalin.http.Context
 import io.javalin.http.Handler
+
 
 class TrackingController {
     private var app: Javalin? = null
     fun start() {
-        val javalin = Javalin.create { obj: JavalinConfig -> obj.enableCorsForAllOrigins() }.start(PORT)
+        val javalin = Javalin.create { config: JavalinConfig ->
+            config.plugins.enableCors { cors ->
+                cors.add { it ->
+                    it.anyHost()
+                }
+            }
+        }.start(PORT)//registerPlugin(CorsPlugin.forAllOrigins());
         val trackingService = TrackingService()
         javalin.before(Handler { ctx: Context ->
             Log.d(TAG, ctx.fullUrl())
