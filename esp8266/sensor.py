@@ -5,14 +5,22 @@ import uasyncio as asyncio
 import logger
 
 # global trig, echo, ds_pin, ds_sensor, timeout, roms
-
+#LOLIN D1 mini v3.1.0
 # Trig-D6-GPIO12
 # Echo-D5-GPIO14
 # trig = machine.Pin(12, machine.Pin.OUT)
 # echo = machine.Pin(14, machine.Pin.IN)
-trig = machine.Pin(12, machine.Pin.OUT, pull=None)
+# trig = machine.Pin(12, machine.Pin.OUT, pull=None)
+# trig.value(0)
+# echo = machine.Pin(14, machine.Pin.IN, pull=None)
+#Ai-Thinker ESP-C3-12F
+# Trig-IO1-GPIO1
+# Echo-IO2-GPIO2
+# trig = machine.Pin(12, machine.Pin.OUT)
+# echo = machine.Pin(14, machine.Pin.IN)
+trig = machine.Pin(1, machine.Pin.OUT, pull=None)
 trig.value(0)
-echo = machine.Pin(14, machine.Pin.IN, pull=None)
+echo = machine.Pin(2, machine.Pin.IN, pull=None)
 
 timeout = 60000
 ds_pin = machine.Pin(0, machine.Pin.PULL_UP)

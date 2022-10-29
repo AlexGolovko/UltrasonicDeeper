@@ -1,10 +1,10 @@
 import uasyncio
 
 from microDNSSrv import dns
-from services.userver import httpServer
-from websockets.ws_sonar_server import WSServer
-import services.sensorservice as sensorservice
-import logger, services.blink as blinker
+from userver import httpServer
+from ws_sonar_server import WSServer
+import sensorservice as sensorservice
+import logger, blink as blinker
 
 
 def run():

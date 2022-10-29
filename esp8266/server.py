@@ -2,7 +2,7 @@ import ubinascii
 import uhashlib
 import uasyncio
 import re
-from .protocol import Websocket
+from protocol import Websocket
 
 
 class WebsocketServer(Websocket):
