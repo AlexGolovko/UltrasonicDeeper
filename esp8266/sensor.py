@@ -46,7 +46,7 @@ init()
 
 
 def battery_level():
-    return machine.ADC(0).read()
+    return machine.ADC(machine.Pin(0)).read_uv()
 
 
 # machine.time_pulse_us from Pythondoc:
