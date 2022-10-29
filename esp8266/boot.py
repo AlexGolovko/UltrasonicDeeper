@@ -56,6 +56,12 @@ def install_packages():
 
 machine.Pin(2, machine.Pin.OUT).off()
 do_connect('royter', 'traveller22')
+do_connect('VseBudeUkraine', 'golalexser')
 install_packages()
+try:
+    import webrepl
+    webrepl.start()
+except Exception as err:
+    print(err)
 gc.collect()
 print('wifi connected')
