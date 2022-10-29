@@ -13,6 +13,7 @@ def go():
         webrepl.stop()
         ulogging.basicConfig(level=ulogging.WARNING)
     try:
+        ulogging.basicConfig(level=ulogging.DEBUG)
         import runner
         runner.run()
     except Exception as err:

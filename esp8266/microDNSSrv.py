@@ -14,7 +14,7 @@ class MicroDNSSrv:
         return None
 
     async def serve(self, host, port, backlog=5):
-        # logger.debug('serve:' + str(host) + ':' + str(port))
+        logger.debug('serve:' + str(host) + ':' + str(port))
         ai = usocket.getaddrinfo(host, port)[0]  # blocking!
         s = usocket.socket(usocket.AF_INET, usocket.SOCK_DGRAM)
         self.sock = s
