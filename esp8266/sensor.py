@@ -16,11 +16,10 @@ import logger
 #Ai-Thinker ESP-C3-12F
 # Trig-IO1-GPIO1
 # Echo-IO2-GPIO2
-# trig = machine.Pin(12, machine.Pin.OUT)
-# echo = machine.Pin(14, machine.Pin.IN)
-trig = machine.Pin(1, machine.Pin.OUT, pull=None)
-trig.value(0)
-echo = machine.Pin(2, machine.Pin.IN, pull=None)
+#moved to methods
+#trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
+#trig.value(0)
+#echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
 
 timeout = 60000
 ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
@@ -61,23 +60,6 @@ def battery_level():
 # The function will return -2 if there was timeout waiting for condition marked (*) above,
 # and -1 if there was timeout during the main measurement, marked (**) above.
 # The timeout is the same for both cases and given by timeout_us (which is in microseconds).
-def measure_depth_old():
-    trig.value(1)
-    utime.sleep_us(1)
-    trig.value(0)
-    duration = machine.time_pulse_us(echo, 1, timeout)
-    distance = 0
-    if duration > 0:
-        # d = v * t / 2
-        distance = 1482.7 * duration / 1000000 / 2
-        # t = ('t= {} us'.format(duration))
-        # d = ('d= {:1.3f} m'.format(distance))
-        # utime.sleep_us(timeout - duration)
-    else:
-        logger.info('measuring error' + str(duration))
-    return distance
-
-
 def test():
     while True:
         depths = [measure_depth() for i in range(10)]
@@ -86,6 +68,11 @@ def test():
 
 
 def measure_depth():
+    #
+    trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
+    trig.value(0)
+    echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
+    #
     trig.value(0)
     utime.sleep_ms(100)
     trig.value(1)
@@ -106,6 +93,9 @@ def measure_depth():
 
 
 def measure_air_distance():
+    trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
+    trig.value(0)
+    echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
     trig.value(1)
     utime.sleep_us(1)
     trig.value(0)
