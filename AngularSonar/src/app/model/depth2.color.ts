@@ -1,8 +1,10 @@
 export class Depth2Color {
     depthList: Array<Depth2ColorEntry> = new Array<Depth2ColorEntry>()
     deepWater: Depth2ColorEntry
+    private shallowWater: Depth2ColorEntry;
 
     constructor() {
+        this.shallowWater = new Depth2ColorEntry(0, '#f7fbff')
         this.depthList.push(new Depth2ColorEntry(0, '#f7fbff'))
         this.depthList.push(new Depth2ColorEntry(1, '#deebf7'))
         this.depthList.push(new Depth2ColorEntry(2, '#c6dbef'))
@@ -20,10 +22,15 @@ export class Depth2Color {
     }
 
     public getColorNum(depth: number): string {
+        console.log('public getColorNum(depth: number):' + depth);
         if (depth >= this.deepWater.depth) {
             return this.deepWater.color;
         }
-        return this.depthList.find((depth2ColorEntry: Depth2ColorEntry) => depth2ColorEntry.depth === depth).color
+        const colorEntry = this.depthList.find((depth2ColorEntry: Depth2ColorEntry) => depth2ColorEntry.depth === depth);
+        if (colorEntry === undefined) {
+            return this.shallowWater.color;
+        }
+        return colorEntry.color;
     }
 }
 
