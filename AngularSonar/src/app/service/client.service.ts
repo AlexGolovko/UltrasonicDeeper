@@ -87,7 +87,7 @@ export class ClientService {
     }
 
     public startConnection(): void {
-        if (this.clientInterval === undefined) {
+        /*if (this.clientInterval === undefined) {
             console.log('startConnection')
             this.clientInterval = setInterval(() => {
                 try {
@@ -97,7 +97,7 @@ export class ClientService {
                 }
                 // this.wsService.send(WS.SONAR, '1');
             }, environment.interval);
-        }
+        }*/
     }
 
     public stopConnection(): void {

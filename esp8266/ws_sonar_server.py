@@ -20,11 +20,11 @@ class WSServer:
         logger.info("Connection on {}".format(path))
 
         try:
-            async for msg in ws:
-                logger.info(msg)
+            while True:
                 # dictResponse = {"event": "SONAR",
                 #                 "data": {"status": 200, "depth": "4.20", "battery": "98",
                 #                          "temperature": "24"}}
                 await ws.send(self.callback())
+                # await uasyncio.sleep_ms(1)
         finally:
             logger.debug("Disconnected")
