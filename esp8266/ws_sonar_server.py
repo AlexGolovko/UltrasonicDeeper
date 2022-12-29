@@ -1,7 +1,7 @@
 import uasyncio
 
-from server import serve
 import logger
+from server import serve
 
 
 # import sensor
@@ -26,5 +26,7 @@ class WSServer:
                 #                          "temperature": "24"}}
                 await ws.send(self.callback())
                 # await uasyncio.sleep_ms(1)
+        except Exception as err:
+            logger.error(err)
         finally:
             logger.debug("Disconnected")
