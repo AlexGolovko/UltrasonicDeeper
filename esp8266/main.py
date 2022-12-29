@@ -2,7 +2,6 @@ import uasyncio
 import utime
 import machine
 import network
-import logger
 import ulogging
 
 
@@ -18,7 +17,7 @@ def go():
         import runner
         runner.run()
     except Exception as err:
-        logger.error(err)
+        ulogging.info(err)
         _ = uasyncio.new_event_loop()
         utime.sleep(10)
         machine.reset()
