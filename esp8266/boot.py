@@ -10,19 +10,17 @@ esp.osdebug(None)
 
 # machine.freq(160000000)
 
-
-def do_connect(wifi_name, wifi_pass):
-    ssid = 'microsonar'
-    password = 'microsonar'
+def do_create_apif():
     ap_if = network.WLAN(network.AP_IF)
     ap_if.active(True)
-    # ap_if.config(essid=ssid, password=password)
-    ap_if.config(essid=ssid, authmode=network.AUTH_OPEN)
+    ap_if.config(authmode=network.AUTH_OPEN)
     while not ap_if.active():
         pass
     print('Access Point created')
     print(ap_if.ifconfig())
 
+
+def do_connect(wifi_name, wifi_pass):
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     utime.sleep_ms(200)
@@ -35,6 +33,7 @@ def do_connect(wifi_name, wifi_pass):
         print('network config:', wlan.ifconfig())
     else:
         wlan.active(False)
+
 
 def install_packages():
     try:
@@ -55,6 +54,7 @@ def install_packages():
 
 
 machine.Pin(2, machine.Pin.OUT).off()
+do_create_apif()
 do_connect('royter', 'traveller22')
 do_connect('VseBudeUkraine', 'golalexser')
 install_packages()
