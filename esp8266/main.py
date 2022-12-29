@@ -1,3 +1,4 @@
+import uasyncio
 import utime
 import machine
 import network
@@ -18,6 +19,7 @@ def go():
         runner.run()
     except Exception as err:
         logger.error(err)
+        _ = uasyncio.new_event_loop()
         utime.sleep(10)
         machine.reset()
 
