@@ -71,8 +71,11 @@ android {
         jvmTarget=11
     }
     packagingOptions {
-        exclude 'org/eclipse/jetty/http/encoding.properties'
+        resources {
+            excludes += ['org/eclipse/jetty/http/encoding.properties']
+        }
     }
+    namespace 'com.golovkobalak.sonarapp'
 }
 
 dependencies {
