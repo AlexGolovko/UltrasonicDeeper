@@ -1,13 +1,13 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -15,12 +15,11 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
 import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.SonarController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
+import com.golovkobalak.sonarapp.service.MqttBrokerService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
@@ -59,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        Intent intent = new Intent(this, MqttBrokerService.class);
+        startService(intent);
     }
 
     private void saveFileDirPath() {
