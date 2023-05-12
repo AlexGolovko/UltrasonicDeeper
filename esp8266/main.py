@@ -1,16 +1,20 @@
+import time
+
 import uasyncio
 import utime
 import machine
 import network
 import ulogging
+import pins
+
 
 
 def go():
     wlan = network.WLAN(network.STA_IF)
     if not wlan.isconnected():
         print('not wlan.isconnected()')
-        import webrepl
-        webrepl.stop()
+        # import webrepl
+        # webrepl.stop()
         ulogging.basicConfig(level=ulogging.WARNING)
     try:
         ulogging.basicConfig(level=ulogging.DEBUG)
@@ -18,9 +22,12 @@ def go():
         runner.run()
     except Exception as err:
         ulogging.info(err)
-        _ = uasyncio.new_event_loop()
-        utime.sleep(10)
+        loop = uasyncio.get_event_loop()
+        loop.stop()
+        loop.close()
         machine.reset()
+
+
 
 
 if __name__ == '__main__':

@@ -1,12 +1,12 @@
 import machine
 import uasyncio
+import pins
 
 async def blink():
-    led = machine.Pin(4, machine.Pin.OUT)
     while True:
-        led.on()
+        pins.GREEN.on()
         await uasyncio.sleep_ms(500)
-        led.off()
+        pins.GREEN.off()
         await uasyncio.sleep_ms(500)
 
 def run():

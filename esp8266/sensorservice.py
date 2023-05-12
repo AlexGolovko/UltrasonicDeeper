@@ -3,9 +3,11 @@ import logger
 import math
 import sensor
 import uasyncio, machine
+import ulogging
 
 ds_temperature = 0
 SONAR = "sonar"
+deep_sleep_time = 600
 
 
 def run():
@@ -14,19 +16,26 @@ def run():
     return service
 
 
-class DeepSleepTimer:
-    def __init__(self, deep_sleep_time=600, deep_sleep_count=0):
-        self.deep_sleep_time = deep_sleep_time
-        self.deep_sleep_count = deep_sleep_count
+async def depth():
+    import store
+    while True:
+        try:
+            depths = [sensor.measure_depth() for i in range(3)]
+            if isCorrect(depths):
+                store.depth = str(depths[0])
+            else:
+                store.depth = store.depth - 1
+        except Exception as err:
+            ulogging.info(err)
+        await uasyncio.sleep(0.25)
 
 
 class SensorService:
-    def __init__(self, timer=DeepSleepTimer()):
-        self.timer = timer
 
     def run(self):
         uasyncio.create_task(temperature())
-        uasyncio.create_task(switcher(self.timer))
+        uasyncio.create_task(switcher())
+        uasyncio.create_task(depth())
 
     def callback(self):
         dictResponse = {}
@@ -85,17 +94,18 @@ async def temperature():
             logger.error(err)
 
 
-async def switcher(timer):
+async def switcher():
     while True:
-        await uasyncio.sleep(1)
-        increase(timer)
+        await uasyncio.sleep(10)
+        increase()
 
 
-def increase(timer):
+def increase():
+    import store
     # logger.debug('increase:' + str(timer.deep_sleep_time) + ':' + str(timer.deep_sleep_count))
-    timer.deep_sleep_count += 1
+    store.deep_sleep_count += 10
     # if timer.deep_sleep_count % 10 == 0:
     # logger.debug("I am going to sleep in " + str(timer.deep_sleep_time - timer.deep_sleep_count))
-    if timer.deep_sleep_count > timer.deep_sleep_time:
+    if store.deep_sleep_count > deep_sleep_time:
         logger.debug('I am going to sleep')
         machine.deepsleep(0)

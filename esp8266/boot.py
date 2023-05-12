@@ -4,8 +4,10 @@ import esp
 import gc
 import machine
 import network
+import pins
 
 esp.osdebug(None)
+pins.BLUE.on()
 
 
 # machine.freq(160000000)
@@ -13,7 +15,7 @@ esp.osdebug(None)
 def do_create_apif():
     ap_if = network.WLAN(network.AP_IF)
     ap_if.active(True)
-    ap_if.config(authmode=network.AUTH_OPEN)
+    ap_if.config(authmode=network.AUTH_OPEN, essid='micropython')
     while not ap_if.active():
         pass
     print('Access Point created')
@@ -24,18 +26,19 @@ def do_connect(wifi_name, wifi_pass):
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
     utime.sleep_ms(200)
-    wlans = wlan.scan()
-    if wifi_name in str(wlans):
+    if wifi_name in str(wlan.scan()):
         print('connecting to network...')
         wlan.connect(wifi_name, wifi_pass)
         while not wlan.isconnected():
-            pass
+             pass
         print('network config:', wlan.ifconfig())
+        print('wifi connected')
     else:
         wlan.active(False)
 
 
 def install_packages():
+    do_connect('VseBudeUkraine', 'golalexser')
     try:
         import network
         wlan = network.WLAN(network.STA_IF)
@@ -49,19 +52,18 @@ def install_packages():
                 import upip
                 upip.install('micropython-uasyncio')
                 upip.install('micropython-ulogging')
+                upip.install('micropython-umqtt.simple2')
     except Exception as err:
         print(err)
 
 
-machine.Pin(2, machine.Pin.OUT).off()
 do_create_apif()
-do_connect('royter', 'traveller22')
-do_connect('VseBudeUkraine', 'golalexser')
-install_packages()
-try:
-    import webrepl
-    webrepl.start()
-except Exception as err:
-    print(err)
+# install_packages()
+# try:
+#     import webrepl
+#     webrepl.start()
+# except Exception as err:
+#     print(err)
 gc.collect()
-print('wifi connected')
+pins.BLUE.off()
+print('boot finished')
