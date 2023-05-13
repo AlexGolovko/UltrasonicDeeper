@@ -11,14 +11,13 @@ async def mqtt_publisher():
             # Create an instance of the MQTT client
             ulogging.info("current host: " + str(host))
             await asyncio.sleep_ms(500)
-            client = MQTTClient(client_id="deeper", server=host, socket_timeout=1, message_timeout=5)
+            client = MQTTClient(client_id="deeper", server=host, socket_timeout=1, message_timeout=3)
             try:
-                # Connect to the MQTT broker with a timeout of 5 seconds
                 client.connect()
                 # Publish messages to a topic
                 while True:
                     message = str(store.depth)
-                    client.publish("deeper/depth", message)
+                    client.publish("deeper/depth", message, qos=1)
                     print("Message published: ", message)
                     store.deep_sleep_count = 0
                     await asyncio.sleep_ms(250)

@@ -15,7 +15,7 @@ pins.BLUE.on()
 def do_create_apif():
     ap_if = network.WLAN(network.AP_IF)
     ap_if.active(True)
-    ap_if.config(authmode=network.AUTH_OPEN, essid='micropython')
+    ap_if.config(essid='sonar', password='sonar')
     while not ap_if.active():
         pass
     print('Access Point created')
