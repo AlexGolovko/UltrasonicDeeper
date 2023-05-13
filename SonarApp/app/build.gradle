@@ -106,8 +106,10 @@ dependencies {
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.android.service
+    //mqtt server
     implementation 'io.moquette:moquette-netty-parser:0.8.1'
     implementation 'io.moquette:moquette-broker:0.8.1'
     implementation 'io.moquette:moquette-parser-commons:0.8.1'
-
+    //mqtt client
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
 }

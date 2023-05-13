@@ -71,6 +71,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = new Intent(this, MqttBrokerService.class);
+        startService(intent);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         trackingController.destroy();

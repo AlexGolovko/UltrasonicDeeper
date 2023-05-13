@@ -24,7 +24,7 @@ class TrackingController {
             trackingService.saveTrackingList(body)
             ctx.status(201)
         })
-        //GET http://localhost:8080/system/map/cache/dir
+        //GET http://localhost:8080/system/mapCacheDir
         javalin.get("/system/mapCacheDir", Handler { ctx: Context ->
             val mapCacheDir = trackingService.mapCacheDir
             ctx.result(gson.toJson(mapCacheDir))
@@ -51,6 +51,6 @@ class TrackingController {
     companion object {
         private val TAG = TrackingController::class.java.name
         private val gson = Gson()
-        const val PORT = 8080
+        const val PORT = 8081
     }
 }
