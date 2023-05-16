@@ -6,6 +6,7 @@ import {Injectable} from '@angular/core';
 import {WebSocketServiceImpl} from './websocket/websocket.service';
 import {WS} from './websocket/wsmessage';
 import {environment} from '../../environments/environment';
+import {MqttService} from "ngx-mqtt";
 
 
 @Injectable({
@@ -18,55 +19,59 @@ export class ClientService {
     private readonly endpoint: string;
     private clientInterval: any;
     private wsService: WebSocketServiceImpl;
+    private mqttService: MqttService;
 
-    constructor(wsService: WebSocketServiceImpl) {
+    constructor(wsService: WebSocketServiceImpl, mqttService: MqttService) {
         this.wsService = wsService;
+        this.mqttService = mqttService;
         const sonarClientData = new SonarClientData();
         sonarClientData.batteryLevel = 0;
         sonarClientData.waterTemp = 0;
         sonarClientData.depth = 0;
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
-        this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => {
-                console.log('wsService.on<SonarData>(WS.SONAR)' + JSON.stringify(message))
-                const data = new SonarClientData();
-                if (message === undefined) {
-                    data.isSonarAvailable = false;
-                    data.isMeasureSuccess = false;
-                } else {
-                    try {
-                        data.isSonarAvailable = true;
-                        data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
-                        data.waterTemp = Number(message.temperature);
-                        if (200 === Number(message.status)) {
-                            data.depth = Number(message.depth);
-                            data.isMeasureSuccess = true; // 'SonarApp';
-                        } else {
-                            data.isMeasureSuccess = false; // 'Too deep/shallow';
-                            console.log('Something wrong=' + message.status);
-                        }
-                    } catch (e) {
-                        data.isSonarAvailable = false;
-                        console.log(e);
-                    }
-                }
-                this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
-                this.sonarClientData.next(data);
-            },
-            err => {
-                console.log(err)
-                const data = new SonarClientData();
-                data.isSonarAvailable = false;
-                data.isMeasureSuccess = false;
-                this.sonarClientData.next(data)
-            });
 
-        this.wsService.status.subscribe(isConnected => {
-            this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
-        });
+        this.mqttService.observe('deeper/depth').subscribe((message)=>{
+            this.handleMessage(message)
+        },error => this.handleMessageError(error))
+
+
+        // this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => this.handleMessage(message),err=> this.handleMessageError(err))
+        //
+        // this.wsService.status.subscribe(isConnected => {
+        //     this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
+        // });
 
         this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
+    }
+
+    private handleMessage(message: any) {
+        console.log('handleMessage' + JSON.stringify(message))
+        const data = new SonarClientData();
+        if (message === undefined) {
+            data.isSonarAvailable = false;
+            data.isMeasureSuccess = false;
+        } else {
+            try {
+                data.isSonarAvailable = true;
+                data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
+                data.waterTemp = Number(message.temperature);
+                if (200 === Number(message.status)) {
+                    data.depth = Number(message.depth);
+                    data.isMeasureSuccess = true; // 'SonarApp';
+                } else {
+                    data.isMeasureSuccess = false; // 'Too deep/shallow';
+                    console.log('Something wrong=' + message.status);
+                }
+            } catch (e) {
+                data.isSonarAvailable = false;
+                console.log(e);
+            }
+        }
+        this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
+        this.sonarClientData.next(data);
+
     }
 
     static updateBatteryLevel(batteryADC: number): number {
@@ -149,5 +154,13 @@ export class ClientService {
                 throw new Error(err.statusText);
             }
         );
+    }
+
+    private handleMessageError(err: any) {
+        console.log(err)
+        const data = new SonarClientData();
+        data.isSonarAvailable = false;
+        data.isMeasureSuccess = false;
+        this.sonarClientData.next(data)
     }
 }
