@@ -23,8 +23,10 @@ async def depth():
             depths = [sensor.measure_depth() for i in range(3)]
             if isCorrect(depths):
                 store.depth = str(depths[0])
+                store.status = 200
             else:
                 store.depth = store.depth - 1
+                store.status = 300
         except Exception as err:
             ulogging.info(err)
         await uasyncio.sleep(0.25)

@@ -1,4 +1,5 @@
 async def mqtt_publisher():
+    import ujson
     import uasyncio as asyncio
     import ulogging
     from umqtt.simple2 import MQTTClient
@@ -16,7 +17,10 @@ async def mqtt_publisher():
                 client.connect()
                 # Publish messages to a topic
                 while True:
-                    message = str(store.depth)
+                    dictResponse = {
+                        "data": {"status": str(store.status), "depth": str(store.depth), "battery": str(-1),
+                                 "temperature": str(-1)}}
+                    message = ujson.dumps(dictResponse)
                     client.publish("deeper/depth", message, qos=1)
                     print("Message published: ", message)
                     store.deep_sleep_count = 0
