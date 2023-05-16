@@ -11,6 +11,7 @@ import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 import {CanvasComponent} from './canvas/canvas.component';
 import {HttpClientModule} from '@angular/common/http';
 import {IMqttServiceOptions, MqttModule,} from 'ngx-mqtt';
+import {environment} from "../environments/environment";
 
 const appRoutes: Routes = [
     {path: '', component: ClientComponent},
@@ -19,7 +20,7 @@ const appRoutes: Routes = [
     {path: 'chart', component: CanvasComponent}
 ];
 export const MQTT_SERVICE_OPTIONS: IMqttServiceOptions = {
-    hostname: 'localhost',
+    hostname: environment.mqttHostname,
     port: 9001,
     // path: '/mqtt'
 };

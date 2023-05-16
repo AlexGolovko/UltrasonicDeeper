@@ -36,7 +36,8 @@ export class ClientService {
     }
 
     private handleMessage(message: any) {
-        console.log('handleMessage' + JSON.stringify(message.payload.toString())
+        message = JSON.parse(message.payload.toString()).data as SonarData
+        console.log('handleMessage' + JSON.stringify(message))
         const data = new SonarClientData();
         if (message === undefined) {
             data.isSonarAvailable = false;

@@ -7,6 +7,7 @@ export const environment = {
     url: /*'http://192.168.31.238/feature',// */'http://localhost:8080/sonar',
     wsEndpoint: 'ws://192.168.31.133:8080',
     androidHost: '192.168.31.34',
+    mqttHostname: '192.168.31.151',
     interval: 300,
     listSize: 10
 };
