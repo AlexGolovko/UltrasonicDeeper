@@ -13,9 +13,9 @@ export interface WebsocketService {
     send(event: string, data: any): void;
 }
 
-@Injectable({
-    providedIn: 'root'
-})
+// @Injectable({
+//     providedIn: 'root'
+// })
 export class WebSocketServiceImpl implements WebsocketService, OnDestroy {
 
     public status: Observable<boolean>;

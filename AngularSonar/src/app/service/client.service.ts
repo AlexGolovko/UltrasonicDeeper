@@ -3,8 +3,6 @@ import {SonarClientData} from '../model/SonarClientData';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {SonarState} from '../model/SonarState';
 import {Injectable} from '@angular/core';
-import {WebSocketServiceImpl} from './websocket/websocket.service';
-import {WS} from './websocket/wsmessage';
 import {environment} from '../../environments/environment';
 import {MqttService} from "ngx-mqtt";
 
@@ -18,11 +16,9 @@ export class ClientService {
     private sonarClientData: BehaviorSubject<SonarClientData>;
     private readonly endpoint: string;
     private clientInterval: any;
-    private wsService: WebSocketServiceImpl;
     private mqttService: MqttService;
 
-    constructor(wsService: WebSocketServiceImpl, mqttService: MqttService) {
-        this.wsService = wsService;
+    constructor(mqttService: MqttService) {
         this.mqttService = mqttService;
         const sonarClientData = new SonarClientData();
         sonarClientData.batteryLevel = 0;
@@ -31,23 +27,16 @@ export class ClientService {
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
 
-        this.mqttService.observe('deeper/depth').subscribe((message)=>{
+        this.mqttService.observe('deeper/depth').subscribe((message) => {
             this.handleMessage(message)
-        },error => this.handleMessageError(error))
-
-
-        // this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => this.handleMessage(message),err=> this.handleMessageError(err))
-        //
-        // this.wsService.status.subscribe(isConnected => {
-        //     this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
-        // });
+        }, error => this.handleMessageError(error))
 
         this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
     }
 
     private handleMessage(message: any) {
-        console.log('handleMessage' + JSON.stringify(message))
+        console.log('handleMessage' + JSON.stringify(message.payload.toString())
         const data = new SonarClientData();
         if (message === undefined) {
             data.isSonarAvailable = false;
@@ -85,7 +74,7 @@ export class ClientService {
                 return 1
             }
             return batteryLevel
-        }catch (e) {
+        } catch (e) {
             console.log(e);
             return 1
         }
@@ -139,7 +128,10 @@ export class ClientService {
             sonarClientData.isSonarAvailable = false;
             console.log(e);
         }
-        this.setState({isSonarAvailable: sonarClientData.isSonarAvailable, isMeasureSuccess: sonarClientData.isMeasureSuccess});
+        this.setState({
+            isSonarAvailable: sonarClientData.isSonarAvailable,
+            isMeasureSuccess: sonarClientData.isMeasureSuccess
+        });
         return sonarClientData;
     }
 
