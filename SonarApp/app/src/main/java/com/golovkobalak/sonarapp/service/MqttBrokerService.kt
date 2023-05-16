@@ -35,6 +35,7 @@ class MqttBrokerService : Service() {
                 file.delete()
             }
             memoryConfig.setProperty(BrokerConstants.PERSISTENT_STORE_PROPERTY_NAME, filePath)
+            memoryConfig.setProperty(BrokerConstants.WEB_SOCKET_PORT_PROPERTY_NAME, "9001")
             mqttServer.startServer(memoryConfig)
             createLogger()
             internalPublish()
