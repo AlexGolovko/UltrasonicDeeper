@@ -11,8 +11,7 @@ import ultraServer, switcher, deeper
 def run():
     loop = uasyncio.get_event_loop()
     try:
-        import mqttpublisher
-        loop.create_task(blink.blink())
+        loop.create_task(blink.run())
         loop.create_task(switcher.run())
         loop.create_task(deeper.run())
         loop.create_task(ultraServer.start_server())

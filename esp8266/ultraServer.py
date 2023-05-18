@@ -7,7 +7,7 @@ import switcher
 
 def response():
     dictResponse = {"status": str(store.status), "depth": str(store.depth), "battery": str(-1),
-                    "temperature": str(-1)}
+                    "temperature": str(store.ds_temperature)}
     message = ujson.dumps(dictResponse)
     return message
 
