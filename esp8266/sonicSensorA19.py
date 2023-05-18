@@ -53,7 +53,7 @@ def measure_depth():
     echo = machine.Pin(4, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
     #
     trig.value(0)
-    utime.sleep_ms(60)
+    uasyncio.sleep_ms(60)
     trig.value(1)
     utime.sleep_us(20)
     trig.value(0)

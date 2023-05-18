@@ -1,19 +1,33 @@
 import uasyncio, ulogging, pins, machine, math, ujson, sonicSensorA19, store
 
+
 async def run():
-    import store
     while True:
         try:
-            depths = [sonicSensorA19.measure_depth() for i in range(3)]
-            if isCorrect(depths):
-                store.depth = str(depths[0])
-                store.status = 200
-            else:
-                store.depth = store.depth - 1
-                store.status = 300
+            depth()
         except Exception as err:
             ulogging.info(err)
-        await uasyncio.sleep(0.25)
+        await uasyncio.sleep_ms(300)
+
+
+def precise_depth():
+    depths = [sonicSensorA19.measure_depth() for i in range(3)]
+    if isCorrect(depths):
+        store.depth = str(depths[0])
+        store.status = 200
+    else:
+        store.depth = store.depth - 1
+        store.status = 300
+
+
+def depth():
+    curr_depth = sonicSensorA19.measure_depth()
+    if curr_depth == 0 or curr_depth > 37:
+        store.depth = - 1
+        store.status = 300
+        return
+    store.depth = str(curr_depth)
+    store.status = 200
 
 
 def isCorrect(depths):

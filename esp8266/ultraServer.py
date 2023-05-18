@@ -3,21 +3,21 @@ import ujson
 import ulogging
 import store
 import switcher
+import utime
 
 
 def response():
-    dictResponse = {"status": str(store.status), "depth": str(store.depth), "battery": str(-1),
+    return {"status": str(store.status), "depth": str(store.depth), "battery": str(-1),
                     "temperature": str(store.ds_temperature)}
-    message = ujson.dumps(dictResponse)
-    return message
 
 
 async def handle_client(reader, writer):
+    curr_time = utime.ticks_ms()
     request_line = await reader.readline()
     ulogging.debug('Received {} from {}'.format(request_line.strip(), writer.get_extra_info('peername')))
     method, path, _ = request_line.decode().split(' ')
 
-    if method == 'GET' and path == '/sonar':
+    if method == 'GET' and '/sonar' in path:
         switcher.reset()
         response_body = response()
         await send_response(writer, store.status, response_body)
@@ -28,7 +28,7 @@ async def handle_client(reader, writer):
     #     await send_response(writer, 200, response_body)
     else:
         await send_response(writer, 404, {'error': 'Not found'})
-
+    ulogging.debug('response time: {}'.format(utime.ticks_ms() - curr_time))
     await writer.aclose()
 
 
@@ -42,7 +42,7 @@ async def handle_client(reader, writer):
 async def send_response(writer, status_code, body):
     response_body = ujson.dumps(body)
     response = 'HTTP/1.1 {} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{}'.format(
-        status_code, len(response_body), response_body
+        status_code, len(response_body), str(response_body)
     )
     await writer.awrite(response)
 
