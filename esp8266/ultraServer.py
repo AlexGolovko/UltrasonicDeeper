@@ -41,7 +41,7 @@ async def handle_client(reader, writer):
 
 async def send_response(writer, status_code, body):
     response_body = ujson.dumps(body)
-    response = 'HTTP/1.1 {} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{}'.format(
+    response = 'HTTP/1.1 {} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{}'.format(
         status_code, len(response_body), response_body
     )
     await writer.awrite(response)

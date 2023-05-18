@@ -58,6 +58,7 @@ def install_packages():
 
 
 do_create_apif()
+do_connect('VseBudeUkraine', 'golalexser')
 # install_packages()
 # try:
 #     import webrepl

@@ -22,7 +22,7 @@ def go():
         import runner
         runner.run()
     except Exception as err:
-        ulogging.info(err)
+        ulogging.info(str(err))
         loop = uasyncio.get_event_loop()
         loop.stop()
         loop.close()
@@ -32,10 +32,4 @@ def go():
 
 
 if __name__ == '__main__':
-    # go()
-    while True:
-        pins.GREEN.on()
-        utime.sleep(1)
-        pins.GREEN.off()
-        utime.sleep(1)
-        # pins.D0.off()
+    go()
