@@ -6,6 +6,7 @@ import machine
 import network
 import ulogging
 import pins
+pins.D0.on()
 
 
 
@@ -31,4 +32,10 @@ def go():
 
 
 if __name__ == '__main__':
-    go()
+    # go()
+    while True:
+        pins.GREEN.on()
+        utime.sleep(1)
+        pins.GREEN.off()
+        utime.sleep(1)
+        # pins.D0.off()

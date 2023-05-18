@@ -22,16 +22,16 @@ async def mqtt_publisher():
                                  "temperature": str(-1)}}
                     message = ujson.dumps(dictResponse)
                     client.publish("deeper/depth", message, qos=1)
-                    print("Message published: ", message)
+                    ulogging.info("Message published: "+str(message))
                     store.deep_sleep_count = 0
                     await asyncio.sleep_ms(250)
             except Exception as e:
-                ulogging.info(e)
+                ulogging.info(str(e))
                 try:
                     # Disconnect from the MQTT broker
                     client.disconnect()
                 except Exception as e:
-                    ulogging.info(e)
+                    ulogging.info(str(e))
             ip_parts = host.split('.')
             ip_parts[-1] = str(int(ip_parts[-1]) + 1)
             host = '.'.join(ip_parts)

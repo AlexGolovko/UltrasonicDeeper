@@ -8,7 +8,7 @@ import pins
 
 esp.osdebug(None)
 pins.BLUE.on()
-
+pins.D0.on()
 
 # machine.freq(160000000)
 

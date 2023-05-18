@@ -3,9 +3,9 @@ import ulogging
 import blink
 from microDNSSrv import dns
 from userver import httpServer
-import sensorservice as sensorservice
 # from wsserver import WSServer
 # from wsservice import WSService
+import ultraServer, switcher, deeper
 
 
 def run():
@@ -13,8 +13,9 @@ def run():
     try:
         import mqttpublisher
         loop.create_task(blink.blink())
-        loop.create_task(mqttpublisher.mqtt_publisher())
-        sensorservice.run()
+        loop.create_task(switcher.run())
+        loop.create_task(deeper.run())
+        loop.create_task(ultraServer.start_server())
         # dns()
         # httpServer()
         # WSServer(callback=service.callback).run()

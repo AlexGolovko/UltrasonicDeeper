@@ -1,5 +1,6 @@
 import uasyncio as asyncio
 import logger
+import ulogging
 import gc
 
 
@@ -27,7 +28,7 @@ class Server:
         #     await writer.aclose()
         #     logger.debug("is not a check")
         addr = writer.get_extra_info('peername')
-        # logger.debug('Received {} from {}'.format(request_line.strip(), addr))
+        ulogging.debug('Received {} from {}'.format(request_line.strip(), addr))
 
         # Read headers
         headers = {}
@@ -40,14 +41,15 @@ class Server:
                 # logger.debug('Invalid request header:' + line)
                 return
             headers[frags[0]] = frags[1].strip()
-        # logger.debug("Headers:" + str(headers))
+        ulogging.debug("Headers:" + str(headers))
 
         # Handle the request
         if len(request_line) > 0:
             response = 'HTTP/1.0 204 No Content\r\n'
-            response += 'Content-Type: text/plain\r\n'
-            response += 'Access-Control-Allow-Origin: *\r\n\r\n'
-            response += ''
+            response += 'Content-Length: 0\r\n'
+            response += 'Cross-Origin-Resource-Policy: cross-origin\r\n'
+            response += 'Date: Fri, 12 May 2023 15:30:09 GMT\r\n\r\n'
+            # response += ''
             # response += 'I am trying'
             # with open('index.html') as f:
             #     response += f.read()

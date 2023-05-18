@@ -1,6 +1,6 @@
 import uasyncio, usocket, uselect
 from re import match
-import logger
+import ulogging
 import gc
 
 
@@ -14,7 +14,7 @@ class MicroDNSSrv:
         return None
 
     async def serve(self, host, port, backlog=5):
-        logger.debug('serve:' + str(host) + ':' + str(port))
+        ulogging.debug('serve:' + str(host) + ':' + str(port))
         ai = usocket.getaddrinfo(host, port)[0]  # blocking!
         s = usocket.socket(usocket.AF_INET, usocket.SOCK_DGRAM)
         self.sock = s
@@ -30,14 +30,14 @@ class MicroDNSSrv:
                     buf, addr = s.recvfrom(256)
                     #
                     ret = self.cb(buf)
-                    # logger.info(ret)
+                    ulogging.debug(ret)
                     # await uasyncio.sleep_ms(1)
                     if ret:
                         s.sendto(ret, addr)  # blocking
                     #
                 await uasyncio.sleep_ms(1)
             except Exception as err:
-                logger.error(err)
+                ulogging.warning(str(err))
                 # Shutdown server
                 s.close()
                 return
@@ -99,7 +99,7 @@ class MicroDNSSrv:
                 b'\x00\x00\x00\x1E',  # Answer TTL 30 secondes
                 b'\x00\x04',  # Answer data length
                 ipV4Bytes])  # Answer data
-            # logger.debug(result)
+            ulogging.debug(result)
             return result
         except:
             pass
@@ -145,7 +145,7 @@ class MicroDNSSrv:
 
     def cb(self, packet):
         domName = MicroDNSSrv._getAskedDomainName(packet)
-        # logger.debug(domName)
+        ulogging.debug(domName)
         if domName:
             domName = domName.lower()
             ipB = self._domList.get(domName, None)
@@ -192,6 +192,7 @@ class MicroDNSSrv:
 
 
 def dns():
+    ulogging.info("MicroDNSSrv start.")
     import network
     ap_if = network.WLAN(network.AP_IF)
     if MicroDNSSrv.Create({
@@ -201,6 +202,6 @@ def dns():
         "*.toto.com": "192.168.4.1",
         "www.site.*": "192.168.4.1",
         "*connectivitycheck*": ap_if.ifconfig()[0]}):
-        logger.debug("MicroDNSSrv started.")
+        ulogging.info("MicroDNSSrv started.")
     else:
-        logger.debug("Error to starts MicroDNSSrv...")
+        ulogging.info("Error to starts MicroDNSSrv...")

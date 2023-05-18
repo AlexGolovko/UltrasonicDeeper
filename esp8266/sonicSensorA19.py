@@ -1,11 +1,11 @@
 import uasyncio
 
-import machine, utime, onewire, ds18x20
+import machine, utime
 import uasyncio as asyncio
-import logger
+import ulogging
 
 # global trig, echo, ds_pin, ds_sensor, timeout, roms
-#LOLIN D1 mini v3.1.0
+# LOLIN D1 mini v3.1.0
 # Trig-D6-GPIO12
 # Echo-D5-GPIO14
 # trig = machine.Pin(12, machine.Pin.OUT)
@@ -13,39 +13,18 @@ import logger
 # trig = machine.Pin(12, machine.Pin.OUT, pull=None)
 # trig.value(0)
 # echo = machine.Pin(14, machine.Pin.IN, pull=None)
-#Ai-Thinker ESP-C3-12F
+# Ai-Thinker ESP-C3-12F
 # Trig-IO1-GPIO1
 # Echo-IO2-GPIO2
-#moved to methods
-#trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
-#trig.value(0)
-#echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
+# moved to methods
+# trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
+# trig.value(0)
+# echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
 
 timeout = 60000
 ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
 
 global ds_sensor, roms
-
-
-# D3-GPIO0
-
-def init():
-    logger.info("In init")
-    global ds_sensor
-    global roms
-    try:
-        ds_sensor = ds18x20.DS18X20(onewire.OneWire(ds_pin))
-        roms = ds_sensor.scan()
-        logger.info('Found DS devices: ' + str(roms))
-    except Exception as err:
-        logger.error(err)
-
-
-init()
-
-
-def battery_level():
-    return machine.ADC(machine.Pin(0)).read_uv()
 
 
 # machine.time_pulse_us from Pythondoc:
@@ -68,10 +47,10 @@ def test():
 
 
 def measure_depth():
-    #
-    trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
+    curr_time = utime.ticks_ms()
+    trig = machine.Pin(3, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
     trig.value(0)
-    echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
+    echo = machine.Pin(4, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
     #
     trig.value(0)
     utime.sleep_ms(60)
@@ -87,15 +66,17 @@ def measure_depth():
         # d = ('d= {:1.3f} m'.format(distance))
         # utime.sleep_us(timeout - duration)
     else:
-        logger.info('measuring error' + str(duration))
+        ulogging.info('measuring error' + str(duration))
     trig.value(0)
+    execution_time = utime.ticks_diff(utime.ticks_ms(), curr_time)
+    ulogging.debug('measure depth duration: ' + str(execution_time))
     return distance
 
 
 def measure_air_distance():
-    trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
+    trig = machine.Pin(3, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
     trig.value(0)
-    echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
+    echo = machine.Pin(4, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
     trig.value(1)
     utime.sleep_us(1)
     trig.value(0)
@@ -109,23 +90,6 @@ def measure_air_distance():
         d = ('d= {:1.3f} m'.format(distance))
         print(t, d)
     else:
-        logger.info('measuring error' + str(duration))
+        ulogging.info('measuring error' + str(duration))
 
     return distance, duration
-
-
-
-
-def temperature():
-    try:
-        if len(roms) == 0:
-            return
-        ds_sensor.convert_temp()
-        utime.sleep_ms(750)
-        return ds_sensor.read_temp(roms[0])
-    except onewire.OneWireError as err:
-        logger.error(err)
-        return -273
-    except Exception as err:
-        logger.error(err)
-        return -273
