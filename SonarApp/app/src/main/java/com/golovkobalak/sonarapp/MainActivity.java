@@ -18,7 +18,6 @@ import androidx.navigation.ui.NavigationUI;
 import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.SonarController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
-import com.golovkobalak.sonarapp.service.MqttBrokerService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import io.realm.Realm;
 
@@ -58,8 +57,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
         }
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Intent intent = new Intent(this, MqttBrokerService.class);
-        startService(intent);
     }
 
     private void saveFileDirPath() {
@@ -73,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Intent intent = new Intent(this, MqttBrokerService.class);
-        startService(intent);
     }
 
     @Override
