@@ -10,12 +10,15 @@ esp.osdebug(None)
 pins.BLUE.on()
 pins.D0.on()
 
-# machine.freq(160000000)
+
+machine.freq(160000000)
 
 def do_create_apif():
+    ssid = 'sonar'
+    password = 'microsonar'
     ap_if = network.WLAN(network.AP_IF)
     ap_if.active(True)
-    ap_if.config(essid='sonar', password='sonar')
+    ap_if.config(essid=ssid, password=password, authmode=network.AUTH_WPA_WPA2_PSK)
     while not ap_if.active():
         pass
     print('Access Point created')
@@ -30,7 +33,7 @@ def do_connect(wifi_name, wifi_pass):
         print('connecting to network...')
         wlan.connect(wifi_name, wifi_pass)
         while not wlan.isconnected():
-             pass
+            pass
         print('network config:', wlan.ifconfig())
         print('wifi connected')
     else:
