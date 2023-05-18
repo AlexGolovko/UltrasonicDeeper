@@ -4,7 +4,6 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {SonarState} from '../model/SonarState';
 import {Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
-import {MqttService} from "ngx-mqtt";
 
 
 @Injectable({
@@ -16,20 +15,14 @@ export class ClientService {
     private sonarClientData: BehaviorSubject<SonarClientData>;
     private readonly endpoint: string;
     private clientInterval: any;
-    private mqttService: MqttService;
 
-    constructor(mqttService: MqttService) {
-        this.mqttService = mqttService;
+    constructor() {
         const sonarClientData = new SonarClientData();
         sonarClientData.batteryLevel = 0;
         sonarClientData.waterTemp = 0;
         sonarClientData.depth = 0;
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
-
-        this.mqttService.observe('deeper/depth').subscribe((message) => {
-            this.handleMessage(message)
-        }, error => this.handleMessageError(error))
 
         this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
