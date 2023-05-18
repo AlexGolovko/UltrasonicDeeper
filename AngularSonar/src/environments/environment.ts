@@ -4,10 +4,11 @@
 
 export const environment = {
     production: false,
-    url: /*'http://192.168.31.238/feature',// */'http://localhost:8080/sonar',
+    url: /*'http://192.168.31.238/feature',// */'http://192.168.31.175:8080/sonar',
     wsEndpoint: 'ws://192.168.31.133:8080',
     androidHost: '192.168.31.34',
-    interval: 300,
+    interval: 333,
+    timeout: 300,
     listSize: 10
 };
 
