@@ -4,7 +4,7 @@ import {BehaviorSubject, Observable, timeout} from 'rxjs';
 import {SonarState} from '../model/SonarState';
 import {Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
-import {HttpClient, HttpHeaders} from "@angular/common/http";
+import {HttpClient} from "@angular/common/http";
 
 
 @Injectable({
@@ -14,7 +14,6 @@ export class ClientService {
 
     private readonly sonarInfo: BehaviorSubject<SonarState>;
     private sonarClientData: BehaviorSubject<SonarClientData>;
-    private readonly endpoint: string;
     private clientInterval: any;
 
     constructor(private http: HttpClient) {
@@ -25,7 +24,6 @@ export class ClientService {
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
 
-        this.endpoint = environment.url;
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
     }
 
@@ -79,7 +77,7 @@ export class ClientService {
             console.log('startConnection')
             this.clientInterval = setInterval(() => {
                 const currTime = new Date().getTime()
-                this.http.get(this.endpoint, {responseType: 'text', params: {id: currTime}})
+                this.http.get(environment.url, {responseType: 'text', params: {id: currTime}})
                     .pipe(timeout(environment.timeout))
                     .subscribe(
                         (data: any) => {
