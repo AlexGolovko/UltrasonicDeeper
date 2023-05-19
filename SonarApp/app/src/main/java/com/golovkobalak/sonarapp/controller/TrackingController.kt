@@ -26,7 +26,7 @@ class TrackingController {
             ctx.status(201)
         })
         //POST http://localhost:8080/sonar
-        javalin.post("/tracking", Handler { ctx: Context ->
+        javalin.post("/sonar", Handler { ctx: Context ->
             val body = ctx.body()
             Log.i(this.javaClass.name, "body:" + body)
             ctx.status(201)
