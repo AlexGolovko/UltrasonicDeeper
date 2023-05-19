@@ -11,6 +11,7 @@ import io.javalin.http.Context
 import io.javalin.http.Handler
 
 class TrackingController {
+    private var currentData = ""
     private var app: Javalin? = null
     fun start() {
         val javalin = Javalin.create { obj: JavalinConfig -> obj.enableCorsForAllOrigins() }.start(PORT)
@@ -29,7 +30,12 @@ class TrackingController {
         javalin.post("/sonar", Handler { ctx: Context ->
             val body = ctx.body()
             Log.i(this.javaClass.name, "body:" + body)
+            currentData = body
             ctx.status(201)
+        })
+        //GET http://localhost:8080/sonar
+        javalin.get("/sonar", Handler { ctx: Context ->
+            ctx.result(currentData)
         })
         //GET http://localhost:8080/system/mapCacheDir
         javalin.get("/system/mapCacheDir", Handler { ctx: Context ->
