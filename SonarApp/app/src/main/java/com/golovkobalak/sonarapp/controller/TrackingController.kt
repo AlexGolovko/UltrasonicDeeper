@@ -1,6 +1,7 @@
 package com.golovkobalak.sonarapp.controller
 
 import android.util.Log
+import android.widget.Toast
 import com.golovkobalak.sonarapp.model.GeoSquare
 import com.golovkobalak.sonarapp.service.TrackingService
 import com.google.gson.Gson
@@ -22,6 +23,12 @@ class TrackingController {
         javalin.post("/tracking", Handler { ctx: Context ->
             val body = ctx.body()
             trackingService.saveTrackingList(body)
+            ctx.status(201)
+        })
+        //POST http://localhost:8080/sonar
+        javalin.post("/tracking", Handler { ctx: Context ->
+            val body = ctx.body()
+            Log.i(this.javaClass.name, "body:" + body)
             ctx.status(201)
         })
         //GET http://localhost:8080/system/mapCacheDir
