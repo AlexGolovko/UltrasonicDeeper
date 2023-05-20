@@ -1,6 +1,8 @@
+import ds18x20
+import machine
+import onewire
 import uasyncio
-
-import machine, utime, onewire, ds18x20, ulogging
+import ulogging
 
 # global trig, echo, ds_pin, ds_sensor, timeout, roms
 # LOLIN D1 mini v3.1.0
@@ -22,12 +24,6 @@ import machine, utime, onewire, ds18x20, ulogging
 ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
 
 global ds_sensor, roms
-
-
-# D3-GPIO0
-
-def battery_level():
-    return machine.ADC(machine.Pin(0)).read_uv()
 
 
 def init():

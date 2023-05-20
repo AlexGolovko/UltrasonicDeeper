@@ -8,7 +8,7 @@ pins.D0.on()
 
 
 
-def go():
+def goAsync():
     ulogging.basicConfig(level=ulogging.WARNING)
     try:
         import runner
@@ -21,7 +21,11 @@ def go():
         machine.reset()
 
 
+def goSync():
+    ulogging.basicConfig(level=ulogging.WARNING)
+    import runner
+    runner.start()
 
 
 if __name__ == '__main__':
-    go()
+    goSync()

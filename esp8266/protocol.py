@@ -190,7 +190,7 @@ class Websocket:
             raise TypeError()
 
         self.write_frame(opcode, buf)
-        await self._stream.drain()
+        await uasyncio.sleep(0)
 
     async def wait_closed(self):
         await self._stream.drain()

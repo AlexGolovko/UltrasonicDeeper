@@ -4,10 +4,11 @@ import ulogging
 import store
 import switcher
 import utime
+import gc
 
 
 def response():
-    return {"status": str(store.status), "depth": str(store.depth), "battery": str(-1),
+    return {"status": str(store.status), "depth": str(store.depth), "battery": str(store.battery),
                     "temperature": str(store.ds_temperature)}
 
 
@@ -33,10 +34,13 @@ async def handle_client(reader, writer):
         await writer.aclose()
     except Exception as err:
         await writer.aclose()
+    finally:
+        gc.collect()
 
 async def send_response(writer, status_code, body):
     response_body = ujson.dumps(body)
-    response = 'HTTP/1.1 {} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{}'.format(
+    response = 'HTTP/1.1 {} OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\n' \
+               'Connection: keep-alive\r\nAccess-Control-Allow-Origin: *\r\n\r\n{}'.format(
         status_code, len(response_body), str(response_body)
     )
     await writer.awrite(response)
