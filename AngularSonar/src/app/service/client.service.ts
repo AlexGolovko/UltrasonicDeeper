@@ -5,6 +5,8 @@ import {SonarState} from '../model/SonarState';
 import {Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
 import {HttpClient} from "@angular/common/http";
+import {WebSocketServiceImpl} from './websocket/websocket.service';
+import {WS} from './websocket/wsmessage';
 
 
 @Injectable({
@@ -15,14 +17,22 @@ export class ClientService {
     private readonly sonarInfo: BehaviorSubject<SonarState>;
     private sonarClientData: BehaviorSubject<SonarClientData>;
     private clientInterval: any;
+    private wsService: WebSocketServiceImpl;
 
-    constructor(private http: HttpClient) {
+    constructor(wsService: WebSocketServiceImpl) {
+        this.wsService = wsService;
         const sonarClientData = new SonarClientData();
         sonarClientData.batteryLevel = 0;
         sonarClientData.waterTemp = 0;
         sonarClientData.depth = 0;
         sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
+
+        this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => this.handleMessage(message), err => this.handleMessageError(err))
+
+        this.wsService.status.subscribe(isConnected => {
+            this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
+        });
 
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
     }
@@ -73,23 +83,23 @@ export class ClientService {
     }
 
     public startConnection(): void {
-        if (this.clientInterval === undefined) {
-            console.log('startConnection')
-            this.clientInterval = setInterval(() => {
-                const currTime = new Date().getTime()
-                this.http.get(environment.url, {responseType: 'text', params: {id: currTime}})
-                    .pipe(timeout(environment.timeout))
-                    .subscribe(
-                        (data: any) => {
-                            this.handleMessage(data)
-                        },
-                        (error) => {
-                            this.handleMessageError(error)
-                        }
-                    )
-
-            }, environment.interval);
-        }
+        // if (this.clientInterval === undefined) {
+        //     console.log('startConnection')
+        //     this.clientInterval = setInterval(() => {
+        //         const currTime = new Date().getTime()
+        //         this.http.get(environment.url, {responseType: 'text', params: {id: currTime}})
+        //             .pipe(timeout(environment.timeout))
+        //             .subscribe(
+        //                 (data: any) => {
+        //                     this.handleMessage(data)
+        //                 },
+        //                 (error) => {
+        //                     this.handleMessageError(error)
+        //                 }
+        //             )
+        //
+        //     }, environment.interval);
+        // }
     }
 
     public stopConnection(): void {

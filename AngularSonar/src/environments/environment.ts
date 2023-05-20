@@ -5,7 +5,7 @@
 export const environment = {
     production: false,
     url: 'http://localhost:8080/sonar',
-    wsEndpoint: 'ws://192.168.31.133:8080',
+    wsEndpoint: 'ws://localhost:7070/sonar',
     androidHost: '192.168.31.34',
     interval: 333,
     timeout: 300,
