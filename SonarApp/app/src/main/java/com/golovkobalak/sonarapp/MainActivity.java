@@ -18,6 +18,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.SonarController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
+import com.golovkobalak.sonarapp.controller.WsController;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import io.realm.Realm;
 
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     private final TrackingController trackingController = new TrackingController();
     private final SonarController sonarController = new SonarController();
+    private final WsController wsController = new WsController();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         SonarContext.setAssetManager(getAssets());
         trackingController.start();
         sonarController.start();
+        wsController.start();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
