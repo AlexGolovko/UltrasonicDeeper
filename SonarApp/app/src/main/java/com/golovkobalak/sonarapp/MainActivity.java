@@ -80,5 +80,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         trackingController.destroy();
         sonarController.destroy();
+        wsController.destroy();
     }
 }
