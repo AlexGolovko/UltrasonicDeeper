@@ -1,3 +1,4 @@
+import time
 import uasyncio, ulogging, pins, machine
 import utime
 
@@ -18,9 +19,10 @@ def increase():
 
 
 def go_sleep():
-    ulogging.info('I am going to sleep')
+    print('I am going to sleep')
     pins.D0.off()
-    machine.deepsleep(0)
+    time.sleep_ms(100)
+    machine.reset()
 
 
 def reset():
