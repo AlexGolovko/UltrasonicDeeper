@@ -67,9 +67,6 @@ export class MapComponent implements OnInit, AfterViewInit {
 
         });
         this.clientService.getSonarClientData().subscribe(value => {
-            if (value.isMeasureSuccess) {
-                this.androidService.saveAndroidData(value, this.crd)
-            }
             if (this.marker !== null) {
                 const arrowAngle = this.getAngle(this.prevLatLng, this.currLatLng)
                 const arrowIcon: string = MapComponent.getArrowPng(value);

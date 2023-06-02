@@ -83,6 +83,8 @@ export class CanvasComponent implements OnInit, AfterViewInit {
         if (currVal.waterTemp > -100) {
             this.ctx.fillText(currVal.waterTemp.toFixed(1) + ' c' + String.fromCharCode(176), this.ctx.canvas.width - 100, 120)
         }
-        this.ctx.fillText(currVal.batteryLevel + ' %', this.ctx.canvas.width - 100, 150)
+        if (currVal.batteryLevel !== undefined) {
+            this.ctx.fillText(currVal.batteryLevel + ' %', this.ctx.canvas.width - 100, 150)
+        }
     }
 }

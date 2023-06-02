@@ -24,7 +24,6 @@ export class ClientComponent implements OnInit, OnDestroy {
     private intervalTime: number;
     private watchPosition: number;
     private androidDataList: Array<AndroidData>;
-    private androidListSendSize: number = environment.listSize;
 
     constructor(private clientService: ClientService, private geoService: GeoService, private androidBridge: AndroidBridgeService) {
     }
@@ -39,8 +38,6 @@ export class ClientComponent implements OnInit, OnDestroy {
                 this.isMeasureSuccess = data.isMeasureSuccess;
                 if (data.isMeasureSuccess) {
                     this.sonarClientData.depth = data.depth;
-                    this.increaseTrackArray(data.depth);
-                    this.androidBridge.saveAndroidData(data, this.crd)
                 }
             }
         });
@@ -57,19 +54,6 @@ export class ClientComponent implements OnInit, OnDestroy {
         clearInterval(this.interval);
         this.clientService.stopConnection();
         navigator.geolocation.clearWatch(this.watchPosition);
-    }
-
-    private increaseTrackArray(num: number): void {
-        const array: Array<string> = Object.assign([], this.trackArray);
-        const depth = Number(num.toFixed(2));
-        if (array[0] === this.firstElement) {
-            array.shift();
-        }
-        if (array.length > 8) {
-            array.splice(-1, 1);
-        }
-        array.splice(0, 0, depth.toFixed(2));
-        this.trackArray = array;
     }
 }
 

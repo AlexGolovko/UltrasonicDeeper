@@ -1,12 +1,9 @@
 import {SonarData} from '../model/SonarData';
 import {SonarClientData} from '../model/SonarClientData';
-import {BehaviorSubject, Observable, timeout} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {SonarState} from '../model/SonarState';
 import {Injectable} from '@angular/core';
 import {environment} from '../../environments/environment';
-import {HttpClient} from "@angular/common/http";
-import {WebSocketServiceImpl} from './websocket/websocket.service';
-import {WS} from './websocket/wsmessage';
 
 
 @Injectable({
@@ -17,37 +14,62 @@ export class ClientService {
     private readonly sonarInfo: BehaviorSubject<SonarState>;
     private sonarClientData: BehaviorSubject<SonarClientData>;
     private clientInterval: any;
-    private wsService: WebSocketServiceImpl;
+    private ws: Observable<unknown>;
 
-    constructor(wsService: WebSocketServiceImpl) {
-        this.wsService = wsService;
+    constructor() {
         const sonarClientData = new SonarClientData();
         sonarClientData.batteryLevel = 0;
         sonarClientData.waterTemp = 0;
         sonarClientData.depth = 0;
-        sonarClientData.isSonarAvailable = false;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
 
-        this.wsService.on<SonarData>(WS.SONAR).subscribe((message) => this.handleMessage(message), err => this.handleMessageError(err))
 
-        this.wsService.status.subscribe(isConnected => {
-            this.setState({isSonarAvailable: isConnected, isMeasureSuccess: isConnected});
-        });
+        this.ws = this.getObservable()
+        this.ws.subscribe(next => this.handleMessage(next), err => this.handleMessageError(err),)
 
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
     }
 
+    private getObservable() {
+        return new Observable(
+            observer => {
+                let webSocket = new WebSocket(environment.wsEndpoint);
+                webSocket.onopen = function (event) {
+                    console.log('WebSocket is connected.');
+                }
+                webSocket.onmessage = function (event) {
+                    observer.next(event.data);
+                }
+                webSocket.onerror = function (event) {
+                    observer.error(event);
+                }
+                webSocket.onclose = function (event) {
+                    observer.complete();
+                }
+            }
+        );
+    }
+
     private handleMessage(messageStr: any) {
-        const message: SonarData = JSON.parse(messageStr.toString())
-        const data = new SonarClientData();
-        if (message === undefined) {
+        if (messageStr === undefined || JSON.parse(messageStr).error !== undefined) {
+            const data = new SonarClientData();
             data.isSonarAvailable = false;
             data.isMeasureSuccess = false;
-        } else {
+            this.sonarClientData.next(data);
+            console.log(`handleMessage error: ${JSON.parse(messageStr).error}`)
+            return;
+        }
+        try {
+            const message: SonarData = JSON.parse(messageStr)
+            const data = new SonarClientData();
             try {
                 data.isSonarAvailable = true;
-                data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
-                data.waterTemp = Number(message.temperature);
+                if (Number(message.battery) > 0) {
+                    data.batteryLevel = ClientService.updateBatteryLevel(Number(message.battery));
+                }
+                if (Number(message.temperature) > -273) {
+                    data.waterTemp = Number(message.temperature);
+                }
                 if (200 === Number(message.status)) {
                     data.depth = Number(message.depth);
                     data.isMeasureSuccess = true; // 'SonarApp';
@@ -59,9 +81,15 @@ export class ClientService {
                 data.isSonarAvailable = false;
                 console.log(e);
             }
+
+            this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
+            this.sonarClientData.next(data);
+        } catch (Exception) {
+            const data = new SonarClientData();
+            data.isSonarAvailable = false;
+            data.isMeasureSuccess = false;
+            console.log(Exception);
         }
-        this.setState({isSonarAvailable: data.isSonarAvailable, isMeasureSuccess: data.isMeasureSuccess});
-        this.sonarClientData.next(data);
 
     }
 

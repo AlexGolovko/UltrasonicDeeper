@@ -5,5 +5,4 @@ export const environment = {
     androidHost: 'localhost',
     interval: 333,
     timeout: 300,
-    listSize: 10
 };

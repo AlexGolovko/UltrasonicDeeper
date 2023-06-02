@@ -6,7 +6,7 @@ export interface Comparable extends Hashable {
     equals(obj: Comparable): boolean
 }
 
-export class HahSet<T extends Comparable> {
+export class HashSet<T extends Comparable> {
     private bucketSize = 32
     private buckets = new Array<Array<T>>()
 

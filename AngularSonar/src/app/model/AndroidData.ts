@@ -1,4 +1,5 @@
 import {SonarData} from './SonarData';
+import {error} from "protractor";
 
 export class AndroidData extends SonarData {
     public time: string;
@@ -11,7 +12,7 @@ export class AndroidData extends SonarData {
     readonly speed: number | null;
 
     constructor(depth: string, battery: string, temperature: string, position: GeolocationPosition, date: string) {
-        super(depth, battery, temperature);
+        super(depth, battery, temperature, null);
         this.time = date;
         if (position) {
             this.accuracy = position.coords.accuracy;

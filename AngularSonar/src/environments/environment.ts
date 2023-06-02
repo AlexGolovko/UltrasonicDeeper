@@ -5,11 +5,10 @@
 export const environment = {
     production: false,
     url: 'http://localhost:8080/sonar',
-    wsEndpoint: 'ws://localhost:7070/sonar',
+    wsEndpoint: 'ws://192.168.31.151:7070/sonar',
     androidHost: '192.168.31.34',
     interval: 333,
-    timeout: 300,
-    listSize: 10
+    timeout: 300
 };
 
 /*
