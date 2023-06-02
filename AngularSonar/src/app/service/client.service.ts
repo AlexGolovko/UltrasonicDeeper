@@ -14,7 +14,6 @@ export class ClientService {
     private readonly sonarInfo: BehaviorSubject<SonarState>;
     private sonarClientData: BehaviorSubject<SonarClientData>;
     private clientInterval: any;
-    private ws: Observable<unknown>;
 
     constructor() {
         const sonarClientData = new SonarClientData();
@@ -22,32 +21,37 @@ export class ClientService {
         sonarClientData.waterTemp = 0;
         sonarClientData.depth = 0;
         this.sonarClientData = new BehaviorSubject<SonarClientData>(sonarClientData);
-
-
-        this.ws = this.getObservable()
-        this.ws.subscribe(next => this.handleMessage(next), err => this.handleMessageError(err),)
-
         this.sonarInfo = new BehaviorSubject<SonarState>({isSonarAvailable: false, isMeasureSuccess: false});
+        this.connectWebSocket()
     }
 
-    private getObservable() {
-        return new Observable(
-            observer => {
-                let webSocket = new WebSocket(environment.wsEndpoint);
-                webSocket.onopen = function (event) {
-                    console.log('WebSocket is connected.');
-                }
-                webSocket.onmessage = function (event) {
-                    observer.next(event.data);
-                }
-                webSocket.onerror = function (event) {
-                    observer.error(event);
-                }
-                webSocket.onclose = function (event) {
-                    observer.complete();
-                }
-            }
-        );
+    private connectWebSocket() {
+        const webSocket = new WebSocket(environment.wsEndpoint);
+
+        webSocket.onopen = () => {
+            console.log('WebSocket is connected.');
+
+            const observer = {
+                next: message => this.handleMessage(message),
+                error: err => this.handleMessageError(err),
+                complete: () => console.log('complete'),
+            };
+            webSocket.onmessage = (event) => {
+                observer.next(event.data);
+            };
+            webSocket.onerror = (event) => {
+                observer.error(event);
+            };
+            webSocket.onclose = () => {
+                console.log('WebSocket connection closed. Reconnecting...');
+                this.connectWebSocket();
+            };
+        };
+
+        webSocket.onclose = () => {
+            console.log('WebSocket connection closed. Reconnecting...');
+            this.connectWebSocket();
+        };
     }
 
     private handleMessage(messageStr: any) {
