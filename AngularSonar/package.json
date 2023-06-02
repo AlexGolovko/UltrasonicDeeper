@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start_dev": "ng serve  --configuration development --live-reload",
     "build": "ng build --configuration=production --base-href=. --optimization=false",
     "test": "ng test",
     "lint": "ng lint",

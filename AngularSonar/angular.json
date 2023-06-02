@@ -40,7 +40,7 @@
               "baseHref": ".",
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
+              "sourceMap": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
@@ -57,6 +57,14 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           }
         },
@@ -68,6 +76,9 @@
           "configurations": {
             "production": {
               "browserTarget": "AngularSonar:build:production"
+            },
+            "development": {
+              "browserTarget": "AngularSonar:build:development"
             }
           }
         },
