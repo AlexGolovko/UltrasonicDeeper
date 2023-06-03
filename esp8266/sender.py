@@ -1,3 +1,4 @@
+import json
 import uasyncio, urequests
 import ulogging
 import utime
@@ -22,8 +23,8 @@ def sendSonarData(client_ip):
 
 
 def message():
-    return {"status": str(store.status), "depth": str(store.depth),
-            "battery": str(store.battery), "temperature": str(store.ds_temperature)}
+    return json.dumps({"status": str(store.status), "depth": str(store.depth),
+                       "battery": str(store.battery), "temperature": str(store.ds_temperature)})
 
 
 def sendSonarDataLoop():
@@ -36,4 +37,4 @@ def sendSonarDataLoop():
 
 
 def sendWsSonarData(wsclient):
-    uasyncio.run(wsclient.send(str(message())))
+    uasyncio.run(wsclient.send(message()))
