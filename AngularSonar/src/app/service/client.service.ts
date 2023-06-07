@@ -97,10 +97,12 @@ export class ClientService {
 
     }
 
-    static updateBatteryLevel(batteryADC: number): number {
+    static updateBatteryLevel(voltage: number): number {
+        const maxVoltage = 4.15; // Maximum voltage (fully charged)
+        const minVoltage = 3.0; // Minimum voltage (discharged)
         try {
-            const batteryVcc: number = (4.3 * Number(batteryADC.toFixed(2)) / 1023) - 0.25
-            const batteryLevel = Math.trunc(100 * batteryVcc - 300)
+            // Calculate the percentage based on the voltage range
+            const batteryLevel = ((voltage - minVoltage) / (maxVoltage - minVoltage)) * 100;
             if (batteryLevel > 100) {
                 return 100
             }
