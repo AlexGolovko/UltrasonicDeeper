@@ -109,7 +109,7 @@ export class ClientService {
             if (batteryLevel < 0) {
                 return 1
             }
-            return batteryLevel
+            return Math.round(batteryLevel)
         } catch (e) {
             console.log(e);
             return 1
