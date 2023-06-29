@@ -7,13 +7,13 @@ deep_sleep_time = 600
 
 async def run():
     while True:
-        await uasyncio.sleep(60)
+        await uasyncio.sleep(120)
         increase()
 
 
 def increase():
     import store
-    store.deep_sleep_count += 60
+    store.deep_sleep_count += 120
     if store.deep_sleep_count > deep_sleep_time:
         go_sleep()
 

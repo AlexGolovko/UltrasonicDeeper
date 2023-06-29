@@ -11,13 +11,9 @@ pins.D0.on()
 def goAsync():
     ulogging.basicConfig(level=ulogging.WARNING)
     try:
-        import runner
-        runner.run()
+        import microdot_async_runner
     except Exception as err:
         ulogging.info(str(err))
-        loop = uasyncio.get_event_loop()
-        loop.stop()
-        loop.close()
         machine.reset()
 
 
@@ -28,4 +24,4 @@ def goSync():
 
 
 if __name__ == '__main__':
-    goSync()
+    goAsync()

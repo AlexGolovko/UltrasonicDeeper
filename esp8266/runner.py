@@ -11,6 +11,7 @@ import deeper
 import ipfinder
 import pins
 import sender
+import store
 import switcher
 import ultraServer
 
@@ -50,12 +51,12 @@ def start():
             ulogging.debug('execution time get ip: {}'.format(utime.ticks_diff(utime.ticks_ms(), start_time)))
             battery.save_battery_level()
             deeper.depth()
-            ulogging.debug('execution time deeper: {}'.format(utime.ticks_diff(utime.ticks_ms(), start_time)))
+            ulogging.debug('execution time deeper: {} depth: {}'.format(utime.ticks_diff(utime.ticks_ms(), start_time), store.depth))
             sender.sendWsSonarData(wsClient)
             execution_time_ms = utime.ticks_diff(utime.ticks_ms(), start_time)
             ulogging.debug('execution time: {}'.format(execution_time_ms))
-            utime.sleep_ms(100 - execution_time_ms)
-            start_time = utime.ticks_ms()
+            utime.sleep_ms(200 - execution_time_ms)
+            start_time = utime.tiimcks_ms()
         except Exception as err:
             ulogging.info(str(err))
             client_ip = None

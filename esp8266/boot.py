@@ -49,13 +49,14 @@ def install_packages():
             try:
                 import uasyncio
                 import ulogging
+                import urequests
                 return
             except Exception as err:
                 print(err)
                 import upip
                 upip.install('micropython-uasyncio')
                 upip.install('micropython-ulogging')
-                upip.install('micropython-umqtt.simple2')
+                upip.install('micropython-urequests')
     except Exception as err:
         print(err)
 
