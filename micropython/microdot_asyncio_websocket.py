@@ -91,6 +91,7 @@ def with_websocket(f):
                 message = await ws.receive()
                 await ws.send(message)
     """
+
     async def wrapper(request, *args, **kwargs):
         ws = await websocket_upgrade(request)
         try:
@@ -100,4 +101,5 @@ def with_websocket(f):
             if exc.errno not in [32, 54, 104]:  # pragma: no cover
                 raise
         return ''
+
     return wrapper

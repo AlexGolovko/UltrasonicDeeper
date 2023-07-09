@@ -1,11 +1,8 @@
 import machine
-import uasyncio
 import ulogging
-
 import pins
 
 pins.D0.on()
-
 
 
 def goAsync():
@@ -14,7 +11,7 @@ def goAsync():
         import microdot_async_runner
     except Exception as err:
         ulogging.info(str(err))
-        machine.reset()
+        # machine.reset()
 
 
 def goSync():

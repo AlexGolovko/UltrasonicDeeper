@@ -30,6 +30,7 @@ def _iscoroutine(coro):
     return hasattr(coro, 'send') and hasattr(coro, 'throw')
 
 
+
 class _AsyncBytesIO:
     def __init__(self, data):
         self.stream = io.BytesIO(data)

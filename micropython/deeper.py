@@ -1,4 +1,4 @@
-import uasyncio, ulogging, pins, machine, math, ujson, sonicSensorA19, store
+import uasyncio, ulogging, math, sonicSensorA19, store
 
 
 async def run():

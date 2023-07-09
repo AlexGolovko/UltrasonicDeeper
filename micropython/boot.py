@@ -10,8 +10,8 @@ esp.osdebug(None)
 pins.BLUE.on()
 pins.D0.on()
 
-
 machine.freq(160000000)
+
 
 def do_create_apif():
     ssid = 'sonar'
@@ -47,23 +47,23 @@ def install_packages():
         wlan = network.WLAN(network.STA_IF)
         if wlan.isconnected():
             try:
-                import uasyncio
+                # import uasyncio
                 import ulogging
-                import urequests
+                # import urequests
                 return
             except Exception as err:
                 print(err)
                 import upip
-                upip.install('micropython-uasyncio')
+                # upip.install('micropython-uasyncio')
                 upip.install('micropython-ulogging')
-                upip.install('micropython-urequests')
+                # upip.install('micropython-urequests')
     except Exception as err:
         print(err)
 
 
 do_create_apif()
 # do_connect('VseBudeUkraine', 'golalexser')
-# install_packages()
+install_packages()
 # try:
 #     import webrepl
 #     webrepl.start()

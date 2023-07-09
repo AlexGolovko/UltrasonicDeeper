@@ -1,29 +1,14 @@
-import ds18x20
-import machine
-import onewire
 import uasyncio
 import ulogging
 
-# global trig, echo, ds_pin, ds_sensor, timeout, roms
-# LOLIN D1 mini v3.1.0
-# Trig-D6-GPIO12
-# Echo-D5-GPIO14
-# trig = machine.Pin(12, machine.Pin.OUT)
-# echo = machine.Pin(14, machine.Pin.IN)
-# trig = machine.Pin(12, machine.Pin.OUT, pull=None)
-# trig.value(0)
-# echo = machine.Pin(14, machine.Pin.IN, pull=None)
-# Ai-Thinker ESP-C3-12F
-# Trig-IO1-GPIO1
-# Echo-IO2-GPIO2
-# moved to methods
-# trig = machine.Pin(1, mode=machine.Pin.OUT, pull=machine.Pin.PULL_DOWN)
-# trig.value(0)
-# echo = machine.Pin(2, mode=machine.Pin.IN, pull=machine.Pin.PULL_DOWN)
-
-ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
+import sensor
+import store
+import ds18x20
+import machine
+import onewire
 
 global ds_sensor, roms
+ds_pin = machine.Pin(0, machine.Pin.PULL_UP)
 
 
 def init():
@@ -54,3 +39,13 @@ def temperature():
     except Exception as err:
         ulogging.error(str(err))
         return -273
+
+
+async def run():
+    while True:
+        try:
+            store.ds_temperature = temperature()
+            ulogging.debug('temperature= ' + str(store.ds_temperature))
+            await uasyncio.sleep(30)
+        except Exception as err:
+            ulogging.debug(str(err))

@@ -1,5 +1,5 @@
 import time
-import uasyncio, ulogging, pins, machine
+import uasyncio, pins, machine
 import utime
 
 deep_sleep_time = 600
