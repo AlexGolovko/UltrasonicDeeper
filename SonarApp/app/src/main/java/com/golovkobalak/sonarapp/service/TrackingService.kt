@@ -1,5 +1,6 @@
 package com.golovkobalak.sonarapp.service
 
+import android.location.Location
 import android.util.Log
 import com.golovkobalak.sonarapp.SonarContext.filesDirAbsPath
 import com.golovkobalak.sonarapp.model.GeoSquare
@@ -34,6 +35,27 @@ class TrackingService {
             Log.w(this.javaClass.name, e)
         }
         return list
+    }
+
+    fun save(message: String) {
+        try {
+            Log.i(TAG, "save: $message")
+            try {
+                val sonarData = gson.fromJson(message, SonarData::class.java)
+                if(LocationHelper.CURR_LOCATION != null){
+                    sonarData.latitude = LocationHelper.CURR_LOCATION.latitude
+                    sonarData.longitude = LocationHelper.CURR_LOCATION.longitude
+                    sonarData.accuracy = LocationHelper.CURR_LOCATION.accuracy.toString()
+                    sonarData.speed = LocationHelper.CURR_LOCATION.speed.toString()
+                }
+
+                repo.save(sonarData)
+            } catch (e: Exception) {
+                Log.w(this.javaClass.name, e)
+            }
+        } catch (e: Exception) {
+            Log.w(this.javaClass.name, e)
+        }
     }
 
     companion object {

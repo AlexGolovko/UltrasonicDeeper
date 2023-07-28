@@ -1,7 +1,6 @@
 package com.golovkobalak.sonarapp;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,6 +18,7 @@ import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.SonarController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
 import com.golovkobalak.sonarapp.controller.WsController;
+import com.golovkobalak.sonarapp.service.LocationHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import io.realm.Realm;
 
@@ -28,14 +28,18 @@ public class MainActivity extends AppCompatActivity {
     private final TrackingController trackingController = new TrackingController();
     private final SonarController sonarController = new SonarController();
     private final WsController wsController = new WsController();
+    private LocationHelper locationHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Realm.init(this.getBaseContext());
         Logger.init(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS));
         super.onCreate(savedInstanceState);
+
         saveFileDirPath();
         SonarContext.setAssetManager(getAssets());
+        locationHelper = new LocationHelper(this);
+        locationHelper.requestLocationUpdates();
         trackingController.start();
         sonarController.start();
         wsController.start();

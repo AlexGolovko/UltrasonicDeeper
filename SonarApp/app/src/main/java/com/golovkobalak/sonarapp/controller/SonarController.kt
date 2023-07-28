@@ -4,11 +4,14 @@ import android.content.res.AssetManager
 import android.util.Log
 import com.golovkobalak.sonarapp.SonarContext
 import com.golovkobalak.sonarapp.model.Config
+import com.google.gson.Gson
 import io.javalin.Javalin
 import io.javalin.core.JavalinConfig
 import io.javalin.http.ContentType
 import io.javalin.http.ContentType.Companion.getContentTypeByExtension
 import io.javalin.http.Context
+import org.eclipse.jetty.server.Server
+import org.eclipse.jetty.util.thread.QueuedThreadPool
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.IOException
@@ -21,6 +24,8 @@ class SonarController {
 
     fun updateConfig(javalinConfig: JavalinConfig) {
         javalinConfig.enableCorsForAllOrigins()
+        val threadPool = QueuedThreadPool(4, 4)
+        javalinConfig.server { Server(threadPool) }
         val assetManager = SonarContext.assetManager
         val configs: MutableList<Config> = ArrayList()
         try {
@@ -82,6 +87,7 @@ class SonarController {
     }
 
     private fun getContentType(asset: String): ContentType {
+        Log.d(TAG, "getContentType: $asset")
         return getContentTypeByExtension(asset.substring(asset.lastIndexOf(".") + 1))!!
     }
 
@@ -91,5 +97,7 @@ class SonarController {
 
     companion object {
         private const val PORT = 4242
+        private val TAG = SonarController::class.java.name
+
     }
 }

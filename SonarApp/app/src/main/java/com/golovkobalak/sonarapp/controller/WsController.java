@@ -47,6 +47,7 @@ public class WsController {
                 Log.e(TAG, LocalTime.now() + " onMessage: " + text);
                 scheduleErrorNotification();
                 sendMessageToClients(text);
+                trackingService.save(text);
             }
 
             @Override

@@ -38,4 +38,13 @@ public class SonarDataRepository {
                 .lessThan(SonarData.Field.LONGITUDE, geoSquare.east)
                 .findAll();
     }
+
+    public void save(SonarData sonarData) {
+        try (Realm instance = Realm.getInstance(SonarDataRepoConfig.getConfig())) {
+            instance.beginTransaction();
+            instance.copyToRealm(sonarData);
+            instance.commitTransaction();
+        }
+
+    }
 }
