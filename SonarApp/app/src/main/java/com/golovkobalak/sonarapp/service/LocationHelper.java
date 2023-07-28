@@ -75,9 +75,6 @@ public class LocationHelper {
                 // Handle the new location here
                 CURR_LOCATION = location;
                 // Do something with latitude and longitude, e.g., update UI, send to server, etc.
-                Log.d(TAG, "long:" + longitude);
-                Log.d(TAG, "lat:" + latitude);
-
             }
 
             @Override
