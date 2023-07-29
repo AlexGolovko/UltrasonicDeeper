@@ -16,6 +16,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.SonarController;
+import com.golovkobalak.sonarapp.controller.TilesController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
 import com.golovkobalak.sonarapp.controller.WsController;
 import com.golovkobalak.sonarapp.service.LocationHelper;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private final SonarController sonarController = new SonarController();
     private final WsController wsController = new WsController();
     private LocationHelper locationHelper;
+    private TilesController tilesController = new TilesController();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
         trackingController.start();
         sonarController.start();
         wsController.start();
+        tilesController.start();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
         trackingController.destroy();
         sonarController.destroy();
         wsController.destroy();
+        tilesController.destroy();
         locationHelper.stopLocationUpdates();
     }
 }
