@@ -1,12 +1,12 @@
 package com.golovkobalak.sonarapp.service
 
-import android.location.Location
 import android.util.Log
 import com.golovkobalak.sonarapp.SonarContext.filesDirAbsPath
 import com.golovkobalak.sonarapp.model.GeoSquare
 import com.golovkobalak.sonarapp.model.Marker
 import com.golovkobalak.sonarapp.model.SonarData
-import com.golovkobalak.sonarapp.repository.SonarDataRepository
+import com.golovkobalak.sonarapp.repository.RepoFactory
+import com.golovkobalak.sonarapp.repository.realm.SonarDataRealmRepository
 import com.google.gson.Gson
 import java.util.*
 
@@ -61,6 +61,6 @@ class TrackingService {
     companion object {
         private val TAG = TrackingService::class.java.simpleName
         private val gson = Gson()
-        private val repo = SonarDataRepository()
+        private val repo = RepoFactory().sonarDataRepository();
     }
 }

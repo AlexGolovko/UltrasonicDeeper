@@ -1,4 +1,4 @@
-package com.golovkobalak.sonarapp.repository;
+package com.golovkobalak.sonarapp.repository.realm;
 
 import io.realm.DynamicRealm;
 import io.realm.RealmConfiguration;
