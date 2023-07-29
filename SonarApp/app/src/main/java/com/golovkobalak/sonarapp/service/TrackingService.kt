@@ -20,9 +20,6 @@ class TrackingService {
         }
     }
 
-    val mapCacheDir: String
-        get() = "file://" + filesDirAbsPath + "/Tiles"
-
     fun getMarkers(geoSquare: GeoSquare?): List<Marker> {
         val list = ArrayList<Marker>()
         try {

@@ -33,16 +33,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 maxZoom: 19,
                 crossOrigin: true
             });
-        androidService.getMapCacheDir().subscribe(response => {
-            console.log('androidService.getMapCacheDir():' + response)
-            this.cachedTiles = new TileLayer(response + '/{z}/{x}/{y}.png', {
-                minZoom: 19,
-                maxZoom: 19,
-                crossOrigin: true
-            });
-            this.cachedTiles.addTo(this.map)
-        })
-
     }
 
     ngOnInit(): void {
@@ -70,6 +60,12 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             maxZoom: 19
         });
         this.tiles.addTo(this.map);
+        this.cachedTiles = new TileLayer('http://localhost:7000/{z}/{x}/{y}.png', {
+            minZoom: 19,
+            maxZoom: 19,
+            crossOrigin: true
+        });
+        this.cachedTiles.addTo(this.map)
         this.map.invalidateSize({debounceMoveend: true});
         const greenIcon = new Icon({
             iconUrl: 'assets/marker-icon-2x.png',

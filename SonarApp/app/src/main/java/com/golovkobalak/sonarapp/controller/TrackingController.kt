@@ -37,11 +37,6 @@ class TrackingController {
         javalin.get("/sonar", Handler { ctx: Context ->
             ctx.result(currentData)
         })
-        //GET http://localhost:8080/system/mapCacheDir
-        javalin.get("/system/mapCacheDir", Handler { ctx: Context ->
-            val mapCacheDir = trackingService.mapCacheDir
-            ctx.result(gson.toJson(mapCacheDir))
-        })
         //GET http://localhost:8080/marker?north=49.960455723200724&east=36.34042262789566&south=49.955769014252176&west=36.33620619532426
         javalin.get("/marker", Handler { ctx: Context ->
             val queryParamMap = ctx.queryParamMap()

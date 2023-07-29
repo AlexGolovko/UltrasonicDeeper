@@ -21,10 +21,6 @@ export class AndroidBridgeService {
         this.baseUrl = 'http://' + environment.androidHost + ':8080';
     }
 
-    getMapCacheDir(): Observable<string> {
-        return this.http.get<string>(this.baseUrl + '/system/mapCacheDir');
-    }
-
     getMarkers(geoSquare: GeoSquare): Observable<DepthMarker> {
         return new Observable((observer) => {
             const markerObservable = this.http.get<Array<DepthMarker>>(this.baseUrl + '/marker', {
