@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
         saveFileDirPath();
         SonarContext.setAssetManager(getAssets());
-        locationHelper = new LocationHelper(this);
-        locationHelper.start();
         trackingController.start();
         sonarController.start();
         wsController.start();
@@ -63,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
         }
+        locationHelper = new LocationHelper(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
