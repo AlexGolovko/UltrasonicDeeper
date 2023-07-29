@@ -1,6 +1,7 @@
 package com.golovkobalak.sonarapp.controller
 
 import android.util.Log
+import android.widget.Toast
 import com.golovkobalak.sonarapp.model.GeoSquare
 import com.golovkobalak.sonarapp.service.TrackingService
 import com.google.gson.Gson
@@ -10,6 +11,7 @@ import io.javalin.http.Context
 import io.javalin.http.Handler
 
 class TrackingController {
+    private var currentData = ""
     private var app: Javalin? = null
     fun start() {
         val javalin = Javalin.create { obj: JavalinConfig -> obj.enableCorsForAllOrigins() }.start(PORT)
@@ -24,10 +26,16 @@ class TrackingController {
             trackingService.saveTrackingList(body)
             ctx.status(201)
         })
-        //GET http://localhost:8080/system/map/cache/dir
-        javalin.get("/system/mapCacheDir", Handler { ctx: Context ->
-            val mapCacheDir = trackingService.mapCacheDir
-            ctx.result(gson.toJson(mapCacheDir))
+        //POST http://localhost:8080/sonar
+        javalin.post("/sonar", Handler { ctx: Context ->
+            val body = ctx.body()
+            Log.i(this.javaClass.name, "body:" + body)
+            currentData = body
+            ctx.status(201)
+        })
+        //GET http://localhost:8080/sonar
+        javalin.get("/sonar", Handler { ctx: Context ->
+            ctx.result(currentData)
         })
         //GET http://localhost:8080/marker?north=49.960455723200724&east=36.34042262789566&south=49.955769014252176&west=36.33620619532426
         javalin.get("/marker", Handler { ctx: Context ->

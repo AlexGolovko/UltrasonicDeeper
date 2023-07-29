@@ -11,7 +11,6 @@ import {LeafletModule} from '@asymmetrik/ngx-leaflet';
 import {CanvasComponent} from './canvas/canvas.component';
 import {HttpClientModule} from '@angular/common/http';
 
-
 const appRoutes: Routes = [
     {path: '', component: ClientComponent},
     {path: 'map', component: MapComponent},

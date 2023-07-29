@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -15,12 +14,13 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-
 import com.golovkobalak.sonarapp.config.Logger;
 import com.golovkobalak.sonarapp.controller.SonarController;
+import com.golovkobalak.sonarapp.controller.TilesController;
 import com.golovkobalak.sonarapp.controller.TrackingController;
+import com.golovkobalak.sonarapp.controller.WsController;
+import com.golovkobalak.sonarapp.service.LocationHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
 import io.realm.Realm;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,16 +28,22 @@ public class MainActivity extends AppCompatActivity {
     public static final String SESSION_ID = String.valueOf(System.currentTimeMillis());
     private final TrackingController trackingController = new TrackingController();
     private final SonarController sonarController = new SonarController();
+    private final WsController wsController = new WsController();
+    private LocationHelper locationHelper;
+    private TilesController tilesController = new TilesController();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Realm.init(this.getBaseContext());
         Logger.init(this.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS));
         super.onCreate(savedInstanceState);
+
         saveFileDirPath();
         SonarContext.setAssetManager(getAssets());
         trackingController.start();
         sonarController.start();
+        wsController.start();
+        tilesController.start();
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -58,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Location permissions already granted", Toast.LENGTH_SHORT).show();
         }
+        locationHelper = new LocationHelper(this);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -70,9 +77,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         trackingController.destroy();
         sonarController.destroy();
+        wsController.destroy();
+        tilesController.destroy();
+        locationHelper.stopLocationUpdates();
     }
 }

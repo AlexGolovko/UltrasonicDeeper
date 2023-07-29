@@ -5,7 +5,7 @@ import {GeoService} from '../service/geo.service';
 import {AndroidBridgeService} from '../service/android-bridge.service';
 import {GeoSquare} from '../model/GeoSquare';
 import {DepthMarker} from '../model/DepthMarker';
-import {HahSet} from '../model/HahSet';
+import {HashSet} from '../model/HashSet';
 import {Depth2Color} from '../model/depth2.color';
 
 
@@ -19,7 +19,7 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
     private map: Map;
     private tiles: TileLayer;
     private cachedTiles: TileLayer;
-    private readonly cachedMarkers = new HahSet<DepthMarker>();
+    private readonly cachedMarkers = new HashSet<DepthMarker>();
     private depth2color: Depth2Color = new Depth2Color();
 
     constructor(private mapService: MapService, private geoService: GeoService, private androidService: AndroidBridgeService) {
@@ -33,16 +33,6 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
                 maxZoom: 19,
                 crossOrigin: true
             });
-        androidService.getMapCacheDir().subscribe(response => {
-            console.log('androidService.getMapCacheDir():' + response)
-            this.cachedTiles = new TileLayer(response + '/{z}/{x}/{y}.png', {
-                minZoom: 19,
-                maxZoom: 19,
-                crossOrigin: true
-            });
-            this.cachedTiles.addTo(this.map)
-        })
-
     }
 
     ngOnInit(): void {
@@ -70,6 +60,12 @@ export class MapLoadComponent implements OnInit, AfterViewInit {
             maxZoom: 19
         });
         this.tiles.addTo(this.map);
+        this.cachedTiles = new TileLayer('http://localhost:7000/{z}/{x}/{y}.png', {
+            minZoom: 19,
+            maxZoom: 19,
+            crossOrigin: true
+        });
+        this.cachedTiles.addTo(this.map)
         this.map.invalidateSize({debounceMoveend: true});
         const greenIcon = new Icon({
             iconUrl: 'assets/marker-icon-2x.png',

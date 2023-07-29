@@ -57,6 +57,14 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
             }
           }
         },
@@ -68,6 +76,9 @@
           "configurations": {
             "production": {
               "browserTarget": "AngularSonar:build:production"
+            },
+            "development": {
+              "browserTarget": "AngularSonar:build:development"
             }
           }
         },
@@ -109,5 +120,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

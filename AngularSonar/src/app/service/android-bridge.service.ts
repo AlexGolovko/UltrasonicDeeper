@@ -12,8 +12,6 @@ import {Observable} from 'rxjs';
     providedIn: 'root'
 })
 export class AndroidBridgeService {
-    private androidDataList: Array<AndroidData> = new Array<AndroidData>()
-    private androidListSendSize: number = environment.listSize;
 
     private http: HttpClient;
     private baseUrl: string;
@@ -21,21 +19,6 @@ export class AndroidBridgeService {
     constructor(http: HttpClient) {
         this.http = http
         this.baseUrl = 'http://' + environment.androidHost + ':8080';
-    }
-
-    getMapCacheDir(): Observable<string> {
-        return this.http.get<string>(this.baseUrl + '/system/mapCacheDir');
-    }
-
-    saveAndroidData(response: SonarClientData, crd: GeolocationPosition): void {
-        const data: AndroidData = new AndroidData(response.depth.toString(),
-            response.batteryLevel.toString(),
-            response.waterTemp.toString(),
-            crd, String(Date.now()));
-        if (this.androidDataList.length > this.androidListSendSize) {
-            this.http.post(this.baseUrl + '/tracking', JSON.stringify(this.androidDataList.splice(0)))
-        }
-        this.androidDataList.push(data);
     }
 
     getMarkers(geoSquare: GeoSquare): Observable<DepthMarker> {
