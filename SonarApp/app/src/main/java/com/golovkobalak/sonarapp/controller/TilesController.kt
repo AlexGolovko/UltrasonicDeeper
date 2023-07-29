@@ -3,6 +3,7 @@ package com.golovkobalak.sonarapp.controller
 import android.util.Log
 import com.golovkobalak.sonarapp.SonarContext
 import io.javalin.Javalin
+import io.javalin.core.JavalinConfig
 import java.io.File
 
 class TilesController {
@@ -10,8 +11,7 @@ class TilesController {
 
     private var app: Javalin? = null
     fun start() {
-        app = Javalin.create().start(7000)
-
+        app = Javalin.create{ obj: JavalinConfig -> obj.enableCorsForAllOrigins() }.start(7000)
         // Add the "/{z}/{x}/{y}.png" route and associate it with the handler
         app!!.get("/{z}/{x}/{y}.png") { ctx ->
             // Extract the z, x, and y values from the path parameters
@@ -27,7 +27,6 @@ class TilesController {
             if (imageFile.exists() && imageFile.isFile) {
                 // Set the Content-Type header to "image/png"
                 ctx.contentType("image/png")
-
                 // Return the image file
                 ctx.result(imageFile.readBytes())
             } else {
@@ -36,10 +35,9 @@ class TilesController {
             }
         }
         Log.d(TAG, "started")
-
     }
     fun destroy() {
-        app!!.stop();
+        app!!.stop()
     }
 
 }
