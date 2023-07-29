@@ -1,4 +1,4 @@
-# Ultrasonic Depth Sensor with MQTT Communication
+# Ultrasonic Depth Sensor with Websocket Communication
 The Ultrasonic Depth Sensor pet project involves using an Android phone as an ws client, an ESP32 running MicroPython as a Wi-Fi access point and ws server for sonar data, and an Angular app as a user interface.
 
 The architecture consists of three main components:
