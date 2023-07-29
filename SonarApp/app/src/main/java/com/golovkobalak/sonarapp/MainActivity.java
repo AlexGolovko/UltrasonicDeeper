@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         saveFileDirPath();
         SonarContext.setAssetManager(getAssets());
         locationHelper = new LocationHelper(this);
-        locationHelper.requestLocationUpdates();
+        locationHelper.start();
         trackingController.start();
         sonarController.start();
         wsController.start();
@@ -85,5 +85,6 @@ public class MainActivity extends AppCompatActivity {
         trackingController.destroy();
         sonarController.destroy();
         wsController.destroy();
+        locationHelper.stopLocationUpdates();
     }
 }

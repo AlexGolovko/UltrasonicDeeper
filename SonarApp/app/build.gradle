@@ -111,4 +111,7 @@ dependencies {
     androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
     // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
     // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.android.service
+
+    implementation 'com.google.android.gms:play-services-location:17.1.0'
+
 }

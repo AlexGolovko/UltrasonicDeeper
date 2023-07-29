@@ -1,116 +1,60 @@
 package com.golovkobalak.sonarapp.service;
 
-
-import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.util.Log;
-import android.widget.Toast;
+import android.os.Looper;
 
-import androidx.core.app.ActivityCompat;
+import android.util.Log;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 public class LocationHelper {
-    public static Location CURR_LOCATION;
 
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-    private static final long MIN_TIME_BETWEEN_UPDATES = 100; // Minimum time between location updates (in milliseconds)
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 0.1f; // Minimum distance between location updates (in meters)
-    private static final String TAG = LocationHelper.class.getName();
-
-    private Context context;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
-    private HandlerThread handlerThread;
-    private Handler backgroundHandler;
+    public static Location CURR_LOCATION; // Static field to store the latest location
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
 
     public LocationHelper(Context context) {
-        this.context = context;
-        handlerThread = new HandlerThread("LocationHandlerThread");
-        handlerThread.start();
-        backgroundHandler = new Handler(handlerThread.getLooper());
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        createLocationRequest();
+        createLocationCallback();
     }
 
-    public void requestLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Permission is not granted, request it
-            ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_REQUEST_CODE);
-        } else {
-            // Permission is already granted, start getting the location
-            startLocationUpdatesInBackground();
-        }
+    private void createLocationRequest() {
+        locationRequest = LocationRequest.create();
+        locationRequest.setInterval(1000); // Update interval in milliseconds (e.g., every 1 seconds)
+        locationRequest.setFastestInterval(500); // Fastest update interval in milliseconds
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY); // High accuracy mode
     }
 
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted, start getting the location
-                startLocationUpdatesInBackground();
-            } else {
-                // Permission is denied, handle accordingly
-                Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void startLocationUpdatesInBackground() {
-        backgroundHandler.post(this::startLocationUpdates);
-    }
-
-    private void startLocationUpdates() {
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        Log.d(TAG, "startLocationUpdates:");
-        locationListener = new LocationListener() {
+    private void createLocationCallback() {
+        locationCallback = new LocationCallback() {
             @Override
-            public void onLocationChanged(Location location) {
-                // Handle the new location here
-                CURR_LOCATION = location;
-                // Do something with latitude and longitude, e.g., update UI, send to server, etc.
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult != null) {
+                    Location location = locationResult.getLastLocation();
+                    if (location != null) {
+                        CURR_LOCATION = location; // Update the static field with the latest location
+                    }
+                }
             }
         };
+    }
 
-        // Request location updates
-        try {
-            locationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER,
-                    MIN_TIME_BETWEEN_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    locationListener);
-        } catch (SecurityException e) {
-            Log.d(TAG, "startLocationUpdates failed: ");
-            e.printStackTrace();
-        }
+    public void start() {
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
     public void stopLocationUpdates() {
-        // Don't forget to stop location updates when needed
-        if (locationManager != null && locationListener != null) {
-            locationManager.removeUpdates(locationListener);
-        }
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+    }
 
-        if (handlerThread != null) {
-            handlerThread.quit();
-        }
+    // Method to get the last known location from the static field
+    public static Location getLastLocation() {
+        return CURR_LOCATION;
     }
 }

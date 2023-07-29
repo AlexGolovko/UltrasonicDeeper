@@ -41,11 +41,11 @@ class TrackingService {
             Log.i(TAG, "save: $message")
             try {
                 val sonarData = gson.fromJson(message, SonarData::class.java)
-                if (LocationHelper.CURR_LOCATION != null) {
-                    sonarData.latitude = LocationHelper.CURR_LOCATION.latitude
-                    sonarData.longitude = LocationHelper.CURR_LOCATION.longitude
-                    sonarData.accuracy = LocationHelper.CURR_LOCATION.accuracy.toString()
-                    sonarData.speed = LocationHelper.CURR_LOCATION.speed.toString()
+                if (LocationHelper.getLastLocation() != null) {
+                    sonarData.latitude = LocationHelper.getLastLocation().latitude
+                    sonarData.longitude = LocationHelper.getLastLocation().longitude
+                    sonarData.accuracy = LocationHelper.getLastLocation().accuracy.toString()
+                    sonarData.speed = LocationHelper.getLastLocation().speed.toString()
                 }
 
                 repo.save(sonarData)
