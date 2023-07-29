@@ -5,8 +5,9 @@ plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
     id 'com.google.firebase.appdistribution'
-    id 'realm-android'
     id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'realm-android'
 }
 
 android {
@@ -39,14 +40,18 @@ android {
         ndkVersion '21.3.6528147'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        signingConfig signingConfigs.release
+        if (getenv('KEY_STORE_PASSWORD') != null) {
+            signingConfig signingConfigs.release
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (getenv('KEY_STORE_PASSWORD') != null) {
+                signingConfig signingConfigs.release
+            }
             firebaseAppDistribution {
                 releaseNotes = "Release notes at bit.ly/notes"
                 groups = "first-squad"
@@ -68,7 +73,7 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget=11
+        jvmTarget = 11
     }
     packagingOptions {
         resources {

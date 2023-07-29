@@ -42,7 +42,7 @@ public class SonarDataRealmRepository implements SonarDataRepository {
     }
 
     @Override
-    public void save(SonarData sonarData) {
+    public synchronized void save(SonarData sonarData) {
         try (Realm instance = Realm.getInstance(SonarDataRepoConfig.getConfig())) {
             instance.beginTransaction();
             instance.copyToRealm(sonarData);

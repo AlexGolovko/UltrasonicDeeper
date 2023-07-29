@@ -44,7 +44,7 @@ public class WsController {
 
             @Override
             public void onMessage(WebSocket webSocket, String text) {
-                Log.e(TAG, LocalTime.now() + " onMessage: " + text);
+                Log.d(TAG, LocalTime.now() + " onMessage: " + text);
                 scheduleErrorNotification();
                 sendMessageToClients(text);
                 trackingService.save(text);

@@ -7,6 +7,7 @@ open class SonarData(
     var depth: String, var battery: String, var temperature: String,
     var time: String, var altitude: String, var accuracy: String
 ) : RealmObject() {
+    constructor() : this("", "", "", "", "", "")
     var sessionId = MainActivity.SESSION_ID
     var altitudeAccuracy: String? = null
     var heading: String? = null

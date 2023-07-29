@@ -6,7 +6,6 @@ import com.golovkobalak.sonarapp.model.GeoSquare
 import com.golovkobalak.sonarapp.model.Marker
 import com.golovkobalak.sonarapp.model.SonarData
 import com.golovkobalak.sonarapp.repository.RepoFactory
-import com.golovkobalak.sonarapp.repository.realm.SonarDataRealmRepository
 import com.google.gson.Gson
 import java.util.*
 
@@ -42,7 +41,7 @@ class TrackingService {
             Log.i(TAG, "save: $message")
             try {
                 val sonarData = gson.fromJson(message, SonarData::class.java)
-                if(LocationHelper.CURR_LOCATION != null){
+                if (LocationHelper.CURR_LOCATION != null) {
                     sonarData.latitude = LocationHelper.CURR_LOCATION.latitude
                     sonarData.longitude = LocationHelper.CURR_LOCATION.longitude
                     sonarData.accuracy = LocationHelper.CURR_LOCATION.accuracy.toString()
