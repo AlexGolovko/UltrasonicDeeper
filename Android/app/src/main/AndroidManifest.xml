@@ -12,6 +12,18 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Sonar"
             tools:targetApi="31">
+
+        <activity
+                android:name=".MapActivity"
+                android:exported="false"
+                android:label="@string/title_activity_map"
+                android:theme="@style/Theme.Sonar"/>
+        <activity
+                android:name=".SonarActivity"
+                android:exported="false"
+                android:label="@string/title_activity_sonar"
+                android:parentActivityName=".MainActivity"
+                android:theme="@style/Theme.Sonar"/>
         <activity
                 android:name=".MainActivity"
                 android:exported="true"
@@ -24,5 +36,7 @@
             </intent-filter>
         </activity>
     </application>
-
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 </manifest>
