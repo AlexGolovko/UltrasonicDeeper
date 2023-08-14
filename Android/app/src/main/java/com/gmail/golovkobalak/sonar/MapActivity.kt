@@ -4,8 +4,14 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +51,7 @@ fun MapScreen() {
         // Create a Box to stack the WebView and the button on top of each other
         Box(modifier = Modifier.fillMaxSize()) {
             // WebView in the background
-            val url = "https://www.openstreetmap.org/"
+            val url = "http://localhost:4242/load"
             WebViewScreen(url)
 
             // Progress bar
