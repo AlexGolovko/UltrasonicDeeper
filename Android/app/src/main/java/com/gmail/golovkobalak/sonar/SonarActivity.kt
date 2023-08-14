@@ -1,6 +1,7 @@
 package com.gmail.golovkobalak.sonar
 
 import android.annotation.SuppressLint
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -24,6 +25,7 @@ import com.gmail.golovkobalak.sonar.util.CustomChromClient
 class SonarActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
             SonarTheme {
