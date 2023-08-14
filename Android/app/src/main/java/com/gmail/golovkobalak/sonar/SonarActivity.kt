@@ -40,7 +40,8 @@ class SonarActivity : ComponentActivity() {
 
 @Composable
 fun SonarScreen() {
-    val url = "https://www.openstreetmap.org/"
+//    val url = "https://www.openstreetmap.org/"
+    val url = "http://localhost:4242/map"
     WebViewScreen(url)
 }
 

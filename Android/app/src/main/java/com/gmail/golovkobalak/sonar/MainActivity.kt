@@ -1,5 +1,6 @@
 package com.gmail.golovkobalak.sonar
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -20,8 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.gmail.golovkobalak.sonar.service.Runner
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
-import android.Manifest
 
 class MainActivity : ComponentActivity() {
     companion object {
@@ -31,6 +32,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Runner.start(assets, baseContext)
+
         setContent {
             SonarTheme {
                 // A surface container using the 'background' color from the theme
@@ -86,7 +89,9 @@ fun MainScreen() {
                             val intent = Intent(context, SonarActivity::class.java)
                             context.startActivity(intent)
                         },
-                        modifier = Modifier.padding(16.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
                     ) {
                         Text("Open Sonar")
                     }
@@ -96,7 +101,9 @@ fun MainScreen() {
                             val intent = Intent(context, MapActivity::class.java)
                             context.startActivity(intent)
                         },
-                        modifier = Modifier.padding(16.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
                     ) {
                         Text("Open Map")
                     }
