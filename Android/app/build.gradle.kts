@@ -65,5 +65,5 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("io.javalin:javalin:4.6.6")
-
+    implementation("org.osmdroid:osmdroid-android:6.1.13")
 }

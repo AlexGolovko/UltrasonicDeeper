@@ -1,6 +1,8 @@
 package com.gmail.golovkobalak.sonar
 
+import android.content.Context
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -21,11 +23,15 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.gmail.golovkobalak.sonar.service.heavyLogicSimulation
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.views.MapView
 
 
 class MapActivity : ComponentActivity() {
@@ -51,8 +57,7 @@ fun MapScreen() {
         // Create a Box to stack the WebView and the button on top of each other
         Box(modifier = Modifier.fillMaxSize()) {
             // WebView in the background
-            val url = "http://localhost:4242/load"
-            WebViewScreen(url)
+            MapOsm()
 
             // Progress bar
             if (isLoading) {
@@ -93,6 +98,31 @@ fun MapScreen() {
             }
         }
     }
+}
+
+@Composable
+fun MapOsm() {
+    val context = LocalContext.current
+    Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
+
+    val mapView = mapView(context)
+
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { mapView }
+    )
+}
+
+fun mapView(context: Context): MapView {
+    val mapView = MapView(context)
+    mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
+    mapView.setMultiTouchControls(true)
+    mapView.setHorizontalMapRepetitionEnabled(true);
+    mapView.setVerticalMapRepetitionEnabled(false);
+    mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0);
+    mapView.controller.setZoom(10.0);
+    mapView.minZoomLevel = 3.0
+    return mapView
 }
 
 @Preview(showBackground = true)
