@@ -56,9 +56,7 @@ fun MapScreen() {
     Surface(modifier = Modifier.fillMaxSize()) {
         // Create a Box to stack the WebView and the button on top of each other
         Box(modifier = Modifier.fillMaxSize()) {
-            // WebView in the background
             MapOsm()
-
             // Progress bar
             if (isLoading) {
                 // Progress bar (LinearProgressIndicator)
