@@ -19,24 +19,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.gmail.golovkobalak.sonar.service.LocationHelper
 import com.gmail.golovkobalak.sonar.service.heavyLogicSimulation
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 
 class MapActivity : ComponentActivity() {
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setContent {
             SonarTheme {
                 MapScreen()
@@ -48,7 +54,6 @@ class MapActivity : ComponentActivity() {
 @Composable
 fun MapScreen() {
     val context = LocalContext.current
-    val view = LocalView.current
     val scope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(0f) }
@@ -102,13 +107,19 @@ fun MapScreen() {
 fun MapOsm() {
     val context = LocalContext.current
     Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
-
     val mapView = mapView(context)
+    val marker = Marker(mapView)
 
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { mapView }
-    )
+    mapView.overlays.add(marker)
+    AndroidView(modifier = Modifier.fillMaxSize(),
+        factory = {
+            val currLocation = GeoPoint(LocationHelper.lastLocation.latitude, LocationHelper.lastLocation.longitude)
+            marker.position = GeoPoint(LocationHelper.lastLocation.latitude, LocationHelper.lastLocation.longitude)
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            mapView.controller.setCenter(currLocation)
+            mapView
+
+        })
 }
 
 fun mapView(context: Context): MapView {
@@ -118,7 +129,7 @@ fun mapView(context: Context): MapView {
     mapView.setHorizontalMapRepetitionEnabled(true);
     mapView.setVerticalMapRepetitionEnabled(false);
     mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0);
-    mapView.controller.setZoom(10.0);
+    mapView.controller.setZoom(16.0);
     mapView.minZoomLevel = 3.0
     return mapView
 }
