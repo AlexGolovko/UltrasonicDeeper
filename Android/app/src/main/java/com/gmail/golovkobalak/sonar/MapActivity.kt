@@ -111,12 +111,18 @@ fun MapOsm() {
     val marker = Marker(mapView)
     mapView.overlays.add(marker)
 
-    LaunchedEffect(LocationHelper.lastLocation){
-        LocationHelper.lastLocation.collect{newLocation ->
-            val currLocation = GeoPoint(newLocation.latitude, newLocation.longitude)
-            marker.position = GeoPoint(newLocation.latitude, newLocation.longitude)
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-            mapView.controller.setCenter(currLocation)
+    mapView.setUseDataConnection(true) // Enable map interaction
+    mapView.setMultiTouchControls(true) // Enable multi-touch gestures
+    var locationUpdate = 0;
+    LaunchedEffect(LocationHelper.lastLocation) {
+        LocationHelper.lastLocation.collect { newLocation ->
+            val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
+            marker.position = geoPoint
+            if (locationUpdate < 3) {
+                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                mapView.controller.setCenter(geoPoint)
+                locationUpdate++;
+            }
         }
     }
     AndroidView(modifier = Modifier.fillMaxSize(),
