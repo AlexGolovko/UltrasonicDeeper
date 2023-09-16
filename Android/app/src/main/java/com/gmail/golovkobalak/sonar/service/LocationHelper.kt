@@ -5,13 +5,30 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class LocationHelper {
+object LocationHelper {
     private var fusedLocationClient: FusedLocationProviderClient? = null
     private var locationRequest: LocationRequest? = null
     private var locationCallback: LocationCallback? = null
+    private val _lastLocation = MutableStateFlow(Location("KyivCenter").apply {
+        latitude = 50.4501 // Kyiv's latitude
+        longitude = 30.5234 // Kyiv's longitude
+        altitude = 0.0 // Altitude in meters
+        bearing = 0.0f // Bearing in degrees
+        speed = 0.0f // Speed in meters per second
+    })
+    val lastLocation: StateFlow<Location> = _lastLocation
+
+    // Update the location when it changes
+    fun updateLocation(location: Location) {
+        Log.d(this.javaClass.name, "location is updated: " + location)
+        _lastLocation.value = location
+    }
 
     init {
         createLocationRequest()
@@ -30,9 +47,7 @@ class LocationHelper {
             override fun onLocationResult(locationResult: LocationResult) {
                 val location = locationResult.lastLocation
                 if (location != null) {
-                    // Update the static field with the latest location
-                    lastLocation.latitude = location.latitude
-                    lastLocation.longitude = location.longitude
+                    updateLocation(location)
                 }
             }
         }
@@ -61,17 +76,5 @@ class LocationHelper {
 
     fun stopLocationUpdates() {
         fusedLocationClient!!.removeLocationUpdates(locationCallback!!)
-    }
-
-    companion object {
-        // Method to get the last known location from the static field
-        // Create a GeoPoint for Kyiv city center
-        val lastLocation: Location = Location("KyivCenter").apply {
-            latitude = 50.4501 // Kyiv's latitude
-            longitude = 30.5234 // Kyiv's longitude
-            altitude = 0.0 // Altitude in meters
-            bearing = 0.0f // Bearing in degrees
-            speed = 0.0f // Speed in meters per second
-        } // Static field to store the latest location
     }
 }
