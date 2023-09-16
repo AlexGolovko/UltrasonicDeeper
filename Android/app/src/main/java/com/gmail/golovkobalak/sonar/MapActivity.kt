@@ -109,16 +109,19 @@ fun MapOsm() {
     Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
     val mapView = mapView(context)
     val marker = Marker(mapView)
-
     mapView.overlays.add(marker)
-    AndroidView(modifier = Modifier.fillMaxSize(),
-        factory = {
-            val currLocation = GeoPoint(LocationHelper.lastLocation.latitude, LocationHelper.lastLocation.longitude)
-            marker.position = GeoPoint(LocationHelper.lastLocation.latitude, LocationHelper.lastLocation.longitude)
+
+    LaunchedEffect(LocationHelper.lastLocation){
+        LocationHelper.lastLocation.collect{newLocation ->
+            val currLocation = GeoPoint(newLocation.latitude, newLocation.longitude)
+            marker.position = GeoPoint(newLocation.latitude, newLocation.longitude)
             marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             mapView.controller.setCenter(currLocation)
+        }
+    }
+    AndroidView(modifier = Modifier.fillMaxSize(),
+        factory = {
             mapView
-
         })
 }
 

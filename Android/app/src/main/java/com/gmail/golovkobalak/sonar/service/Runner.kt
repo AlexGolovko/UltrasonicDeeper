@@ -9,7 +9,7 @@ import com.gmail.golovkobalak.sonar.controller.TilesController
 object Runner {
     val sonarController: SonarController = SonarController()
     val tilesController: TilesController = TilesController()
-    val locationHelper: LocationHelper = LocationHelper()
+    val locationHelper: LocationHelper = LocationHelper
     fun start(assets: AssetManager, baseContext: Context) {
         GlobalContext.assetManager = assets
         GlobalContext.filesDirAbsPath = baseContext.filesDir.absolutePath
