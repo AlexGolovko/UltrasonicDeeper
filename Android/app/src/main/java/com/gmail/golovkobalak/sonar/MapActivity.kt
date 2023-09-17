@@ -2,7 +2,9 @@ package com.gmail.golovkobalak.sonar
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Environment
 import android.preference.PreferenceManager
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -24,23 +26,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.gmail.golovkobalak.sonar.service.LocationHelper
-import com.gmail.golovkobalak.sonar.service.heavyLogicSimulation
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
+import com.gmail.golovkobalak.sonar.util.CacheManagerCallback
+import com.gmail.golovkobalak.sonar.util.CacheProgress
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.cachemanager.CacheManager
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
+import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
 
+
 class MapActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(javaClass.name, Environment.getExternalStorageDirectory().absolutePath)
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setContent {
@@ -61,7 +69,22 @@ fun MapScreen() {
     Surface(modifier = Modifier.fillMaxSize()) {
         // Create a Box to stack the WebView and the button on top of each other
         Box(modifier = Modifier.fillMaxSize()) {
-            MapOsm()
+            val mapView = mapView()
+            // Collect the progress value and update the state
+            val progressFlow = CacheProgress.getProgressFlow()
+            LaunchedEffect(progressFlow) {
+                progressFlow.collect { currentProgress ->
+                    progress = currentProgress
+                }
+            }
+            // Collect the loading state and update isLoading
+            val loadingFlow = CacheProgress.isLoadingFlow()
+            LaunchedEffect(loadingFlow) {
+                loadingFlow.collect { isLoadingValue ->
+                    isLoading = isLoadingValue
+                }
+            }
+
             // Progress bar
             if (isLoading) {
                 // Progress bar (LinearProgressIndicator)
@@ -78,16 +101,9 @@ fun MapScreen() {
             Button(
                 onClick = {
                     // Implement your button's click action here
-                    isLoading = true // Show the progress bar when the button is clicked
                     scope.launch(Dispatchers.Default) {
-                        heavyLogicSimulation(progressCallback = { progressValue ->
-                            // Update the progress value
-                            progress = progressValue
-                        })
-
-                        // Once the heavy logic is completed, update the isLoading state
+                        cacheMap(mapView, context)
                         withContext(Dispatchers.Main) {
-                            isLoading = false
                             Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -104,10 +120,12 @@ fun MapScreen() {
 }
 
 @Composable
-fun MapOsm() {
+fun mapView(): MapView {
     val context = LocalContext.current
+    Configuration.getInstance()
     Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
-    val mapView = mapView(context)
+    val mapView = MapView(context)
+    configureMapView(mapView)
     val marker = Marker(mapView)
     mapView.overlays.add(marker)
 
@@ -129,18 +147,41 @@ fun MapOsm() {
         factory = {
             mapView
         })
+    return mapView
 }
 
-fun mapView(context: Context): MapView {
-    val mapView = MapView(context)
-    mapView.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
+fun cacheMap(mapView: MapView, context: Context) {
+    val cacheManager = CacheManager(mapView)
+    cacheManager.downloadAreaAsyncNoUI(context, mapView.boundingBox, 19, 19, CacheManagerCallback())
+}
+
+fun configureMapView(mapView: MapView) {
+    mapView.setTileSource(TileSource())
     mapView.setMultiTouchControls(true)
     mapView.setHorizontalMapRepetitionEnabled(true);
     mapView.setVerticalMapRepetitionEnabled(false);
     mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0);
     mapView.controller.setZoom(16.0);
     mapView.minZoomLevel = 3.0
-    return mapView
+}
+
+fun TileSource(): OnlineTileSourceBase {
+    //Custom tile source without flag no bulk
+    val tileSource: OnlineTileSourceBase = XYTileSource(
+        "Mapnik",
+        0, 19, 256, ".png", arrayOf(
+            "https://a.tile.openstreetmap.org/",
+            "https://b.tile.openstreetmap.org/",
+            "https://c.tile.openstreetmap.org/"
+        ), "© OpenStreetMap contributors",
+        TileSourcePolicy(
+            2,
+            TileSourcePolicy.FLAG_NO_PREVENTIVE
+                    or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                    or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+        )
+    )
+    return tileSource;
 }
 
 @Preview(showBackground = true)
