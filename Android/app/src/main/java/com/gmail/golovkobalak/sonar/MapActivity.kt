@@ -142,14 +142,14 @@ fun MapView() {
                 setTileSource(TileSource())
                 setUseDataConnection(true) // Enable map interaction
                 setMultiTouchControls(true)
-                setHorizontalMapRepetitionEnabled(true);
-                setVerticalMapRepetitionEnabled(false);
+                setHorizontalMapRepetitionEnabled(true)
+                setVerticalMapRepetitionEnabled(false)
                 setScrollableAreaLimitLatitude(
                     MapView.getTileSystem().maxLatitude,
                     MapView.getTileSystem().minLatitude,
                     0
-                );
-                controller.setZoom(16.0);
+                )
+                controller.setZoom(16.0)
                 minZoomLevel = 3.0
                 CacheManagerUtil.cacheManager = CacheManager(this)
                 CacheManagerUtil.mapView = this
@@ -162,7 +162,7 @@ fun MapView() {
         },
         modifier = Modifier.fillMaxSize()
     )
-    var locationUpdate = 0;
+    var locationUpdate = 0
     LaunchedEffect(LocationHelper.lastLocation) {
         LocationHelper.lastLocation.collect { newLocation ->
             val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
@@ -170,14 +170,14 @@ fun MapView() {
             if (locationUpdate < 3) {
                 CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 CacheManagerUtil.mapView.controller.setCenter(geoPoint)
-                locationUpdate++;
+                locationUpdate++
             }
         }
     }
 }
 
 fun cancelCacheMap() {
-    CacheManagerUtil.cacheManager.cancelAllJobs();
+    CacheManagerUtil.cacheManager.cancelAllJobs()
     CacheProgress.updateLoading(false)
 }
 
@@ -197,10 +197,10 @@ fun configureMap(mapView: MapView) {
     mapView.setTileSource(TileSource())
     mapView.setUseDataConnection(true) // Enable map interaction
     mapView.setMultiTouchControls(true)
-    mapView.setHorizontalMapRepetitionEnabled(true);
-    mapView.setVerticalMapRepetitionEnabled(false);
-    mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0);
-    mapView.controller.setZoom(16.0);
+    mapView.setHorizontalMapRepetitionEnabled(true)
+    mapView.setVerticalMapRepetitionEnabled(false)
+    mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0)
+    mapView.controller.setZoom(16.0)
     mapView.minZoomLevel = 3.0
     CacheManagerUtil.cacheManager = CacheManager(mapView)
 }
@@ -221,7 +221,7 @@ fun TileSource(): OnlineTileSourceBase {
                     or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
         )
     )
-    return tileSource;
+    return tileSource
 }
 
 @Preview(showBackground = true)
