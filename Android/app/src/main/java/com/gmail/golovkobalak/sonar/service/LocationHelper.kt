@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +25,7 @@ object LocationHelper {
 
     // Update the location when it changes
     fun updateLocation(location: Location) {
-        Log.d(this.javaClass.name, "location is updated: " + location)
+//        Log.d(this.javaClass.name, "location is updated: " + location)
         _lastLocation.value = location
     }
 

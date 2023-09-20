@@ -3,7 +3,6 @@ package com.gmail.golovkobalak.sonar
 import android.content.Context
 import android.os.Bundle
 import android.os.Environment
-import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -28,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.gmail.golovkobalak.sonar.service.LocationHelper
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 import com.gmail.golovkobalak.sonar.util.CacheManagerCallback
+import com.gmail.golovkobalak.sonar.util.CacheManagerUtil
 import com.gmail.golovkobalak.sonar.util.CacheProgress
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -44,10 +44,11 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
 
-
 class MapActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
+        Configuration.getInstance()
+            .load(applicationContext, applicationContext.getSharedPreferences("osmdroid", MODE_PRIVATE))
         Log.d(javaClass.name, Environment.getExternalStorageDirectory().absolutePath)
         super.onCreate(savedInstanceState)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -69,7 +70,7 @@ fun MapScreen() {
     Surface(modifier = Modifier.fillMaxSize()) {
         // Create a Box to stack the WebView and the button on top of each other
         Box(modifier = Modifier.fillMaxSize()) {
-            val mapView = mapView()
+            MapView()
             // Collect the progress value and update the state
             val progressFlow = CacheProgress.getProgressFlow()
             LaunchedEffect(progressFlow) {
@@ -97,14 +98,23 @@ fun MapScreen() {
                 )
             }
 
+
             // "Download" button on top layer
             Button(
                 onClick = {
-                    // Implement your button's click action here
-                    scope.launch(Dispatchers.Default) {
-                        cacheMap(mapView, context)
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(context, "Button Clicked", Toast.LENGTH_SHORT).show()
+                    if (isLoading) {
+                        scope.launch(Dispatchers.Default) {
+                            cancelCacheMap()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "Download canceled", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        scope.launch(Dispatchers.Default) {
+                            cacheMap(CacheManagerUtil.mapView, context)
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 },
@@ -113,56 +123,86 @@ fun MapScreen() {
                     .padding(16.dp)
                     .align(Alignment.BottomEnd) // Align the button to the bottom-end (top layer)
             ) {
-                Text("Download detailed map", fontSize = 18.sp)
+                if (isLoading) {
+                    Text("Cancel downloading", fontSize = 18.sp)
+                } else {
+                    Text("Download detailed map", fontSize = 18.sp)
+                }
             }
         }
     }
 }
 
 @Composable
-fun mapView(): MapView {
-    val context = LocalContext.current
-    Configuration.getInstance()
-    Configuration.getInstance().load(context, PreferenceManager.getDefaultSharedPreferences(context))
-    val mapView = MapView(context)
-    configureMapView(mapView)
-    val marker = Marker(mapView)
-    mapView.overlays.add(marker)
+fun MapView() {
+    AndroidView(
+        factory = { context ->
+            MapView(context).apply {
+                // Configure the MapView as needed
+                setTileSource(TileSource())
+                setUseDataConnection(true) // Enable map interaction
+                setMultiTouchControls(true)
+                setHorizontalMapRepetitionEnabled(true);
+                setVerticalMapRepetitionEnabled(false);
+                setScrollableAreaLimitLatitude(
+                    MapView.getTileSystem().maxLatitude,
+                    MapView.getTileSystem().minLatitude,
+                    0
+                );
+                controller.setZoom(16.0);
+                minZoomLevel = 3.0
+                CacheManagerUtil.cacheManager = CacheManager(this)
+                CacheManagerUtil.mapView = this
+                val marker = Marker(this)
+                CacheManagerUtil.mapView.overlays.add(marker)
+                CacheManagerUtil.currPositionMarker = marker
 
-    mapView.setUseDataConnection(true) // Enable map interaction
-    mapView.setMultiTouchControls(true) // Enable multi-touch gestures
+
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    )
     var locationUpdate = 0;
     LaunchedEffect(LocationHelper.lastLocation) {
         LocationHelper.lastLocation.collect { newLocation ->
             val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
-            marker.position = geoPoint
+            CacheManagerUtil.currPositionMarker.position = geoPoint
             if (locationUpdate < 3) {
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                mapView.controller.setCenter(geoPoint)
+                CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                CacheManagerUtil.mapView.controller.setCenter(geoPoint)
                 locationUpdate++;
             }
         }
     }
-    AndroidView(modifier = Modifier.fillMaxSize(),
-        factory = {
-            mapView
-        })
-    return mapView
+}
+
+fun cancelCacheMap() {
+    CacheManagerUtil.cacheManager.cancelAllJobs();
+    CacheProgress.updateLoading(false)
 }
 
 fun cacheMap(mapView: MapView, context: Context) {
-    val cacheManager = CacheManager(mapView)
-    cacheManager.downloadAreaAsyncNoUI(context, mapView.boundingBox, 19, 19, CacheManagerCallback())
+    val boundingBox = mapView.boundingBox
+    Log.d("cacheMap", "BoundingBox: ${boundingBox.latNorth}:${boundingBox.latSouth}")
+    CacheManagerUtil.cacheManager.downloadAreaAsyncNoUI(
+        context,
+        boundingBox,
+        18,
+        18,
+        CacheManagerCallback()
+    )
 }
 
-fun configureMapView(mapView: MapView) {
+fun configureMap(mapView: MapView) {
     mapView.setTileSource(TileSource())
+    mapView.setUseDataConnection(true) // Enable map interaction
     mapView.setMultiTouchControls(true)
     mapView.setHorizontalMapRepetitionEnabled(true);
     mapView.setVerticalMapRepetitionEnabled(false);
     mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0);
     mapView.controller.setZoom(16.0);
     mapView.minZoomLevel = 3.0
+    CacheManagerUtil.cacheManager = CacheManager(mapView)
 }
 
 fun TileSource(): OnlineTileSourceBase {
