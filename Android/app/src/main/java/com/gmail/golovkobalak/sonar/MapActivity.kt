@@ -192,19 +192,6 @@ fun cacheMap(mapView: MapView, context: Context) {
         CacheManagerCallback()
     )
 }
-
-fun configureMap(mapView: MapView) {
-    mapView.setTileSource(TileSource())
-    mapView.setUseDataConnection(true) // Enable map interaction
-    mapView.setMultiTouchControls(true)
-    mapView.setHorizontalMapRepetitionEnabled(true)
-    mapView.setVerticalMapRepetitionEnabled(false)
-    mapView.setScrollableAreaLimitLatitude(MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0)
-    mapView.controller.setZoom(16.0)
-    mapView.minZoomLevel = 3.0
-    CacheManagerUtil.cacheManager = CacheManager(mapView)
-}
-
 fun TileSource(): OnlineTileSourceBase {
     //Custom tile source without flag no bulk
     val tileSource: OnlineTileSourceBase = XYTileSource(
