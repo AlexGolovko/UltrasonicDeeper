@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 object CacheProgress {
     private val progressFlow = MutableStateFlow(0f)
     private val isLoadingFlow = MutableStateFlow(false)
-    var tilesTotal = 1;
+    var tilesTotal = 1
 
     fun getProgressFlow(): Flow<Float> = progressFlow
 
