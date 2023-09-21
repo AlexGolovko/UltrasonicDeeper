@@ -113,7 +113,7 @@ fun MapScreen() {
                         scope.launch(Dispatchers.Default) {
                             cacheMap(CacheManagerUtil.mapView, context)
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "Download started", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Download of ${CacheProgress.tilesTotal} tiles started", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }

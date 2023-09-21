@@ -4,7 +4,7 @@ import android.util.Log
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 
 class CacheManagerCallback() : CacheManager.CacheManagerCallback {
-    var tilesTotal = 1;
+    var tilesTotal = 1
     override fun onTaskComplete() {
         Log.d(javaClass.name, "onTaskComplete")
         CacheProgress.updateLoading(false)
@@ -25,6 +25,7 @@ class CacheManagerCallback() : CacheManager.CacheManagerCallback {
     override fun setPossibleTilesInArea(total: Int) {
         Log.d(javaClass.name, "Total: $total")
         if (total > 0) tilesTotal = total
+        CacheProgress.tilesTotal = total
 
     }
 
