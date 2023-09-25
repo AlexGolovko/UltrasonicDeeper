@@ -29,6 +29,7 @@ import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 import com.gmail.golovkobalak.sonar.util.CacheManagerCallback
 import com.gmail.golovkobalak.sonar.util.CacheManagerUtil
 import com.gmail.golovkobalak.sonar.util.CacheProgress
+import com.gmail.golovkobalak.sonar.util.OsmDroidConfiguration
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
@@ -36,9 +37,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.cachemanager.CacheManager
-import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
-import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
-import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -113,7 +111,11 @@ fun MapScreen() {
                         scope.launch(Dispatchers.Default) {
                             cacheMap(CacheManagerUtil.mapView, context)
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "Download of ${CacheProgress.tilesTotal} tiles started", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Download of ${CacheProgress.tilesTotal} tiles started",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
@@ -139,7 +141,7 @@ fun MapView() {
         factory = { context ->
             MapView(context).apply {
                 // Configure the MapView as needed
-                setTileSource(TileSource())
+                setTileSource(OsmDroidConfiguration.baseTileSource())
                 setUseDataConnection(true) // Enable map interaction
                 setMultiTouchControls(true)
                 setHorizontalMapRepetitionEnabled(true)
@@ -156,8 +158,6 @@ fun MapView() {
                 val marker = Marker(this)
                 CacheManagerUtil.mapView.overlays.add(marker)
                 CacheManagerUtil.currPositionMarker = marker
-
-
             }
         },
         modifier = Modifier.fillMaxSize()
@@ -192,24 +192,7 @@ fun cacheMap(mapView: MapView, context: Context) {
         CacheManagerCallback()
     )
 }
-fun TileSource(): OnlineTileSourceBase {
-    //Custom tile source without flag no bulk
-    val tileSource: OnlineTileSourceBase = XYTileSource(
-        "Mapnik",
-        0, 19, 256, ".png", arrayOf(
-            "https://a.tile.openstreetmap.org/",
-            "https://b.tile.openstreetmap.org/",
-            "https://c.tile.openstreetmap.org/"
-        ), "© OpenStreetMap contributors",
-        TileSourcePolicy(
-            2,
-            TileSourcePolicy.FLAG_NO_PREVENTIVE
-                    or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
-                    or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-        )
-    )
-    return tileSource
-}
+
 
 @Preview(showBackground = true)
 @Composable

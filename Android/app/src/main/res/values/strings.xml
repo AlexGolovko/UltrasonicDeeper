@@ -2,4 +2,5 @@
     <string name="app_name">Sonar</string>
     <string name="title_activity_sonar">SonarActivity</string>
     <string name="title_activity_map">MapActivity</string>
+    <string name="title_activity_deeper">DeeperActivity</string>
 </resources>

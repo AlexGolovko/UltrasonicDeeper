@@ -85,8 +85,8 @@ fun MainScreen() {
                 ) {
                     Button(
                         onClick = {
-                            // Start "SonarActivity" when the button is clicked
-                            val intent = Intent(context, SonarActivity::class.java)
+                            // Start "DeeperActivity" when the button is clicked
+                            val intent = Intent(context, DeeperActivity::class.java)
                             context.startActivity(intent)
                         },
                         modifier = Modifier
