@@ -27,6 +27,7 @@ import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 class MainActivity : ComponentActivity() {
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+        val SESSION_ID = System.currentTimeMillis().toString()
     }
 
 
