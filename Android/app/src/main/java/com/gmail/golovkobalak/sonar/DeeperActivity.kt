@@ -1,7 +1,9 @@
 package com.gmail.golovkobalak.sonar
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.preference.PreferenceManager
 import androidx.activity.ComponentActivity
@@ -19,9 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
+import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.depthGradient
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.greenArrow
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.redArrow
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.yellowArrow
+import com.gmail.golovkobalak.sonar.model.CircleDrawable
 import com.gmail.golovkobalak.sonar.model.SonarDataException
 import com.gmail.golovkobalak.sonar.service.LocationHelper
 import com.gmail.golovkobalak.sonar.service.sonar.SonarDataFlow
@@ -34,9 +38,12 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import kotlin.math.roundToInt
 
 class DeeperActivity : ComponentActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         SonarService.connect()
@@ -60,9 +67,41 @@ class DeeperActivity : ComponentActivity() {
     }
 
     companion object {
-        lateinit var redArrow: BitmapDrawable;
-        lateinit var yellowArrow: BitmapDrawable;
-        lateinit var greenArrow: BitmapDrawable;
+        lateinit var redArrow: Drawable;
+        lateinit var yellowArrow: Drawable;
+        lateinit var greenArrow: Drawable;
+        var depthGradient = arrayOf(
+            intArrayOf(172, 238, 246),
+            intArrayOf(157, 236, 186),
+            intArrayOf(96, 144, 144),
+            intArrayOf(192, 225, 233),
+            intArrayOf(179, 217, 228),
+            intArrayOf(166, 209, 223),
+            intArrayOf(154, 201, 218),
+            intArrayOf(141, 193, 214),
+            intArrayOf(129, 185, 210),
+            intArrayOf(117, 177, 206),
+            intArrayOf(104, 169, 202),
+            intArrayOf(92, 161, 198),
+            intArrayOf(80, 153, 194),
+            intArrayOf(68, 145, 190),
+            intArrayOf(56, 137, 186),
+            intArrayOf(43, 128, 182),
+            intArrayOf(28, 120, 178),
+            intArrayOf(7, 112, 173),
+            intArrayOf(0, 104, 169),
+            intArrayOf(0, 95, 164),
+            intArrayOf(0, 87, 159),
+            intArrayOf(0, 79, 154),
+            intArrayOf(0, 70, 148),
+            intArrayOf(0, 62, 142),
+            intArrayOf(0, 54, 136),
+            intArrayOf(0, 45, 129),
+            intArrayOf(0, 36, 122),
+            intArrayOf(0, 27, 115),
+            intArrayOf(0, 16, 107),
+            intArrayOf(0, 4, 99)
+        )
     }
 }
 
@@ -117,6 +156,7 @@ fun MapComponent(modifier: Modifier) {
         LocationHelper.lastLocation.collect { newLocation ->
             val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
             CacheManagerUtil.currPositionMarker.position = geoPoint
+            CacheManagerUtil.currPositionMarker.setInfoWindow(null)
             CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             CacheManagerUtil.mapView.controller.setCenter(geoPoint)
             CacheManagerUtil.currPositionMarker.rotation = 45 - newLocation.bearing
@@ -134,10 +174,26 @@ fun MapComponent(modifier: Modifier) {
     LaunchedEffect(SonarDataFlow.SonarDataFlow) {
         SonarDataFlow.SonarDataFlow.collect { sonarData ->
             CacheManagerUtil.currPositionMarker.icon = greenArrow
+            if ("" != sonarData.depth) {
+                val circleMarker = Marker(CacheManagerUtil.mapView)
+                circleMarker.position = CacheManagerUtil.currPositionMarker.position
+                val circleDrawable = CircleDrawable.create(300, generateBlueGradient(sonarData.depth.toFloat()))
+                circleMarker.icon = circleDrawable
+                CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
+            }
         }
     }
 }
 
+fun generateBlueGradient(value: Float): Int {
+    val depth = value.roundToInt()
+    if (depth > 29) {
+        val rgb = depthGradient[29]
+        return android.graphics.Color.rgb(rgb[0], rgb[1], rgb[2])
+    }
+    val rgb = depthGradient[depth]
+    return android.graphics.Color.rgb(rgb[0], rgb[1], rgb[2])
+}
 
 @Composable
 fun CanvasComponent(modifier: Modifier) {
@@ -146,6 +202,8 @@ fun CanvasComponent(modifier: Modifier) {
     ) {
         // Draw custom graphics on the canvas
         drawRect(Color.Blue)
-        drawCircle(Color.Red, radius = size.minDimension / 4)
+//        drawCircle(Color.Red, radius = size.minDimension / 4)
+        val circleBitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(circleBitmap)
     }
 }
