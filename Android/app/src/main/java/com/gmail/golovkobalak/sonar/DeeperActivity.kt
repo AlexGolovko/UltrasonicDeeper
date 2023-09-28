@@ -1,11 +1,13 @@
+@file:OptIn(ExperimentalTextApi::class)
+
 package com.gmail.golovkobalak.sonar
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -18,9 +20,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
+import androidx.lifecycle.lifecycleScope
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.depthGradient
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.greenArrow
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.redArrow
@@ -34,6 +43,7 @@ import com.gmail.golovkobalak.sonar.util.CacheManagerUtil
 import com.gmail.golovkobalak.sonar.util.OsmDroidConfiguration
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -46,7 +56,7 @@ class DeeperActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        SonarService.connect()
+        lifecycleScope.launch { SonarService.connect() }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         // Initialize OSMdroid configuration
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
@@ -146,6 +156,7 @@ fun MapComponent(modifier: Modifier) {
                     marker.icon = redArrow
                     CacheManagerUtil.mapView.overlays.add(marker)
                     CacheManagerUtil.currPositionMarker = marker
+                    Log.d(DeeperActivity::class.java.name, "mapView redo")
                 }
             },
 
@@ -196,14 +207,50 @@ fun generateBlueGradient(value: Float): Int {
 }
 
 @Composable
+@OptIn(ExperimentalTextApi::class)
 fun CanvasComponent(modifier: Modifier) {
+    val textMeasure = rememberTextMeasurer()
+
+    val batteryLevel = 85
+    val depth = 6.5
+    val text = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                color = Color.Black,
+                fontSize = 80.sp,
+                fontStyle = FontStyle.Normal,
+                fontWeight = FontWeight.Bold
+            )
+        ) {
+            append("$depth m")
+        }
+        withStyle(
+            style = SpanStyle(
+                color = Color.Black,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold
+            )
+        ) {
+            append("\n\n           $batteryLevel %")
+        }
+    }
     Canvas(
         modifier = modifier.fillMaxSize()
     ) {
         // Draw custom graphics on the canvas
-        drawRect(Color.Blue)
-//        drawCircle(Color.Red, radius = size.minDimension / 4)
-        val circleBitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888)
-        val canvas = android.graphics.Canvas(circleBitmap)
+        drawRect(Color.White)
+        val dp = size.height.toDp() / 3;
+        drawText(
+            textMeasurer = textMeasure,
+            text = text,
+            topLeft = Offset(dp.toPx(), 10.dp.toPx())
+        )
+        val canvasWidth = size.width
+        val canvasHeight = size.height
+        drawLine(
+            start = Offset(x = 0f, y = 0f),
+            end = Offset(x = 0f, y = canvasHeight),
+            color = Color.Blue
+        )
     }
 }

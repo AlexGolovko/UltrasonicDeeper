@@ -27,6 +27,9 @@ object SonarService {
     }
 
     fun connect() {
+        if (webSocket != null) {
+            return
+        }
         val request: Request = Request.Builder()
             .url(SonarConfiguration.SONAR_URL)
             .build()
