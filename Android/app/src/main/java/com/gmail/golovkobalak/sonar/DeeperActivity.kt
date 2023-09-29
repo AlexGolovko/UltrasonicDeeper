@@ -16,8 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -48,6 +47,7 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 class DeeperActivity : ComponentActivity() {
@@ -115,8 +115,30 @@ class DeeperActivity : ComponentActivity() {
     }
 }
 
+fun roundToDecimalPlace(value: Float, decimalPlaces: Int): String {
+    val df = DecimalFormat("#.${"#".repeat(decimalPlaces)}")
+    return df.format(value).toString()
+}
 @Composable
 fun DeeperActivityContent() {
+    var depth by remember { mutableStateOf("1.1") }
+    var batteryLevel by remember { mutableStateOf("100") }
+
+    LaunchedEffect(SonarDataFlow.SonarDataFlow) {
+        SonarDataFlow.SonarDataFlow.collect { sonarData ->
+            CacheManagerUtil.currPositionMarker.icon = greenArrow
+            if ("" != sonarData.depth) {
+                depth = roundToDecimalPlace(sonarData.depth.toFloat(),1)
+                batteryLevel=roundToDecimalPlace(sonarData.battery.toFloat(),2)
+                val circleMarker = Marker(CacheManagerUtil.mapView)
+                circleMarker.position = CacheManagerUtil.currPositionMarker.position
+                val circleDrawable = CircleDrawable.create(300, generateBlueGradient(sonarData.depth.toFloat()))
+                circleMarker.icon = circleDrawable
+                CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
+            }
+        }
+    }
+
     Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.SpaceAround
@@ -125,7 +147,7 @@ fun DeeperActivityContent() {
         MapComponent(modifier = Modifier.weight(1f))
 
         // Second half of the screen for the canvas
-        CanvasComponent(modifier = Modifier.weight(1f))
+        CanvasComponent(depth, batteryLevel, modifier = Modifier.weight(1f))
     }
 }
 
@@ -182,18 +204,7 @@ fun MapComponent(modifier: Modifier) {
             }
         }
     }
-    LaunchedEffect(SonarDataFlow.SonarDataFlow) {
-        SonarDataFlow.SonarDataFlow.collect { sonarData ->
-            CacheManagerUtil.currPositionMarker.icon = greenArrow
-            if ("" != sonarData.depth) {
-                val circleMarker = Marker(CacheManagerUtil.mapView)
-                circleMarker.position = CacheManagerUtil.currPositionMarker.position
-                val circleDrawable = CircleDrawable.create(300, generateBlueGradient(sonarData.depth.toFloat()))
-                circleMarker.icon = circleDrawable
-                CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
-            }
-        }
-    }
+
 }
 
 fun generateBlueGradient(value: Float): Int {
@@ -207,17 +218,13 @@ fun generateBlueGradient(value: Float): Int {
 }
 
 @Composable
-@OptIn(ExperimentalTextApi::class)
-fun CanvasComponent(modifier: Modifier) {
+fun CanvasComponent(depth: String, batteryLevel: String, modifier: Modifier) {
     val textMeasure = rememberTextMeasurer()
-
-    val batteryLevel = 85
-    val depth = 6.5
     val text = buildAnnotatedString {
         withStyle(
             style = SpanStyle(
                 color = Color.Black,
-                fontSize = 80.sp,
+                fontSize = 75.sp,
                 fontStyle = FontStyle.Normal,
                 fontWeight = FontWeight.Bold
             )
@@ -231,7 +238,7 @@ fun CanvasComponent(modifier: Modifier) {
                 fontWeight = FontWeight.Bold
             )
         ) {
-            append("\n\n           $batteryLevel %")
+            append("\n         $batteryLevel %")
         }
     }
     Canvas(
@@ -239,7 +246,7 @@ fun CanvasComponent(modifier: Modifier) {
     ) {
         // Draw custom graphics on the canvas
         drawRect(Color.White)
-        val dp = size.height.toDp() / 3;
+        val dp = size.height.toDp() / 2;
         drawText(
             textMeasurer = textMeasure,
             text = text,
