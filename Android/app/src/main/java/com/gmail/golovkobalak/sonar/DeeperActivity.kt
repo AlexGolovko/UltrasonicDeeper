@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -115,26 +116,30 @@ class DeeperActivity : ComponentActivity() {
     }
 }
 
-fun roundToDecimalPlace(value: Float, decimalPlaces: Int): String {
+fun roundToDecimalPlace(value: Float, decimalPlaces: Int): Float {
     val df = DecimalFormat("#.${"#".repeat(decimalPlaces)}")
-    return df.format(value).toString()
+    return df.format(value).toFloat()
 }
+
 @Composable
 fun DeeperActivityContent() {
-    var depth by remember { mutableStateOf("1.1") }
-    var batteryLevel by remember { mutableStateOf("100") }
+    var depth by remember { mutableStateOf(Float.NaN) }
+    var batteryLevel by remember { mutableStateOf(Float.NaN) }
+    val depthList by remember { mutableStateOf(mutableListOf<Float>()) }
+
 
     LaunchedEffect(SonarDataFlow.SonarDataFlow) {
         SonarDataFlow.SonarDataFlow.collect { sonarData ->
             CacheManagerUtil.currPositionMarker.icon = greenArrow
             if ("" != sonarData.depth) {
-                depth = roundToDecimalPlace(sonarData.depth.toFloat(),1)
-                batteryLevel=roundToDecimalPlace(sonarData.battery.toFloat(),2)
+                depth = roundToDecimalPlace(sonarData.depth.toFloat(), 1)
+                batteryLevel = roundToDecimalPlace(sonarData.battery.toFloat(), 2)
                 val circleMarker = Marker(CacheManagerUtil.mapView)
                 circleMarker.position = CacheManagerUtil.currPositionMarker.position
                 val circleDrawable = CircleDrawable.create(300, generateBlueGradient(sonarData.depth.toFloat()))
                 circleMarker.icon = circleDrawable
                 CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
+                depthList.add(0, depth)
             }
         }
     }
@@ -146,8 +151,7 @@ fun DeeperActivityContent() {
         // First half of the screen for the OSMdroid map
         MapComponent(modifier = Modifier.weight(1f))
 
-        // Second half of the screen for the canvas
-        CanvasComponent(depth, batteryLevel, modifier = Modifier.weight(1f))
+        CanvasComponent(depth, batteryLevel, depthList, modifier = Modifier.weight(1f))
     }
 }
 
@@ -218,27 +222,44 @@ fun generateBlueGradient(value: Float): Int {
 }
 
 @Composable
-fun CanvasComponent(depth: String, batteryLevel: String, modifier: Modifier) {
+fun CanvasComponent(depth: Float, batteryLevel: Float, depthList: MutableList<Float>, modifier: Modifier) {
     val textMeasure = rememberTextMeasurer()
     val text = buildAnnotatedString {
+        var depthText = "$depth"
+        if (depth < 10) {
+            depthText = " $depth"
+        }
         withStyle(
             style = SpanStyle(
                 color = Color.Black,
                 fontSize = 75.sp,
                 fontStyle = FontStyle.Normal,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
             )
         ) {
-            append("$depth m")
+            append(depthText)
         }
         withStyle(
             style = SpanStyle(
                 color = Color.Black,
-                fontSize = 40.sp,
-                fontWeight = FontWeight.Bold
+                fontSize = 30.sp,
+                fontStyle = FontStyle.Normal,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
             )
         ) {
-            append("\n         $batteryLevel %")
+            append(" m")
+        }
+        withStyle(
+            style = SpanStyle(
+                color = Color.Black,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Monospace
+            )
+        ) {
+            append("\n    $batteryLevel %")
         }
     }
     Canvas(
@@ -246,18 +267,51 @@ fun CanvasComponent(depth: String, batteryLevel: String, modifier: Modifier) {
     ) {
         // Draw custom graphics on the canvas
         drawRect(Color.White)
+        if (depthList.size == 0) {
+            return@Canvas
+        }
         val dp = size.height.toDp() / 2;
         drawText(
             textMeasurer = textMeasure,
             text = text,
-            topLeft = Offset(dp.toPx(), 10.dp.toPx())
+            topLeft = Offset(dp.toPx(), 0.dp.toPx())
         )
         val canvasWidth = size.width
         val canvasHeight = size.height
-        drawLine(
-            start = Offset(x = 0f, y = 0f),
-            end = Offset(x = 0f, y = canvasHeight),
-            color = Color.Blue
+        // Define the stroke style with a thicker line
+        val lineWidth =
+            androidx.compose.ui.graphics.drawscope.Stroke(width = 6.dp.toPx()).width
+
+        val depthListMaxSize = canvasWidth / lineWidth
+        if (depthList.size > depthListMaxSize) {
+            for (index in depthList.size-1 downTo depthListMaxSize.toInt()) {
+                depthList.removeAt(index)
+            }
+        }
+
+        val max = depthList.max() * 1.1f
+        depthList.forEachIndexed { index, depth ->
+            val startEndX = canvasWidth - (lineWidth / 2 + index * lineWidth)
+            val startY = canvasHeight
+            val endLineY = depth * canvasHeight / max
+            val orangeColor = Color(1.0f, 0.5f, 0.0f, 1.0f)
+            drawLine(
+                start = Offset(x = startEndX, y = startY),
+                end = Offset(x = startEndX, y = endLineY),
+                color = Color.Gray,
+                strokeWidth = lineWidth,
+            )
+            drawLine(
+                start = Offset(x = startEndX, y = endLineY + 10.dp.toPx()),
+                end = Offset(x = startEndX, y = endLineY),
+                color = orangeColor,
+                strokeWidth = lineWidth,
+            )
+        }
+        drawText(
+            textMeasurer = textMeasure,
+            text = text,
+            topLeft = Offset(dp.toPx(), 0.dp.toPx())
         )
     }
 }
