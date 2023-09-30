@@ -5,10 +5,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.*
 
 object LocationHelper {
     private var fusedLocationClient: FusedLocationProviderClient? = null
@@ -25,7 +27,7 @@ object LocationHelper {
 
     // Update the location when it changes
     fun updateLocation(location: Location) {
-//        Log.d(this.javaClass.name, "location is updated: " + location)
+        Log.d(this.javaClass.name, "location is updated: " + location)
         _lastLocation.value = location
     }
 
@@ -45,14 +47,40 @@ object LocationHelper {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 val location = locationResult.lastLocation
-                if (location != null) {
+                if (location != null && hasLocationChangedByMeters(lastLocation.value, location, 2.0)) {
                     updateLocation(location)
                 }
             }
         }
     }
 
+    private fun haversineDistance(location1: Location, location2: Location): Double {
+        val lat1 = Math.toRadians(location1.latitude)
+        val lon1 = Math.toRadians(location1.longitude)
+        val lat2 = Math.toRadians(location2.latitude)
+        val lon2 = Math.toRadians(location2.longitude)
+
+        val dLat = lat2 - lat1
+        val dLon = lon2 - lon1
+
+        val a = sin(dLat / 2).pow(2) + cos(lat1) * cos(lat2) * sin(dLon / 2).pow(2)
+        val c = 2 * asin(sqrt(a))
+
+        // Radius of the Earth in meters (mean value)
+        val earthRadius = 6371000.0
+
+        return earthRadius * c
+    }
+
+    fun hasLocationChangedByMeters(location1: Location, location2: Location, meters: Double): Boolean {
+        val distance = haversineDistance(location1, location2)
+        return distance >= meters
+    }
+
     fun start(context: Context?) {
+        if (fusedLocationClient != null) {
+            return
+        }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
         if (ActivityCompat.checkSelfPermission(
                 context,

@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -29,36 +32,48 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.depthGradient
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.greenArrow
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.redArrow
-import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.yellowArrow
+import com.gmail.golovkobalak.sonar.deeper.DeeperViewModel
 import com.gmail.golovkobalak.sonar.model.CircleDrawable
-import com.gmail.golovkobalak.sonar.model.SonarDataException
+import com.gmail.golovkobalak.sonar.service.DeeperService
 import com.gmail.golovkobalak.sonar.service.LocationHelper
-import com.gmail.golovkobalak.sonar.service.sonar.SonarDataFlow
 import com.gmail.golovkobalak.sonar.service.sonar.SonarService
 import com.gmail.golovkobalak.sonar.util.CacheManagerUtil
 import com.gmail.golovkobalak.sonar.util.OsmDroidConfiguration
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 class DeeperActivity : ComponentActivity() {
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-
+    private lateinit var deeperService: DeeperService;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lifecycleScope.launch { SonarService.connect() }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        val deeperViewModel = DeeperViewModel()
+        deeperService = DeeperService(deeperViewModel)
+        deeperViewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                SonarService.connect()
+                deeperService.handleSonarMessage()
+
+            }
+        }
+        deeperViewModel.viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                deeperService.checkForMessage()
+            }
+        }
+
+        LocationHelper.start(this)
         // Initialize OSMdroid configuration
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
         redArrow = getArrowPic(R.drawable.arrow_red)
@@ -66,9 +81,14 @@ class DeeperActivity : ComponentActivity() {
         greenArrow = getArrowPic(R.drawable.arrow_green)
         setContent {
             MaterialTheme {
-                DeeperActivityContent()
+                DeeperActivityContent(deeperViewModel)
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocationHelper.stopLocationUpdates()
     }
 
     private fun getArrowPic(arrowPic: Int): BitmapDrawable {
@@ -116,50 +136,46 @@ class DeeperActivity : ComponentActivity() {
     }
 }
 
-fun roundToDecimalPlace(value: Float, decimalPlaces: Int): Float {
-    val df = DecimalFormat("#.${"#".repeat(decimalPlaces)}")
-    return df.format(value).toFloat()
-}
 
 @Composable
-fun DeeperActivityContent() {
-    var depth by remember { mutableStateOf(Float.NaN) }
-    var batteryLevel by remember { mutableStateOf(Float.NaN) }
-    val depthList by remember { mutableStateOf(mutableListOf<Float>()) }
+fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
 
-
-    LaunchedEffect(SonarDataFlow.SonarDataFlow) {
-        SonarDataFlow.SonarDataFlow.collect { sonarData ->
+    LaunchedEffect(deeperViewModel.sonarDataEntity) {
+        deeperViewModel.sonarDataEntity.collect {
+            if (it.depth.isNaN()) return@collect
             CacheManagerUtil.currPositionMarker.icon = greenArrow
-            if ("" != sonarData.depth) {
-                depth = roundToDecimalPlace(sonarData.depth.toFloat(), 1)
-                batteryLevel = roundToDecimalPlace(sonarData.battery.toFloat(), 2)
-                val circleMarker = Marker(CacheManagerUtil.mapView)
-                circleMarker.position = CacheManagerUtil.currPositionMarker.position
-                val circleDrawable = CircleDrawable.create(300, generateBlueGradient(sonarData.depth.toFloat()))
-                circleMarker.icon = circleDrawable
-                CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
-                depthList.add(0, depth)
-            }
+            val circleMarker = Marker(CacheManagerUtil.mapView)
+            //TODO check that for this position marker with this depth (+-0.5m) exist
+            circleMarker.position = CacheManagerUtil.currPositionMarker.position
+            val circleDrawable = CircleDrawable.create(200, generateBlueGradient(it.depth))
+            circleMarker.icon = circleDrawable
+            circleMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
+        }
+    }
+    LaunchedEffect(LocationHelper.lastLocation) {
+        LocationHelper.lastLocation.collect { newLocation ->
+            val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
+            CacheManagerUtil.currPositionMarker.position = geoPoint
+
+            CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+            CacheManagerUtil.mapView.controller.setCenter(geoPoint)
+            CacheManagerUtil.currPositionMarker.rotation = 45 - newLocation.bearing
         }
     }
 
     Row(
-        modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.SpaceAround
+        modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceAround
     ) {
-        // First half of the screen for the OSMdroid map
-        MapComponent(modifier = Modifier.weight(1f))
-
-        CanvasComponent(depth, batteryLevel, depthList, modifier = Modifier.weight(1f))
+        MapComponent(Modifier.weight(1f))
+        CanvasComponent(deeperViewModel, Modifier.weight(1f))
     }
 }
 
 @Composable
 fun MapComponent(modifier: Modifier) {
     Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
+        modifier = modifier, contentAlignment = Alignment.Center
     ) {
         AndroidView(
             factory = { context ->
@@ -171,44 +187,21 @@ fun MapComponent(modifier: Modifier) {
                     setHorizontalMapRepetitionEnabled(true)
                     setVerticalMapRepetitionEnabled(false)
                     setScrollableAreaLimitLatitude(
-                        MapView.getTileSystem().maxLatitude,
-                        MapView.getTileSystem().minLatitude,
-                        0
+                        MapView.getTileSystem().maxLatitude, MapView.getTileSystem().minLatitude, 0
                     )
-                    controller.setZoom(16.0)
-                    minZoomLevel = 3.0
+                    controller.setZoom(19.0)
+                    minZoomLevel = 10.0
                     CacheManagerUtil.mapView = this
                     val marker = Marker(this)
                     marker.icon = redArrow
+                    marker.setInfoWindow(null)
                     CacheManagerUtil.mapView.overlays.add(marker)
                     CacheManagerUtil.currPositionMarker = marker
                     Log.d(DeeperActivity::class.java.name, "mapView redo")
                 }
-            },
-
-            modifier = Modifier.fillMaxSize()
+            }, modifier = Modifier.fillMaxSize()
         )
     }
-    LaunchedEffect(LocationHelper.lastLocation) {
-        LocationHelper.lastLocation.collect { newLocation ->
-            val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
-            CacheManagerUtil.currPositionMarker.position = geoPoint
-            CacheManagerUtil.currPositionMarker.setInfoWindow(null)
-            CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-            CacheManagerUtil.mapView.controller.setCenter(geoPoint)
-            CacheManagerUtil.currPositionMarker.rotation = 45 - newLocation.bearing
-        }
-    }
-    LaunchedEffect(SonarDataFlow.SonarDataErrorFlow) {
-        SonarDataFlow.SonarDataErrorFlow.collect { error ->
-            if (error.message?.contains(SonarDataException.FAILED_TO_MEASURE) == true) {
-                CacheManagerUtil.currPositionMarker.icon = yellowArrow
-            } else {
-                CacheManagerUtil.currPositionMarker.icon = redArrow
-            }
-        }
-    }
-
 }
 
 fun generateBlueGradient(value: Float): Int {
@@ -222,12 +215,16 @@ fun generateBlueGradient(value: Float): Int {
 }
 
 @Composable
-fun CanvasComponent(depth: Float, batteryLevel: Float, depthList: MutableList<Float>, modifier: Modifier) {
+fun CanvasComponent(deeperViewModel: DeeperViewModel, modifier: Modifier) {
     val textMeasure = rememberTextMeasurer()
+
+    val sonarDataEntityState = deeperViewModel.sonarDataEntity.collectAsState()
+    val sonarDataEntity = sonarDataEntityState.value
+
     val text = buildAnnotatedString {
-        var depthText = "$depth"
-        if (depth < 10) {
-            depthText = " $depth"
+        var depthText = sonarDataEntity.depth.toString()
+        if (sonarDataEntity.depth < 10) {
+            depthText = " ${sonarDataEntity.depth}"
         }
         withStyle(
             style = SpanStyle(
@@ -253,13 +250,10 @@ fun CanvasComponent(depth: Float, batteryLevel: Float, depthList: MutableList<Fl
         }
         withStyle(
             style = SpanStyle(
-                color = Color.Black,
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Monospace
+                color = Color.Black, fontSize = 30.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace
             )
         ) {
-            append("\n    $batteryLevel %")
+            append("\n    ${sonarDataEntity.battery} %")
         }
     }
     Canvas(
@@ -267,36 +261,30 @@ fun CanvasComponent(depth: Float, batteryLevel: Float, depthList: MutableList<Fl
     ) {
         // Draw custom graphics on the canvas
         drawRect(Color.White)
-        if (depthList.size == 0) {
+        val list = deeperViewModel.list
+        val maxDepth = deeperViewModel.maxDepth
+        if (list.size == 0) {
             return@Canvas
         }
         val dp = size.height.toDp() / 2;
         drawText(
-            textMeasurer = textMeasure,
-            text = text,
-            topLeft = Offset(dp.toPx(), 0.dp.toPx())
+            textMeasurer = textMeasure, text = text, topLeft = Offset(dp.toPx(), 0.dp.toPx())
         )
         val canvasWidth = size.width
         val canvasHeight = size.height
         // Define the stroke style with a thicker line
-        val lineWidth =
-            androidx.compose.ui.graphics.drawscope.Stroke(width = 6.dp.toPx()).width
-
-        val depthListMaxSize = canvasWidth / lineWidth
-        if (depthList.size > depthListMaxSize) {
-            for (index in depthList.size-1 downTo depthListMaxSize.toInt()) {
-                depthList.removeAt(index)
-            }
+        val lineWidth = androidx.compose.ui.graphics.drawscope.Stroke(width = 3.dp.toPx()).width
+        if (list.size == 1) {
+            val depthListMaxSize = canvasWidth / lineWidth
+            deeperViewModel.updateMaxSize(depthListMaxSize)
         }
-
-        val max = depthList.max() * 1.1f
-        depthList.forEachIndexed { index, depth ->
+        val max = maxDepth * 1.1f
+        list.forEachIndexed { index, sonarData ->
             val startEndX = canvasWidth - (lineWidth / 2 + index * lineWidth)
-            val startY = canvasHeight
-            val endLineY = depth * canvasHeight / max
+            val endLineY = sonarData.depth * canvasHeight / max
             val orangeColor = Color(1.0f, 0.5f, 0.0f, 1.0f)
             drawLine(
-                start = Offset(x = startEndX, y = startY),
+                start = Offset(x = startEndX, y = canvasHeight),
                 end = Offset(x = startEndX, y = endLineY),
                 color = Color.Gray,
                 strokeWidth = lineWidth,
@@ -309,9 +297,7 @@ fun CanvasComponent(depth: Float, batteryLevel: Float, depthList: MutableList<Fl
             )
         }
         drawText(
-            textMeasurer = textMeasure,
-            text = text,
-            topLeft = Offset(dp.toPx(), 0.dp.toPx())
+            textMeasurer = textMeasure, text = text, topLeft = Offset(dp.toPx(), 0.dp.toPx())
         )
     }
 }

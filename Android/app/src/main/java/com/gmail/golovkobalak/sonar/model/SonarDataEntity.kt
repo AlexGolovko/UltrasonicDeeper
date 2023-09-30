@@ -5,11 +5,11 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-open class SonarDataEntity(
-    var depth: String, var battery: String, var temperature: String,
+data class SonarDataEntity(
+    var depth: Float, var battery: Float, var temperature: String,
     var time: String, var altitude: String, var accuracy: String
 ) {
-    constructor() : this("", "", "", "", "", "")
+    constructor() : this(Float.NaN, Float.NaN, "", "", "", "")
 
 
     var sessionId = MainActivity.SESSION_ID
@@ -25,8 +25,8 @@ open class SonarDataEntity(
     }
 
     constructor(sonarData: SonarData) : this(
-        depth = sonarData.depth,
-        battery = sonarData.battery,
+        depth = sonarData.depth.toFloat(),
+        battery = sonarData.battery.toFloat(),
         temperature = sonarData.temperature,
         time = getCurrentTime(), // You can set the time value here as needed.
         altitude = "", // You can set the altitude value here as needed.
