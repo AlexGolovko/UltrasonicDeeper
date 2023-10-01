@@ -21,10 +21,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.room.Room
+import com.gmail.golovkobalak.sonar.config.DatabaseConfig
 import com.gmail.golovkobalak.sonar.service.Runner
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 
 class MainActivity : ComponentActivity() {
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
         val SESSION_ID = System.currentTimeMillis().toString()
@@ -34,7 +37,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Runner.start(assets, baseContext)
-
         setContent {
             SonarTheme {
                 // A surface container using the 'background' color from the theme
@@ -44,6 +46,11 @@ class MainActivity : ComponentActivity() {
             }
         }
         requestLocationPermission()
+        DatabaseConfig.db = Room.databaseBuilder(
+            applicationContext,
+            DatabaseConfig::class.java,
+            "sonar_database"
+        ).build()
     }
 
 

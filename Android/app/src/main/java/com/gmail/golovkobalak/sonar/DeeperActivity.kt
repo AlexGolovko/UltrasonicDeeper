@@ -59,6 +59,7 @@ class DeeperActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val deeperViewModel = DeeperViewModel()
+
         deeperService = DeeperService(deeperViewModel)
         deeperViewModel.viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -139,7 +140,6 @@ class DeeperActivity : ComponentActivity() {
 
 @Composable
 fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
-
     LaunchedEffect(deeperViewModel.sonarDataEntity) {
         deeperViewModel.sonarDataEntity.collect {
             if (it.depth.isNaN()) return@collect

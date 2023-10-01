@@ -1,6 +1,8 @@
 package com.gmail.golovkobalak.sonar.service
 
 import android.util.Log
+import com.gmail.golovkobalak.sonar.DeeperActivity
+import com.gmail.golovkobalak.sonar.config.DatabaseConfig
 import com.gmail.golovkobalak.sonar.deeper.DeeperViewModel
 import com.gmail.golovkobalak.sonar.model.SonarData
 import com.gmail.golovkobalak.sonar.model.SonarDataEntity
@@ -10,13 +12,17 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.text.DecimalFormat
 
 class DeeperService(val deeperViewModel: DeeperViewModel) {
     private val gson = Gson()
     private var isMessageReceived = false
+    private var sonarDataEntityRepo = DatabaseConfig.db.sonarDataEntityRepo()
 
     suspend fun handleSonarMessage() {
+        val all = sonarDataEntityRepo.getAll()
+        all.forEach { it ->
+            Log.d(DeeperActivity::class.simpleName, it.toString())
+        }
         while (true) {
             val text = SonarService.sonarChannel.receive()
             isMessageReceived = true;
@@ -24,13 +30,20 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
             try {
                 val sonarData = gson.fromJson(text, SonarData::class.java)
                 if ("200" == (sonarData.status)) {
-                    val sonarDataEntity = SonarDataEntity(sonarData)
-                    sonarDataEntity.depth = roundToDecimalPlace(sonarDataEntity.depth, 1)
-                    sonarDataEntity.battery = roundToDecimalPlace(sonarDataEntity.battery, 2)
-                    sonarDataEntity.latitude = LocationHelper.lastLocation.value.latitude
-                    sonarDataEntity.longitude = LocationHelper.lastLocation.value.longitude
+                    val sonarDataEntity = SonarDataEntity(
+                        sonarData,
+                        LocationHelper.lastLocation.value.latitude.toString(),
+                        LocationHelper.lastLocation.value.longitude.toString(),
+                        LocationHelper.lastLocation.value.accuracy.toString()
+                    )
                     withContext(Dispatchers.Main) {
                         deeperViewModel.updateDepth(sonarDataEntity)
+                    }
+                    if (!sonarDataEntityRepo.isPointExist(
+                            sonarDataEntity.depth, sonarDataEntity.altitude, sonarDataEntity.longitude
+                        )
+                    ) {
+                        sonarDataEntityRepo.insert(sonarDataEntity)
                     }
                 }
                 if ("300" == (sonarData.status)) {
@@ -65,9 +78,5 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
         }
     }
 
-    private fun roundToDecimalPlace(value: Float, decimalPlaces: Int): Float {
-        val df = DecimalFormat("#.${"#".repeat(decimalPlaces)}")
-        return df.format(value).toFloat()
-    }
 
 }
