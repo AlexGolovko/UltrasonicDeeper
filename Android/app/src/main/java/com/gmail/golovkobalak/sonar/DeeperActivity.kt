@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
@@ -90,6 +91,8 @@ class DeeperActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocationHelper.stopLocationUpdates()
+        SonarService.close()
+
     }
 
     private fun getArrowPic(arrowPic: Int): BitmapDrawable {
@@ -104,8 +107,6 @@ class DeeperActivity : ComponentActivity() {
         lateinit var greenArrow: Drawable;
         var depthGradient = arrayOf(
             intArrayOf(172, 238, 246),
-            intArrayOf(157, 236, 186),
-            intArrayOf(96, 144, 144),
             intArrayOf(192, 225, 233),
             intArrayOf(179, 217, 228),
             intArrayOf(166, 209, 223),
@@ -168,7 +169,75 @@ fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
         modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.SpaceAround
     ) {
         MapComponent(Modifier.weight(1f))
+        LegendComponent(Modifier.weight(0.1f))
         CanvasComponent(deeperViewModel, Modifier.weight(1f))
+    }
+}
+
+@Composable
+fun LegendComponent(modifier: Modifier) {
+    val textMeasure = rememberTextMeasurer()
+    val stringBuilder = StringBuilder()
+    depthGradient.forEachIndexed { index, colors ->
+        stringBuilder.append("$index\n")
+    }
+
+    Canvas(
+        modifier = modifier.fillMaxSize()
+    ) {
+        drawRect(Color.White)
+
+        val rowHeight = size.height / depthGradient.size
+        depthGradient.forEachIndexed { index, colors ->
+            val rect = Rect(
+                left = 0f,
+                top = index * rowHeight,
+                right = 20.dp.toPx(),
+                bottom = (index + 1) * rowHeight
+            )
+
+            drawRect(
+                color = Color(
+                    red = colors[0] / 255f,
+                    green = colors[1] / 255f,
+                    blue = colors[2] / 255f,
+                    alpha = 1f
+                ),
+                topLeft = rect.topLeft,
+                size = rect.size
+            )
+            val legendDepth = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = Color.Black,
+                        fontSize = 10.sp,
+                        fontStyle = FontStyle.Normal,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                ) {
+                    append(stringBuilder.toString())
+
+                }
+
+            }
+            val legend = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        color = Color.Black,
+                        fontSize = 10.sp,
+                        fontStyle = FontStyle.Normal,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace
+                    )
+                ) {
+                    append("${index + 1}")
+
+                }
+
+            }
+            drawText(textMeasurer = textMeasure, text = legend, topLeft = rect.topRight)
+        }
     }
 }
 
@@ -266,10 +335,7 @@ fun CanvasComponent(deeperViewModel: DeeperViewModel, modifier: Modifier) {
         if (list.size == 0) {
             return@Canvas
         }
-        val dp = size.height.toDp() / 2;
-        drawText(
-            textMeasurer = textMeasure, text = text, topLeft = Offset(dp.toPx(), 0.dp.toPx())
-        )
+        val dp = size.height.toDp() / 2 - 10.dp
         val canvasWidth = size.width
         val canvasHeight = size.height
         // Define the stroke style with a thicker line
