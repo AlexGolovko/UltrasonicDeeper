@@ -24,7 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.lifecycleScope
 import com.gmail.golovkobalak.sonar.service.LocationHelper
+import com.gmail.golovkobalak.sonar.service.MapService
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 import com.gmail.golovkobalak.sonar.util.CacheManagerCallback
 import com.gmail.golovkobalak.sonar.util.CacheManagerUtil
@@ -36,6 +38,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -49,6 +54,17 @@ class MapActivity : ComponentActivity() {
             .load(applicationContext, applicationContext.getSharedPreferences("osmdroid", MODE_PRIVATE))
         Log.d(javaClass.name, Environment.getExternalStorageDirectory().absolutePath)
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                MapService.handleScrollEvents()
+            }
+        }
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                MapService.handleEventEvents()
+            }
+        }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         setContent {
             SonarTheme {
@@ -158,6 +174,20 @@ fun MapView() {
                 val marker = Marker(this)
                 CacheManagerUtil.mapView.overlays.add(marker)
                 CacheManagerUtil.currPositionMarker = marker
+                this.addMapListener(object : MapListener {
+                    override fun onScroll(event: ScrollEvent?): Boolean {
+                        Log.e("MapListener", event.toString())
+                        event?.let { MapService.scrollEventChannel.trySend(it) }
+                        return true
+                    }
+
+                    override fun onZoom(event: ZoomEvent?): Boolean {
+                        Log.e("MapListener", event.toString())
+                        event?.let { MapService.zoomEventChannel.trySend(it) }
+                        return true
+                    }
+
+                })
             }
         },
         modifier = Modifier.fillMaxSize()

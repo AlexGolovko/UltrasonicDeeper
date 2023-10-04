@@ -1,7 +1,6 @@
 package com.gmail.golovkobalak.sonar.service
 
 import android.util.Log
-import com.gmail.golovkobalak.sonar.DeeperActivity
 import com.gmail.golovkobalak.sonar.config.DatabaseConfig
 import com.gmail.golovkobalak.sonar.deeper.DeeperViewModel
 import com.gmail.golovkobalak.sonar.model.SonarData
@@ -19,13 +18,9 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
     private var sonarDataEntityRepo = DatabaseConfig.db.sonarDataEntityRepo()
 
     suspend fun handleSonarMessage() {
-        val all = sonarDataEntityRepo.getAll()
-        all.forEach { it ->
-            Log.d(DeeperActivity::class.simpleName, it.toString())
-        }
         while (true) {
             val text = SonarService.sonarChannel.receive()
-            isMessageReceived = true;
+            isMessageReceived = true
             Log.d(Thread.currentThread().name, text)
             try {
                 val sonarData = gson.fromJson(text, SonarData::class.java)
@@ -67,13 +62,13 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
         var isNoMessageSent = true
         while (true) {
             delay(1000)
-            if (!isMessageReceived) {
+            isNoMessageSent = if (!isMessageReceived) {
                 if (isNoMessageSent) {
                     deeperViewModel.updateSonarDataError(SonarDataException(message = "Sonar is not send message"))
                 }
-                isNoMessageSent = true
+                true
             } else {
-                isNoMessageSent = false
+                false
             }
         }
     }
