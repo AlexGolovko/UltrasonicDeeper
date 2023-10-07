@@ -273,7 +273,7 @@ fun MapComponent(modifier: Modifier) {
     }
 }
 
-fun generateBlueGradient(value: Float): Int {
+fun generateBlueGradient(value: Double): Int {
     val depth = value.roundToInt()
     if (depth > 29) {
         val rgb = depthGradient[29]
@@ -344,10 +344,10 @@ fun CanvasComponent(deeperViewModel: DeeperViewModel, modifier: Modifier) {
             val depthListMaxSize = canvasWidth / lineWidth
             deeperViewModel.updateMaxSize(depthListMaxSize)
         }
-        val max = maxDepth * 1.1f
+        val max = maxDepth * 1.1
         list.forEachIndexed { index, sonarData ->
             val startEndX = canvasWidth - (lineWidth / 2 + index * lineWidth)
-            val endLineY = sonarData.depth * canvasHeight / max
+            val endLineY = (sonarData.depth * canvasHeight / max).toFloat()
             val orangeColor = Color(1.0f, 0.5f, 0.0f, 1.0f)
             drawLine(
                 start = Offset(x = startEndX, y = canvasHeight),

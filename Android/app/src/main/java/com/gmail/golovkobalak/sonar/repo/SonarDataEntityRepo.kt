@@ -15,11 +15,20 @@ interface SonarDataEntityRepo {
     fun getAll(): List<SonarDataEntity>
 
     @Query(
-        "SELECT EXISTS (SELECT 1 FROM SonarDataEntity WHERE (depth > :depth-0.2 OR depth < :depth+0.2 )" +
-                "AND (altitude > :altitude-0.00001 OR altitude < :altitude+0.00001)" +
-                "AND (longitude > :longitude-0.00001 OR longitude < :longitude+0.00001))"
+        "SELECT EXISTS (SELECT 1 FROM SonarDataEntity " +
+                "WHERE depth BETWEEN :minDepth AND :maxDepth " +
+                "AND latitude BETWEEN :minLatitude AND :maxLatitude " +
+                "AND longitude BETWEEN :minLongitude AND :maxLongitude)"
     )
-    fun isPointExist(depth: Float, altitude: String, longitude: String): Boolean
+    fun isPointExist(
+        minDepth: Double,
+        maxDepth: Double,
+        minLatitude: Double,
+        maxLatitude: Double,
+        minLongitude: Double,
+        maxLongitude: Double
+    ): Boolean
+
 
     @Query("SELECT * FROM SonarDataEntity WHERE latitude>:latSouth AND latitude<:latNorth AND longitude>:lonWest AND longitude<:lonEast")
     fun getBy(latSouth: Double?, latNorth: Double?, lonWest: Double?, lonEast: Double?): List<SonarDataEntity>

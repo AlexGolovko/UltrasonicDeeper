@@ -11,7 +11,7 @@ private const val INITIAL_SIZE = 256
 class DeeperViewModel : ViewModel() {
     private var depthListMaxSize: Int = INITIAL_SIZE
     val list: MutableList<SonarDataEntity> = mutableListOf()
-    var maxDepth = 1f
+    var maxDepth = 1.0
 
     private val _sonarDataEntity = MutableStateFlow(SonarDataEntity())
     val sonarDataEntity = _sonarDataEntity.asStateFlow()

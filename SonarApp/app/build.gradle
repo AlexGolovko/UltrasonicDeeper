@@ -20,11 +20,14 @@ android {
                 keyAlias = getenv('ALIAS')
                 keyPassword = getenv('KEY_PASSWORD')
             } else {
+                try{
                 def props = new Properties()
                 props.load(file('../key.properties').newReader())
                 storePassword = props['storePassword']
                 keyAlias = props['keyAlias']
-                keyPassword = props['keyPassword']
+                keyPassword = props['keyPassword']}catch(Exception e ){
+                    print(e)
+                }
             }
         }
     }

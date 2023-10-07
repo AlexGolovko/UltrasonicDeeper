@@ -3,6 +3,7 @@ package com.gmail.golovkobalak.sonar.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.gmail.golovkobalak.sonar.MainActivity
+import com.google.gson.Gson
 import java.text.DecimalFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -10,38 +11,38 @@ import java.time.format.DateTimeFormatter
 
 @Entity
 data class SonarDataEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long,
-    val depth: Float,
-    val battery: Float,
-    val temperature: String,
-    val time: String,
-    val altitude: String,
-    val longitude: String,
-    val accuracy: String
+        @PrimaryKey(autoGenerate = true) val id: Long,
+        val depth: Double,
+        val battery: Double,
+        val temperature: Double,
+        val time: String,
+        val latitude: Double,
+        val longitude: Double,
+        val altitude: Double,
+        val accuracy: Float
 ) {
-    constructor() : this(0, Float.NaN, Float.NaN, "", "", "", "", "")
+    constructor() : this(0, Double.NaN, Double.NaN, Double.NaN, "", Double.NaN, Double.NaN, Double.NaN, Float.NaN)
 
     var sessionId = MainActivity.SESSION_ID
-    var altitudeAccuracy: String? = null
-    var heading: String? = null
-    var latitude = 0.0
-    var speed: String? = null
 
-    constructor(sonarData: SonarData, altitude: String, longitude: String, accuracy: String) : this(
-        id = 0,
-        depth = roundToDecimalPlace(sonarData.depth.toFloat(), 1),
-        battery = roundToDecimalPlace(sonarData.battery.toFloat(), 2),
-        temperature = sonarData.temperature,
-        time = getCurrentTime(),
-        altitude = altitude,
-        longitude = longitude,
-        accuracy = accuracy
+    constructor(sonarData: SonarData, latitude: Double, longitude: Double, altitude: Double, accuracy: Float) : this(
+            id = 0,
+            depth = roundToDecimalPlace(sonarData.depth.toDouble(), 1),
+            battery = roundToDecimalPlace(sonarData.battery.toDouble(), 2),
+            temperature = sonarData.temperature.toDouble(),
+            time = getCurrentTime(),
+            latitude = latitude,
+            longitude = longitude,
+            altitude = altitude,
+            accuracy = accuracy
     )
 
     override fun toString(): String {
-        return "SonarDataEntity(id=$id,sessionId=$sessionId depth=$depth, battery=$battery, " +
-                "temperature='$temperature', time='$time', altitude='$altitude', " +
-                "longitude='$longitude',accuracy='$accuracy')"
+        return gson.toJson(this)
+    }
+
+    companion object {
+        var gson = Gson()
     }
 }
 
@@ -51,8 +52,9 @@ private fun getCurrentTime(): String {
     return currentTime.format(formatter)
 }
 
-private fun roundToDecimalPlace(value: Float, decimalPlaces: Int): Float {
+private fun roundToDecimalPlace(value: Double, decimalPlaces: Int): Double {
     val df = DecimalFormat("#.${"#".repeat(decimalPlaces)}")
-    return df.format(value).toFloat()
+    return df.format(value).toDouble()
 }
+
 

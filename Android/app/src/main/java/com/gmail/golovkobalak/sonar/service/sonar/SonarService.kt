@@ -34,7 +34,7 @@ object SonarService {
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                Log.e(javaClass.name, t.toString())
+                Log.e(javaClass.name, t.toString()+ t.stackTraceToString())
                 reconnect()
             }
         })

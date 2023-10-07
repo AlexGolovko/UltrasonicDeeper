@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 
+private const val PRECISE_VALUE = 0.00001f
+
 class DeeperService(val deeperViewModel: DeeperViewModel) {
     private val gson = Gson()
     private var isMessageReceived = false
@@ -27,15 +29,21 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                 if ("200" == (sonarData.status)) {
                     val sonarDataEntity = SonarDataEntity(
                         sonarData,
-                        LocationHelper.lastLocation.value.latitude.toString(),
-                        LocationHelper.lastLocation.value.longitude.toString(),
-                        LocationHelper.lastLocation.value.accuracy.toString()
+                        LocationHelper.lastLocation.value.latitude,
+                        LocationHelper.lastLocation.value.longitude,
+                        LocationHelper.lastLocation.value.altitude,
+                        LocationHelper.lastLocation.value.accuracy
                     )
                     withContext(Dispatchers.Main) {
                         deeperViewModel.updateDepth(sonarDataEntity)
                     }
                     if (!sonarDataEntityRepo.isPointExist(
-                            sonarDataEntity.depth, sonarDataEntity.altitude, sonarDataEntity.longitude
+                            sonarDataEntity.depth - 0.1,
+                            sonarDataEntity.depth + 0.1,
+                            sonarDataEntity.latitude - PRECISE_VALUE,
+                            sonarDataEntity.latitude + PRECISE_VALUE,
+                            sonarDataEntity.longitude - PRECISE_VALUE,
+                            sonarDataEntity.longitude + PRECISE_VALUE
                         )
                     ) {
                         sonarDataEntityRepo.insert(sonarDataEntity)

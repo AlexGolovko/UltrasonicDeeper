@@ -72,6 +72,12 @@ class MapActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        MapService.resetCachedMarkers()
+
+    }
 }
 
 @Composable
@@ -197,7 +203,7 @@ fun MapView() {
         LocationHelper.lastLocation.collect { newLocation ->
             val geoPoint = GeoPoint(newLocation.latitude, newLocation.longitude)
             CacheManagerUtil.currPositionMarker.position = geoPoint
-            if (locationUpdate < 3) {
+            if (locationUpdate < 5) {
                 CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 CacheManagerUtil.mapView.controller.setCenter(geoPoint)
                 locationUpdate++
