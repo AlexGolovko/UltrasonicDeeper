@@ -1,6 +1,11 @@
+import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
+import java.util.*
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
+    id("com.google.firebase.appdistribution")
     id("com.google.devtools.ksp") version "1.9.10-1.0.13"
 }
 
@@ -22,9 +27,15 @@ android {
     }
 
     buildTypes {
-        release {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            firebaseAppDistribution {
+                artifactType = "APK"
+                groups = "first-squad"
+                appId="1:263480785694:android:210e1d66e9c78bb94ea70f"
+                serviceCredentialsFile="$rootDir/secret/google_auth_cred.json"
+            }
         }
     }
     compileOptions {
@@ -46,6 +57,28 @@ android {
             excludes += "org/eclipse/jetty/http/encoding.properties"
         }
     }
+    signingConfigs {
+        create("release") {
+            val signFile = rootProject.file("./release.keystore")
+            storeFile = signFile
+            if (System.getenv("KEY_STORE_PASSWORD") != null) {
+                storePassword = System.getenv("KEY_STORE_PASSWORD")
+                keyAlias = System.getenv("ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            } else {
+                try {
+                    val props = Properties()
+                    props.load(file("../key.properties").reader())
+                    storePassword = props.getProperty("storePassword")
+                    keyAlias = props.getProperty("keyAlias")
+                    keyPassword = props.getProperty("keyPassword")
+                } catch (e: Exception) {
+                    println(e)
+                }
+            }
+        }
+    }
+
 }
 
 dependencies {
