@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -34,11 +33,14 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.scale
 import androidx.lifecycle.viewModelScope
+import androidx.preference.PreferenceManager
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.depthGradient
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.greenArrow
 import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.redArrow
+import com.gmail.golovkobalak.sonar.DeeperActivity.Companion.yellowArrow
 import com.gmail.golovkobalak.sonar.deeper.DeeperViewModel
 import com.gmail.golovkobalak.sonar.model.CircleDrawable
+import com.gmail.golovkobalak.sonar.model.SonarDataException
 import com.gmail.golovkobalak.sonar.service.DeeperService
 import com.gmail.golovkobalak.sonar.service.LocationHelper
 import com.gmail.golovkobalak.sonar.service.sonar.SonarService
@@ -54,7 +56,7 @@ import org.osmdroid.views.overlay.Marker
 import kotlin.math.roundToInt
 
 class DeeperActivity : ComponentActivity() {
-    private lateinit var deeperService: DeeperService;
+    private lateinit var deeperService: DeeperService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,9 +104,9 @@ class DeeperActivity : ComponentActivity() {
     }
 
     companion object {
-        lateinit var redArrow: Drawable;
-        lateinit var yellowArrow: Drawable;
-        lateinit var greenArrow: Drawable;
+        lateinit var redArrow: Drawable
+        lateinit var yellowArrow: Drawable
+        lateinit var greenArrow: Drawable
         var depthGradient = arrayOf(
             intArrayOf(172, 238, 246),
             intArrayOf(192, 225, 233),
@@ -152,6 +154,19 @@ fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
             circleMarker.icon = circleDrawable
             circleMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             CacheManagerUtil.mapView.overlays.add(CacheManagerUtil.mapView.overlays.size - 1, circleMarker)
+            CacheManagerUtil.mapView.invalidate()
+        }
+    }
+    LaunchedEffect(deeperViewModel.sonarDataException) {
+        deeperViewModel.sonarDataException.collect {
+            if (SonarDataException.FAILED_TO_MEASURE == it.message) {
+                CacheManagerUtil.currPositionMarker.icon = yellowArrow
+                CacheManagerUtil.mapView.invalidate()
+            }
+            if (SonarDataException.FAILED_TO_UNKNOWN_REASON == it.message) {
+                CacheManagerUtil.currPositionMarker.icon = redArrow
+                CacheManagerUtil.mapView.invalidate()
+            }
         }
     }
     LaunchedEffect(LocationHelper.lastLocation) {
@@ -162,6 +177,7 @@ fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
             CacheManagerUtil.currPositionMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
             CacheManagerUtil.mapView.controller.setCenter(geoPoint)
             CacheManagerUtil.currPositionMarker.rotation = 45 - newLocation.bearing
+            CacheManagerUtil.mapView.invalidate()
         }
     }
 
@@ -206,21 +222,6 @@ fun LegendComponent(modifier: Modifier) {
                 topLeft = rect.topLeft,
                 size = rect.size
             )
-            val legendDepth = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        color = Color.Black,
-                        fontSize = 10.sp,
-                        fontStyle = FontStyle.Normal,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
-                    )
-                ) {
-                    append(stringBuilder.toString())
-
-                }
-
-            }
             val legend = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
