@@ -25,30 +25,15 @@ jobs:
           cache: "gradle"
       - run: ./gradlew build --no-daemon --parallel
 
-      - name: Build with Gradle and assemble debug APk
-        run: ./gradlew assembleDebug --stacktrace
-
       - name: Run unit tests
         run: ./gradlew test
 
       - name: Assemble Android Instrumentation Tests
         run: ./gradlew assembleDebugAndroidTest
 
-      - name: Upload app APK
-        uses: actions/upload-artifact@v1
-        with:
-          name: app-debug
-          path: Android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload Android Test APK
-        uses: actions/upload-artifact@v1
-        with:
-          name: app-debug-androidTest
-          path: Android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-
       - name: Firebase App Distribute
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Android/secret/google_auth_cred.json
           GOOGLE_APPLICATION_CREDENTIALS_VALUE: ${{secrets.GOOGLE_APPLICATION_CREDENTIALS_VALUE}}
-        run: ./scripts/config_google_auth_file.sh && ./gradlew assembleRelease appDistributionUploadRelease
+        run: ./scripts/config_google_auth_file.sh && ./gradlew release
         working-directory: ./Android
