@@ -16,3 +16,11 @@ buildscript {
         classpath(kotlin("gradle-plugin", version = "1.9.10"))
     }
 }
+
+
+tasks {
+    register("release") {
+        dependsOn("app:assembleRelease", "app:appDistributionUploadRelease")
+        description = "Builds and distributes the release version of the app."
+    }
+}

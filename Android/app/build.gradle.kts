@@ -18,14 +18,21 @@ android {
         minSdk = 30
         targetSdk = 34
         versionCode = 1
-        versionName = "0.1"
+        versionName = "0.1.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
     }
-
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("./release.keystore")
+            storePassword = System.getenv("KEY_STORE_PASSWORD")
+            keyAlias = System.getenv("ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
+        }
+    }
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
@@ -33,9 +40,10 @@ android {
             firebaseAppDistribution {
                 artifactType = "APK"
                 groups = "first-squad"
-                appId="1:263480785694:android:210e1d66e9c78bb94ea70f"
-                serviceCredentialsFile="$rootDir/secret/google_auth_cred.json"
+                appId = "1:263480785694:android:210e1d66e9c78bb94ea70f"
+                serviceCredentialsFile = "$rootDir/secret/google_auth_cred.json"
             }
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -55,27 +63,6 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "org/eclipse/jetty/http/encoding.properties"
-        }
-    }
-    signingConfigs {
-        create("release") {
-            val signFile = rootProject.file("./release.keystore")
-            storeFile = signFile
-            if (System.getenv("KEY_STORE_PASSWORD") != null) {
-                storePassword = System.getenv("KEY_STORE_PASSWORD")
-                keyAlias = System.getenv("ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
-            } else {
-                try {
-                    val props = Properties()
-                    props.load(file("../key.properties").reader())
-                    storePassword = props.getProperty("storePassword")
-                    keyAlias = props.getProperty("keyAlias")
-                    keyPassword = props.getProperty("keyPassword")
-                } catch (e: Exception) {
-                    println(e)
-                }
-            }
         }
     }
 
@@ -110,3 +97,4 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.google.code.gson:gson:2.10.1")
 }
+
