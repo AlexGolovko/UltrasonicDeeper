@@ -1,5 +1,4 @@
 import com.google.firebase.appdistribution.gradle.firebaseAppDistribution
-import java.util.*
 
 plugins {
     id("com.android.application")
@@ -18,7 +17,7 @@ android {
         minSdk = 30
         targetSdk = 34
         versionCode = 1
-        versionName = "0.1.2"
+        versionName = "0.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -77,7 +76,7 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
-    implementation("androidx.activity:activity-compose:1.7.2")
+    implementation("androidx.activity:activity-compose:1.8.0")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
