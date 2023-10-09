@@ -16,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.room.Room
@@ -73,7 +75,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
 
     Surface(color = Color.White) {
         // Composable content of the main activity
@@ -82,7 +83,23 @@ fun MainScreen() {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("All fine\n\n\n\n\n new line")
+            Column(modifier = Modifier.padding(32.dp)) {
+                Text(
+                    text = "Ultrasonic Deeper",
+                    style = TextStyle(
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    )
+                )
+                Text(
+                    text = "\n\n\nTurn on sonar\n\nTurn on wifi\n\nConnect to microsonar AP\nwith password = microsonar\n\nClick the button Open Sonar",
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        color = Color.Black
+                    )
+                )
+            }
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
