@@ -31,6 +31,9 @@ jobs:
       - name: Assemble Android Instrumentation Tests
         run: ./gradlew assembleDebugAndroidTest --parallel
 
+      - name: Sonarqube analyze
+        run: ./gradlew sonar --parallel
+
       - name: Firebase App Distribute
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Android/secret/google_auth_cred.json

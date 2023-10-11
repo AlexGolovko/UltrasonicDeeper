@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.8.10" apply false
     id("com.google.gms.google-services") version "4.4.0" apply false
     id("com.google.firebase.appdistribution") version "4.0.0" apply false
+    id("org.sonarqube") version "4.4.1.3373"
     kotlin("jvm") version "1.9.10" apply false
 }
 
@@ -14,6 +15,14 @@ buildscript {
     }
     dependencies {
         classpath(kotlin("gradle-plugin", version = "1.9.10"))
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "alexgolovko_Android_DeepMapper")
+        property("sonar.organization", "alexgolovko")
+        property("sonar.host.url", "https://sonarcloud.io")
     }
 }
 
