@@ -41,6 +41,7 @@ android {
                 groups = "first-squad"
                 appId = "1:263480785694:android:210e1d66e9c78bb94ea70f"
                 serviceCredentialsFile = "$rootDir/secret/google_auth_cred.json"
+                releaseNotes = "Devoted to Ivan's Birthday\n Happy Birthday!!!"
             }
             buildConfigField("String", "SONAR_URL", "\"ws://192.168.4.1:5000/sonar\"")
             signingConfig = signingConfigs.getByName("release")
