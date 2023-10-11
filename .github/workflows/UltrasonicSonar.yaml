@@ -23,13 +23,13 @@ jobs:
           distribution: "oracle"
           java-version: "21"
           cache: "gradle"
-      - run: ./gradlew build --no-daemon --parallel
+      - run: ./gradlew build --parallel
 
       - name: Run unit tests
-        run: ./gradlew test
+        run: ./gradlew test --parallel
 
       - name: Assemble Android Instrumentation Tests
-        run: ./gradlew assembleDebugAndroidTest
+        run: ./gradlew assembleDebugAndroidTest --parallel
 
       - name: Firebase App Distribute
         env:
