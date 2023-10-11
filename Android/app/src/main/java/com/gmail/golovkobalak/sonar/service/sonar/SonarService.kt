@@ -1,7 +1,7 @@
 package com.gmail.golovkobalak.sonar.service.sonar
 
 import android.util.Log
-import com.gmail.golovkobalak.sonar.config.SonarConfiguration
+import com.gmail.golovkobalak.sonar.BuildConfig
 import kotlinx.coroutines.channels.Channel
 import okhttp3.*
 import java.util.*
@@ -17,7 +17,7 @@ object SonarService {
             return
         }
         val request: Request = Request.Builder()
-            .url(SonarConfiguration.SONAR_URL)
+            .url(BuildConfig.SONAR_URL)
             .build()
 
         client.newWebSocket(request, object : WebSocketListener() {

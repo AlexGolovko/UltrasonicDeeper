@@ -42,7 +42,11 @@ android {
                 appId = "1:263480785694:android:210e1d66e9c78bb94ea70f"
                 serviceCredentialsFile = "$rootDir/secret/google_auth_cred.json"
             }
+            buildConfigField("String", "SONAR_URL", "\"ws://192.168.4.1:5000/sonar\"")
             signingConfig = signingConfigs.getByName("release")
+        }
+        getByName("debug"){
+           buildConfigField("String", "SONAR_URL", "\"ws://192.168.31.131:5000/sonar\"")
         }
     }
     compileOptions {
@@ -54,6 +58,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
