@@ -6,8 +6,8 @@ import com.gmail.golovkobalak.sonar.deeper.DeeperViewModel
 import com.gmail.golovkobalak.sonar.model.SonarData
 import com.gmail.golovkobalak.sonar.model.SonarDataEntity
 import com.gmail.golovkobalak.sonar.model.SonarDataException
-import com.gmail.golovkobalak.sonar.service.sonar.SonarService
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -18,10 +18,11 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
     private val gson = Gson()
     private var isMessageReceived = false
     private var sonarDataEntityRepo = DatabaseConfig.db.sonarDataEntityRepo()
+    private var dispatcher: CoroutineDispatcher=Dispatchers.Default
 
     suspend fun handleSonarMessage() {
         while (true) {
-            val text = SonarService.sonarChannel.receive()
+            val text = WebsocketService.sonarChannel.receive()
             isMessageReceived = true
             Log.d(Thread.currentThread().name, text)
             try {
@@ -34,7 +35,7 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                         LocationHelper.lastLocation.value.altitude,
                         LocationHelper.lastLocation.value.accuracy
                     )
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatcher) {
                         deeperViewModel.updateDepth(sonarDataEntity)
                     }
                     if (!sonarDataEntityRepo.isPointExist(
@@ -50,12 +51,12 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                     }
                 }
                 if ("300" == (sonarData.status)) {
-                    withContext(Dispatchers.Main) {
+                    withContext(dispatcher) {
                         deeperViewModel.updateSonarDataError(SonarDataException(message = SonarDataException.FAILED_TO_MEASURE))
                     }
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+                withContext(dispatcher) {
                     deeperViewModel.updateSonarDataError(
                         SonarDataException(
                             message = SonarDataException.FAILED_TO_UNKNOWN_REASON, e

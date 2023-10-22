@@ -3,7 +3,6 @@
 package com.gmail.golovkobalak.sonar
 
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
@@ -31,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
@@ -43,12 +43,11 @@ import com.gmail.golovkobalak.sonar.model.CircleDrawable
 import com.gmail.golovkobalak.sonar.model.SonarDataException
 import com.gmail.golovkobalak.sonar.service.DeeperService
 import com.gmail.golovkobalak.sonar.service.LocationHelper
-import com.gmail.golovkobalak.sonar.service.sonar.SonarService
+import com.gmail.golovkobalak.sonar.service.WebsocketService
 import com.gmail.golovkobalak.sonar.util.CacheManagerUtil
 import com.gmail.golovkobalak.sonar.util.OsmDroidConfiguration
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -65,14 +64,13 @@ class DeeperActivity : ComponentActivity() {
 
         deeperService = DeeperService(deeperViewModel)
         deeperViewModel.viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                SonarService.connect()
+            coroutineScope {
+                WebsocketService.connect()
                 deeperService.handleSonarMessage()
-
             }
         }
         deeperViewModel.viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            coroutineScope {
                 deeperService.checkForMessage()
             }
         }
@@ -93,14 +91,14 @@ class DeeperActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         LocationHelper.stopLocationUpdates()
-        SonarService.close()
+        WebsocketService.close()
 
     }
 
-    private fun getArrowPic(arrowPic: Int): BitmapDrawable {
+    private fun getArrowPic(arrowPic: Int): Drawable {
         val icon = BitmapFactory.decodeResource(resources, arrowPic)
         val scaledBitmap = icon.scale(icon.width, icon.height, false)
-        return BitmapDrawable(scaledBitmap)
+        return scaledBitmap.toDrawable(resources)
     }
 
     companion object {
@@ -148,7 +146,6 @@ fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
             if (it.depth.isNaN()) return@collect
             CacheManagerUtil.currPositionMarker.icon = greenArrow
             val circleMarker = Marker(CacheManagerUtil.mapView)
-            //TODO check that for this position marker with this depth (+-0.5m) exist
             circleMarker.position = CacheManagerUtil.currPositionMarker.position
             val circleDrawable = CircleDrawable.create(200, generateBlueGradient(it.depth))
             circleMarker.icon = circleDrawable
@@ -194,7 +191,7 @@ fun DeeperActivityContent(deeperViewModel: DeeperViewModel) {
 fun LegendComponent(modifier: Modifier) {
     val textMeasure = rememberTextMeasurer()
     val stringBuilder = StringBuilder()
-    depthGradient.forEachIndexed { index, colors ->
+    depthGradient.forEachIndexed { index, _ ->
         stringBuilder.append("$index\n")
     }
 
@@ -206,21 +203,13 @@ fun LegendComponent(modifier: Modifier) {
         val rowHeight = size.height / depthGradient.size
         depthGradient.forEachIndexed { index, colors ->
             val rect = Rect(
-                left = 0f,
-                top = index * rowHeight,
-                right = 20.dp.toPx(),
-                bottom = (index + 1) * rowHeight
+                left = 0f, top = index * rowHeight, right = 20.dp.toPx(), bottom = (index + 1) * rowHeight
             )
 
             drawRect(
                 color = Color(
-                    red = colors[0] / 255f,
-                    green = colors[1] / 255f,
-                    blue = colors[2] / 255f,
-                    alpha = 1f
-                ),
-                topLeft = rect.topLeft,
-                size = rect.size
+                    red = colors[0] / 255f, green = colors[1] / 255f, blue = colors[2] / 255f, alpha = 1f
+                ), topLeft = rect.topLeft, size = rect.size
             )
             val legend = buildAnnotatedString {
                 withStyle(

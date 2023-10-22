@@ -1,4 +1,4 @@
-package com.gmail.golovkobalak.sonar.service.sonar
+package com.gmail.golovkobalak.sonar.service
 
 import android.util.Log
 import com.gmail.golovkobalak.sonar.BuildConfig
@@ -6,7 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import okhttp3.*
 import java.util.*
 
-object SonarService {
+object WebsocketService {
 
     private val client by lazy { OkHttpClient() }
     private var webSocket: WebSocket? = null
@@ -22,7 +22,7 @@ object SonarService {
 
         client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                SonarService.webSocket = webSocket
+                WebsocketService.webSocket = webSocket
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
@@ -30,7 +30,7 @@ object SonarService {
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                SonarService.webSocket = null
+                WebsocketService.webSocket = null
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
