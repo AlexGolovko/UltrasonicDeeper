@@ -3,6 +3,7 @@
 package com.gmail.golovkobalak.sonar
 
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
@@ -98,7 +99,7 @@ class DeeperActivity : ComponentActivity() {
     private fun getArrowPic(arrowPic: Int): Drawable {
         val icon = BitmapFactory.decodeResource(resources, arrowPic)
         val scaledBitmap = icon.scale(icon.width, icon.height, false)
-        return scaledBitmap.toDrawable(resources)
+        return BitmapDrawable(scaledBitmap)
     }
 
     companion object {
