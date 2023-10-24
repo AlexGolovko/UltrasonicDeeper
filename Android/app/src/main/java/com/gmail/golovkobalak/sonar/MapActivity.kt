@@ -34,6 +34,7 @@ import com.gmail.golovkobalak.sonar.util.CacheProgress
 import com.gmail.golovkobalak.sonar.util.OsmDroidConfiguration
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,6 +49,7 @@ import org.osmdroid.views.overlay.Marker
 
 
 class MapActivity : ComponentActivity() {
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         Configuration.getInstance()
@@ -56,12 +58,12 @@ class MapActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(dispatcher) {
                 MapService.handleScrollEvents()
             }
         }
         lifecycleScope.launch {
-            withContext(Dispatchers.IO) {
+            withContext(dispatcher) {
                 MapService.handleEventEvents()
             }
         }
@@ -144,7 +146,7 @@ fun MapScreen() {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(14.dp)
                     .align(Alignment.BottomEnd) // Align the button to the bottom-end (top layer)
             ) {
                 if (isLoading) {
