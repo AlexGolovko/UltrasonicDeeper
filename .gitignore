@@ -1,6 +1,11 @@
 /SonarApp/.gradle/
 /SonarApp/.idea/
+/SonarApp/key.properties
+/SonarApp/local.properties
 /esp8266/.idea/
 SonarApp/build/
 package-lock.json
 SonarApp/secrets/
+*.iml
+key.properties
+local.properties

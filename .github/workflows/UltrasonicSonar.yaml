@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./SonarApp
+        working-directory: ./Android
     env:
       KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
       ALIAS: ${{ secrets.ALIAS }}
@@ -18,50 +18,25 @@ jobs:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_ANDROID }}
     steps:
       - uses: actions/checkout@v3
-      - name: Setup nodejs
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          cache: "npm"
-          cache-dependency-path: AngularSonar/package-lock.json
-
-      - name: Angular build
-        working-directory: ./AngularSonar
-        run: |
-          npm install
-          npm run build
-
       - uses: actions/setup-java@v3
         with:
-          distribution: "temurin"
+          distribution: "oracle"
           java-version: "17"
           cache: "gradle"
-      - run: ./gradlew build sonarqube --no-daemon --parallel
-
-      - name: Build with Gradle and assemble debug APk
-        run: ./gradlew assembleDebug --stacktrace
+      - run: ./gradlew build --parallel
 
       - name: Run unit tests
-        run: ./gradlew test
+        run: ./gradlew test --parallel
 
       - name: Assemble Android Instrumentation Tests
-        run: ./gradlew assembleDebugAndroidTest
+        run: ./gradlew assembleDebugAndroidTest --parallel
 
-      - name: Upload app APK
-        uses: actions/upload-artifact@v1
-        with:
-          name: app-debug
-          path: SonarApp/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Upload Android Test APK
-        uses: actions/upload-artifact@v1
-        with:
-          name: app-debug-androidTest
-          path: SonarApp/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+      - name: Sonarqube analyze
+        run: ./gradlew sonar --parallel
 
       - name: Firebase App Distribute
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{secrets.GOOGLE_APPLICATION_CREDENTIALS_PATH}}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ github.workspace }}/Android/secret/google_auth_cred.json
           GOOGLE_APPLICATION_CREDENTIALS_VALUE: ${{secrets.GOOGLE_APPLICATION_CREDENTIALS_VALUE}}
-        run: ./scripts/config_google_auth_file.sh && ./gradlew assembleRelease appDistributionUploadRelease
-        working-directory: ./SonarApp
+        run: ./scripts/config_google_auth_file.sh && ./gradlew release
+        working-directory: ./Android
