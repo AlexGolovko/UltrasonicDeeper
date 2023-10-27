@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: "oracle"
-          java-version: "18"
+          java-version: "19"
           cache: "gradle"
       - run: ./gradlew clean build --parallel --no-daemon
 
