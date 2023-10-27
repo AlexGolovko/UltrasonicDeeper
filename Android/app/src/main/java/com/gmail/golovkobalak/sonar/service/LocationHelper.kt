@@ -77,11 +77,7 @@ object LocationHelper {
         return distance >= meters
     }
 
-    fun start(context: Context?) {
-        if (fusedLocationClient != null) {
-            return
-        }
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context!!)
+    fun start(context: Context): Boolean {
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -89,16 +85,12 @@ object LocationHelper {
                 context, Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
+            Log.d(javaClass.name, "No permission to start")
+            return false
         }
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
         fusedLocationClient!!.requestLocationUpdates(locationRequest!!, locationCallback!!, Looper.getMainLooper())
+        return true
     }
 
     fun stopLocationUpdates() {

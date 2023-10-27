@@ -31,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.graphics.scale
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
@@ -76,7 +75,6 @@ class DeeperActivity : ComponentActivity() {
             }
         }
 
-        LocationHelper.start(this)
         // Initialize OSMdroid configuration
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
         redArrow = getArrowPic(R.drawable.arrow_red)

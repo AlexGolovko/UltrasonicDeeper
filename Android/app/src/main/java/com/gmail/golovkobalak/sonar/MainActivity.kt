@@ -35,10 +35,8 @@ class MainActivity : ComponentActivity() {
         val SESSION_ID = System.currentTimeMillis().toString()
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Runner.start(assets, baseContext)
         setContent {
             SonarTheme {
                 // A surface container using the 'background' color from the theme
@@ -53,6 +51,12 @@ class MainActivity : ComponentActivity() {
             DatabaseConfig::class.java,
             "sonar_database"
         ).build()
+        Runner.start(baseContext)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Runner.stop()
     }
 
 
