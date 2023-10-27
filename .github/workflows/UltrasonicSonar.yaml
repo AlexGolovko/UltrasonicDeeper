@@ -23,7 +23,7 @@ jobs:
           distribution: "oracle"
           java-version: "21"
           cache: "gradle"
-      - run: ./gradlew build --parallel --no-daemon
+      - run: ./gradlew clean build --parallel --no-daemon
 
       - name: Run unit tests
         run: ./gradlew test --parallel
