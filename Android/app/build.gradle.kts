@@ -7,7 +7,6 @@ plugins {
     id("com.google.firebase.appdistribution")
     id("com.google.devtools.ksp")
 }
-
 android {
     namespace = "com.gmail.golovkobalak.sonar"
     compileSdk = 34
@@ -71,7 +70,6 @@ android {
 dependencies {
     val roomVersion = "2.6.0"
     implementation("androidx.room:room-runtime:$roomVersion")
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.20-1.0.14")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.preference:preference-ktx:1.2.1")
