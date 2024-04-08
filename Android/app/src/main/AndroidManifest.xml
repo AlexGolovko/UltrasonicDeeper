@@ -18,11 +18,16 @@
             android:theme="@style/Theme.Sonar"
             tools:targetApi="31">
         <activity
+                android:name=".DashboardActivity"
+                android:exported="false"
+                android:label="@string/title_activity_dashboard"
+                android:theme="@style/Theme.Sonar"/>
+        <activity
                 android:name=".DeeperActivity"
                 android:exported="false"
                 android:label="@string/title_activity_deeper"
-                android:theme="@style/Theme.Sonar"
-                android:screenOrientation="landscape"/>
+                android:screenOrientation="landscape"
+                android:theme="@style/Theme.Sonar"/>
         <activity
                 android:name=".MapActivity"
                 android:exported="false"

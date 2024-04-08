@@ -136,6 +136,17 @@ fun MainScreen() {
                     ) {
                         Text("Open Map")
                     }
+                    Button(
+                        onClick = {
+                            val intent = Intent(context, DashboardActivity::class.java)
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text("Dashboard")
+                    }
                 }
             }
         }
