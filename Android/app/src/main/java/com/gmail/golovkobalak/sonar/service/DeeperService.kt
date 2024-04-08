@@ -1,16 +1,19 @@
 package com.gmail.golovkobalak.sonar.service
 
 import android.util.Log
+import com.gmail.golovkobalak.sonar.MainActivity
 import com.gmail.golovkobalak.sonar.config.DatabaseConfig
 import com.gmail.golovkobalak.sonar.deeper.DeeperViewModel
 import com.gmail.golovkobalak.sonar.model.SonarData
 import com.gmail.golovkobalak.sonar.model.SonarDataEntity
 import com.gmail.golovkobalak.sonar.model.SonarDataException
+import com.gmail.golovkobalak.sonar.model.TripEntity
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 
 private const val PRECISE_VALUE = 0.00001f
 
@@ -18,11 +21,17 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
     private val gson = Gson()
     private var isMessageReceived = false
     private var sonarDataEntityRepo = DatabaseConfig.db.sonarDataEntityRepo()
-    private var dispatcher: CoroutineDispatcher=Dispatchers.Default
+    private var tripEntityRepo = DatabaseConfig.db.tripEntityRepoRepo()
+    private var dispatcher: CoroutineDispatcher = Dispatchers.Default
 
     suspend fun handleSonarMessage() {
+        var tripEntityId = -1L;
         while (true) {
             val text = WebsocketService.sonarChannel.receive()
+            if (tripEntityId == -1L) {
+                val tripEntity = getTripEntity()
+                tripEntityId = tripEntity.id;
+            }
             isMessageReceived = true
             Log.d(Thread.currentThread().name, text)
             try {
@@ -33,7 +42,8 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                         LocationHelper.lastLocation.value.latitude,
                         LocationHelper.lastLocation.value.longitude,
                         LocationHelper.lastLocation.value.altitude,
-                        LocationHelper.lastLocation.value.accuracy
+                        LocationHelper.lastLocation.value.accuracy,
+                        tripEntityId
                     )
                     withContext(dispatcher) {
                         deeperViewModel.updateDepth(sonarDataEntity)
@@ -65,6 +75,16 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                 }
             }
         }
+    }
+
+    private fun getTripEntity(): TripEntity {
+        val tripEntityOpt = tripEntityRepo.getBy(MainActivity.SESSION_ID)
+        val tripEntity = tripEntityOpt.orElseGet {
+            val newTripEntity = TripEntity(sessionId = MainActivity.SESSION_ID, date = LocalDate.now())
+            tripEntityRepo.insert(newTripEntity)
+            newTripEntity
+        }
+        return tripEntity
     }
 
     suspend fun checkForMessage() {

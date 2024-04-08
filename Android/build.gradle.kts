@@ -1,8 +1,8 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
-    val kotlinVersion="1.9.20"
-    val kspVersion="1.9.20-1.0.14"
-    id("com.android.application") version "8.1.0" apply false
+    val kotlinVersion="1.9.23"
+    val kspVersion="1.9.23-1.0.20"
+    id("com.android.application") version "8.2.0" apply false
     id("com.google.gms.google-services") version "4.4.0" apply false
     id("com.google.firebase.appdistribution") version "4.0.0" apply false
     id("org.sonarqube") version "4.4.1.3373"

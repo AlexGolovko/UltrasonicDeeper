@@ -11,30 +11,32 @@ import java.time.format.DateTimeFormatter
 
 @Entity
 data class SonarDataEntity(
-        @PrimaryKey(autoGenerate = true) val id: Long,
-        val depth: Double,
-        val battery: Double,
-        val temperature: Double,
-        val time: String,
-        val latitude: Double,
-        val longitude: Double,
-        val altitude: Double,
-        val accuracy: Float
+    @PrimaryKey(autoGenerate = true) val id: Long,
+    val depth: Double,
+    val battery: Double,
+    val temperature: Double,
+    val time: String,
+    val latitude: Double,
+    val longitude: Double,
+    val altitude: Double,
+    val accuracy: Float,
+    val tripId: Long
 ) {
-    constructor() : this(0, Double.NaN, Double.NaN, Double.NaN, "", Double.NaN, Double.NaN, Double.NaN, Float.NaN)
+    constructor() : this(0, Double.NaN, Double.NaN, Double.NaN, "", Double.NaN, Double.NaN, Double.NaN, Float.NaN, Long.MIN_VALUE)
 
     var sessionId = MainActivity.SESSION_ID
 
-    constructor(sonarData: SonarData, latitude: Double, longitude: Double, altitude: Double, accuracy: Float) : this(
-            id = 0,
-            depth = roundToDecimalPlace(sonarData.depth.toDouble(), 1),
-            battery = roundToDecimalPlace(sonarData.battery.toDouble(), 2),
-            temperature = sonarData.temperature.toDouble(),
-            time = getCurrentTime(),
-            latitude = latitude,
-            longitude = longitude,
-            altitude = altitude,
-            accuracy = accuracy
+    constructor(sonarData: SonarData, latitude: Double, longitude: Double, altitude: Double, accuracy: Float, tripId: Long) : this(
+        id = 0,
+        depth = roundToDecimalPlace(sonarData.depth.toDouble(), 1),
+        battery = roundToDecimalPlace(sonarData.battery.toDouble(), 2),
+        temperature = sonarData.temperature.toDouble(),
+        time = getCurrentTime(),
+        latitude = latitude,
+        longitude = longitude,
+        altitude = altitude,
+        accuracy = accuracy,
+        tripId=tripId
     )
 
     override fun toString(): String {
