@@ -43,10 +43,12 @@ android {
 //                releaseNotes = "Devoted to Ivan's Birthday\n Happy Birthday!!!"
             }
             buildConfigField("String", "SONAR_URL", "\"ws://192.168.4.1:5000/sonar\"")
+            buildConfigField("String", "CLOUD_URL", "\"http://10.0.2.2:8080\"")
             signingConfig = signingConfigs.getByName("release")
         }
-        getByName("debug"){
-           buildConfigField("String", "SONAR_URL", "\"ws://192.168.31.131:5000/sonar\"")
+        getByName("debug") {
+            buildConfigField("String", "SONAR_URL", "\"ws://192.168.31.131:5000/sonar\"")
+            buildConfigField("String", "CLOUD_URL", "\"http://10.0.2.2:8080\"")
         }
     }
     compileOptions {
@@ -63,11 +65,19 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.11"
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
 }
 
 
 
 dependencies {
+    implementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation(platform("androidx.compose:compose-bom:2023.08.00"))
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
