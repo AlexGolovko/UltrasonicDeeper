@@ -25,13 +25,13 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
     private var dispatcher: CoroutineDispatcher = Dispatchers.Default
 
     suspend fun handleSonarMessage() {
-        var tripEntityId = -1L;
+        var tripEntityId: Long
+        withContext(dispatcher) {
+            val tripEntity = getTripEntity()
+            tripEntityId = tripEntity.id;
+        }
         while (true) {
             val text = WebsocketService.sonarChannel.receive()
-            if (tripEntityId == -1L) {
-                val tripEntity = getTripEntity()
-                tripEntityId = tripEntity.id;
-            }
             isMessageReceived = true
             Log.d(Thread.currentThread().name, text)
             try {
@@ -47,8 +47,8 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                     )
                     withContext(dispatcher) {
                         deeperViewModel.updateDepth(sonarDataEntity)
-                    }
-                    if (!sonarDataEntityRepo.isPointExist(
+
+                        val isPointExist = sonarDataEntityRepo.isPointExist(
                             sonarDataEntity.depth - 0.1,
                             sonarDataEntity.depth + 0.1,
                             sonarDataEntity.latitude - PRECISE_VALUE,
@@ -56,8 +56,9 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
                             sonarDataEntity.longitude - PRECISE_VALUE,
                             sonarDataEntity.longitude + PRECISE_VALUE
                         )
-                    ) {
-                        sonarDataEntityRepo.insert(sonarDataEntity)
+                        if (!isPointExist) {
+                            sonarDataEntityRepo.insert(sonarDataEntity)
+                        }
                     }
                 }
                 if ("300" == (sonarData.status)) {
@@ -77,16 +78,6 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
         }
     }
 
-    private fun getTripEntity(): TripEntity {
-        val tripEntityOpt = tripEntityRepo.getBy(MainActivity.SESSION_ID)
-        val tripEntity = tripEntityOpt.orElseGet {
-            val newTripEntity = TripEntity(sessionId = MainActivity.SESSION_ID, date = LocalDate.now())
-            tripEntityRepo.insert(newTripEntity)
-            newTripEntity
-        }
-        return tripEntity
-    }
-
     suspend fun checkForMessage() {
         var isNoMessageSent = true
         while (true) {
@@ -102,5 +93,14 @@ class DeeperService(val deeperViewModel: DeeperViewModel) {
         }
     }
 
+    private fun getTripEntity(): TripEntity {
+        val tripEntityOpt = tripEntityRepo.getBy(MainActivity.SESSION_ID)
+        val tripEntity = tripEntityOpt.orElseGet {
+            val newTripEntity = TripEntity(sessionId = MainActivity.SESSION_ID, date = LocalDate.now())
+            tripEntityRepo.insert(newTripEntity)
+            tripEntityRepo.getBy(MainActivity.SESSION_ID).get()
+        }
+        return tripEntity
+    }
 
 }

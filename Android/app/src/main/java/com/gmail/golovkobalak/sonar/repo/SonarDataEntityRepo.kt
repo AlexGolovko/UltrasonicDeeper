@@ -32,4 +32,7 @@ interface SonarDataEntityRepo {
 
     @Query("SELECT * FROM SonarDataEntity WHERE latitude>:latSouth AND latitude<:latNorth AND longitude>:lonWest AND longitude<:lonEast")
     fun getBy(latSouth: Double?, latNorth: Double?, lonWest: Double?, lonEast: Double?): List<SonarDataEntity>
+
+    @Query("SELECT * FROM SonarDataEntity WHERE tripId=:tripId")
+    fun getByTripId(tripId: Long): List<SonarDataEntity>
 }

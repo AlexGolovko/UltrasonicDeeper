@@ -14,8 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.gmail.golovkobalak.sonar.config.DatabaseConfig
+import com.gmail.golovkobalak.sonar.model.TripEntity
+import com.gmail.golovkobalak.sonar.service.TripService
 import com.gmail.golovkobalak.sonar.ui.theme.SonarTheme
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.*
@@ -25,7 +28,7 @@ import java.io.IOException
 
 class DashboardActivity : ComponentActivity() {
     val client by lazy { OkHttpClient() }
-    var tripData = ""
+    var tripData: List<TripEntity> = listOf()
 
     var token: String by mutableStateOf("")
 
@@ -78,6 +81,7 @@ class DashboardActivity : ComponentActivity() {
                     // Assuming the cookie name is "session_id" (modify as needed)
                     this@DashboardActivity.token = response.headers["Set-Cookie"].orEmpty()
                     storeCredentials(email, password)
+                    syncTrips(this@DashboardActivity.tripData)
                 } else {
                     // Handle unsuccessful login response (e.g., show error message)
                     Log.e("Login", "Login failed: ${response.code}")
@@ -114,6 +118,51 @@ class DashboardActivity : ComponentActivity() {
         })
     }
 
+    private fun syncTrips(tripData: List<TripEntity>) {
+        val request = Request.Builder()
+            .url("${BuildConfig.CLOUD_URL}/trips")
+            .header("Cookie", token)
+            .get()
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e("Trips", "Error getting trips: ${e.message}")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val listType = object : TypeToken<List<TripEntity>>() {}.type
+                val trips: List<TripEntity> = Gson().fromJson(response.body?.string() ?: "{}", listType)
+                val cloudTrips = trips
+                    .map { it.sessionId }
+                    .toSet()
+                val localTrips = tripData.map { it.sessionId }.toSet()
+                val unSyncedTrips = localTrips.filter { !cloudTrips.contains(it) }.toSet()
+                unSyncedTrips.forEach {
+                    val trip = TripService.getTripWithSonarDataBySessionId(it)
+                    val body =
+                        Gson().toJson(trip).toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
+                    val post = Request.Builder()
+                        .url("${BuildConfig.CLOUD_URL}/trips")
+                        .header("Cookie", token)
+                        .post(body)
+                        .build()
+                    client.newCall(post).enqueue(object : Callback {
+                        override fun onFailure(call: Call, e: IOException) {
+                            Log.d(this.javaClass.name, e.message ?: "error")
+                        }
+
+                        override fun onResponse(call: Call, response: Response) {
+                            Log.d(this.javaClass.name, response.toString())
+                        }
+
+                    })
+
+                }
+            }
+        })
+    }
+
     private fun getUserCred(): SharedPreferences {
         return this.baseContext.getSharedPreferences("userCred", MODE_PRIVATE)
     }
@@ -127,20 +176,11 @@ class DashboardActivity : ComponentActivity() {
         return Base64.decode(password.toByteArray(Charsets.UTF_8), Base64.NO_WRAP).decodeToString()
     }
 
-    fun getTripsData(): String {
+    fun getTripsData(): List<TripEntity> {
         val tripEntityRepoRepo = DatabaseConfig.db.tripEntityRepoRepo()
-        val tripEntities = tripEntityRepoRepo.getAll()
-        if (!tripEntities.isEmpty()) {
-            return tripEntities.map { "${it.sessionId}:${it.date}\n" }
-                .reduce { acc, line -> acc + line }
-        }
-        return "No trips saved";
+        return tripEntityRepoRepo.getAll()
     }
 
-}
-
-fun handleSync(email: String, password: String) {
-    Log.d("test", "$email $password")
 }
 
 @Composable
@@ -149,14 +189,15 @@ fun Entry(dashboardActivity: DashboardActivity) {
     var password by remember { mutableStateOf(dashboardActivity.getStoredPassword()) }
     val tripsData by remember { mutableStateOf(dashboardActivity.tripData) }
     if (tripsData.isNotEmpty()) {
-        Text(text = tripsData)
+        val trips = tripsData.map { "${it.sessionId}:${it.date}\n" }
+            .reduce { acc, line -> acc + line } ?: "No trips saved"
+        Text(text = trips)
     }
     LoginScreen(email = email,
         onEmailChange = { email = it },
         password = password,
         onPasswordChange = { password = it },
-        onLogin = { dashboardActivity.handleLogin(email, password) },
-        onSync = { handleSync(email, password) })
+        onLogin = { dashboardActivity.handleLogin(email, password) })
 }
 
 
@@ -167,8 +208,6 @@ fun LoginScreen(
     password: String,
     onPasswordChange: (String) -> Unit,
     onLogin: () -> Unit,
-    onSync: () -> Unit,
-
     ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -183,10 +222,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Button(onClick = onLogin) {
-                Text("Login")
-            }
-            OutlinedButton(onClick = onSync) {
-                Text("Sync")
+                Text("Login and Push trips to Cloud")
             }
         }
     }

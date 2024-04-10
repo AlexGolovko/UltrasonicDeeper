@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
             applicationContext,
             DatabaseConfig::class.java,
             "sonar_database"
-        ).build()
+        ).fallbackToDestructiveMigrationFrom(1).build()
         Runner.start(baseContext)
     }
 

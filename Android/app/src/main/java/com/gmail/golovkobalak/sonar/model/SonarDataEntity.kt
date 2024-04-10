@@ -2,7 +2,6 @@ package com.gmail.golovkobalak.sonar.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.gmail.golovkobalak.sonar.MainActivity
 import com.google.gson.Gson
 import java.text.DecimalFormat
 import java.time.LocalDateTime
@@ -23,8 +22,6 @@ data class SonarDataEntity(
     val tripId: Long
 ) {
     constructor() : this(0, Double.NaN, Double.NaN, Double.NaN, "", Double.NaN, Double.NaN, Double.NaN, Float.NaN, Long.MIN_VALUE)
-
-    var sessionId = MainActivity.SESSION_ID
 
     constructor(sonarData: SonarData, latitude: Double, longitude: Double, altitude: Double, accuracy: Float, tripId: Long) : this(
         id = 0,
