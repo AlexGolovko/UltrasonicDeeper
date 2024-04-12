@@ -89,7 +89,6 @@ class DeeperActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        LocationHelper.stopLocationUpdates()
         WebsocketService.close()
 
     }

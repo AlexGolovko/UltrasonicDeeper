@@ -20,5 +20,6 @@ object Runner {
 
     fun stop() {
         job.cancel()
+        locationHelper.stopLocationUpdates()
     }
 }

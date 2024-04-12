@@ -1,6 +1,7 @@
 package com.gmail.golovkobalak.sonar.service
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -89,8 +90,17 @@ object LocationHelper {
             return false
         }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-        fusedLocationClient!!.requestLocationUpdates(locationRequest!!, locationCallback!!, Looper.getMainLooper())
+        startLocationUpdates()
         return true
+    }
+
+    @SuppressLint("MissingPermission")
+    fun startLocationUpdates() {
+        try {
+            fusedLocationClient!!.requestLocationUpdates(locationRequest!!, locationCallback!!, Looper.getMainLooper())
+        } catch (e: Exception) {
+            Log.e(this.javaClass.name, e.message ?: "", e);
+        }
     }
 
     fun stopLocationUpdates() {

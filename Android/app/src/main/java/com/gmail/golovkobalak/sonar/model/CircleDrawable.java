@@ -6,8 +6,8 @@ import android.graphics.drawable.Drawable;
 
 public class CircleDrawable extends Drawable {
 
-    private Paint paint;
-    private int diameter;
+    private final Paint paint;
+    private final int diameter;
 
     public CircleDrawable(int diameter, int color) {
         this.diameter = diameter;
