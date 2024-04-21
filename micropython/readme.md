@@ -6,3 +6,18 @@ Install micropython 1.20.0:
 
 battery test:
 2x1800 = 3600 mAh => 20h working hours, and only 4.2v - 3.4v range used because of xiao esp32c3 "bug"
+
+on mac:  
+brew install esptool
+validate:
+  esptool.py -h
+
+ls /dev/cu.*  
+screen /dev/cu.<usb name> 115200
+
+ampy -p /dev/cu.usbmodem1401 ls
+ampy -p /dev/cu.usbmodem1401 put pins.py
+
+./uploader.sh /dev/cu.usbmodem1401
+
+WEBSOCKET ws://192.168.31.203:5000/sonar
